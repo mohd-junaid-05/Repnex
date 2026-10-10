@@ -23,11 +23,13 @@ type Analysis = {
   projects: Project | Project[] | null;
 };
 
+/** Normalize a joined project relation to its first project, or null if absent. */
 function firstProject(p: Project | Project[] | null): Project | null {
   if (!p) return null;
   return Array.isArray(p) ? (p[0] ?? null) : p;
 }
 
+/** Format a creation timestamp as elapsed minutes, hours, or days from now. */
 function formatRelative(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const minutes = Math.floor(diff / 60_000);
@@ -38,6 +40,7 @@ function formatRelative(iso: string): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
+/** Render project names, analysis ages, and statuses, or an empty workspace hint. */
 export function AnalysesList({ analyses }: { analyses: Analysis[] }) {
   if (analyses.length === 0) {
     return (

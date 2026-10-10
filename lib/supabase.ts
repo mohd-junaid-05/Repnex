@@ -2,6 +2,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { auth } from "@clerk/nextjs/server";
 import { cookies } from "next/headers";
 
+/** Create a server client using request cookies and a Clerk Supabase token when available. */
 export async function createSupabaseClient() {
   const { getToken } = await auth();
   const token = await getToken({ template: "supabase" });

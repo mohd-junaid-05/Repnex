@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseClient } from "@/lib/supabase";
 import { AnalysesList } from "@/components/analyses-list";
 
+/** Ensure a signed-in user has a workspace and render their accessible analyses. */
 export default async function Home() {
   const { userId, orgId } = await auth();
 

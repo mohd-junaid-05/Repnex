@@ -64,6 +64,7 @@ export function walkRepository(
   const skippedFiles: SkippedFile[] = [];
   const absoluteRoot = path.resolve(repoRoot);
 
+  /** Recurse into a directory, collecting source metadata and recording skipped files. */
   function walk(dir: string): void {
     let entries: fs.Dirent[];
     try {

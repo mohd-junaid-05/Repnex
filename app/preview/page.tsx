@@ -5,6 +5,7 @@ import type { ParseResult } from "@/parser/types";
 import { computeFoldedGraph } from "@/lib/folding";
 import { PreviewExplorer } from "@/components/preview-explorer";
 
+/** Load the bundled parse result and prepare its folded graph for the explorer. */
 export default async function PreviewPage() {
   const filePath = path.join(process.cwd(), "parser-output-mantine.json");
   const data: ParseResult = JSON.parse(fs.readFileSync(filePath, "utf-8"));
