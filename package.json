@@ -12,13 +12,17 @@
     "@clerk/nextjs": "^7.9.10",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.2",
+    "@xyflow/react": "^12.12.0",
+    "dagre": "^0.8.5",
     "next": "16.3.8",
     "next-themes": "^0.4.6",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "ts-morph": "^28.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/dagre": "^0.7.54",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

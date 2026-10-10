@@ -40,3 +40,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# parser
+/test-repos/
+/parser-output.json
+/parser/check-*.ts
