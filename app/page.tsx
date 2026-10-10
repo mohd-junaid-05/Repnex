@@ -2,8 +2,9 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { createSupabaseClient } from "@/lib/supabase";
 import { AnalysesList } from "@/components/analyses-list";
+import { AnalysisForm } from "@/components/analysis-form";
 
-/** Ensure a signed-in user has a workspace and render their accessible analyses. */
+/** Ensure a signed-in user has a workspace and render the analysis form and recent analyses. */
 export default async function Home() {
   const { userId, orgId } = await auth();
 
@@ -26,7 +27,6 @@ export default async function Home() {
       });
       redirect("/");
     }
-    // Has orgs but none active — let the OrganizationSwitcher in the header handle it.
   }
 
   let orgName = "Personal Account";
@@ -39,12 +39,11 @@ export default async function Home() {
   const supabase = await createSupabaseClient();
   const { data: analyses, error } = await supabase
     .from("analyses")
-    .select("id, status, created_at, started_at, finished_at, projects(name, repo_url)")
+    .select("id, status, stage, created_at, started_at, finished_at, projects(name, repo_url)")
     .order("created_at", { ascending: false })
     .limit(100);
 
   if (error) {
-    // Log server-side; surface a safe message to the UI.
     console.error("[dashboard] analyses query failed:", error.message);
   }
 
@@ -60,6 +59,14 @@ export default async function Home() {
             {orgName}
           </h1>
         </div>
+
+        {/* Form to submit a new repository */}
+        <section className="bg-white dark:bg-[#0c0d14] border border-zinc-200 dark:border-zinc-800 rounded-md p-4">
+          <h2 className="text-xs font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-3">
+            Analyse Repository
+          </h2>
+          <AnalysisForm />
+        </section>
 
         {/* Analyses list */}
         <section>

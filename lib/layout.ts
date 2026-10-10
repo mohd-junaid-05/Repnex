@@ -18,17 +18,25 @@ export function computeLayout(nodes: FolderNode[], edges: GraphEdge[], expandedN
   g.setDefaultEdgeLabel(() => ({ weight: 1, minlen: 1 }));
 
   nodes.forEach(node => {
-    // Width comes from label, approximate: 100 + label.length * 8
-    let width = 100 + (node.label?.length || 10) * 8;
-    // Height carries how many things depend on it (fan-in)
-    let height = 40 + ((node.fanIn || 0) * 4);
-    
+    let width: number;
+    let height: number;
+
     if (expandedNodes.has(node.id)) {
-      // Panel state: capped height for scrollable file list
-      const maxVisibleRows = 12;
+      // Expanded panel: exactly 7 rows max before scrolling
+      const maxVisibleRows = 7;
       const visibleRows = Math.min(node.files.length, maxVisibleRows);
-      height = 44 + (visibleRows * 25);
-      width = Math.max(width, 270); // Minimum width for a panel
+      height = 56 + (visibleRows * 28);
+
+      let maxFileNameLen = node.label?.length || 10;
+      for (const f of node.files) {
+        const name = f.path.split('/').pop() || f.path;
+        if (name.length > maxFileNameLen) maxFileNameLen = name.length;
+      }
+      width = Math.min(360, Math.max(280, 120 + maxFileNameLen * 8.5));
+    } else {
+      // Collapsed folder: width sized to prevent truncating folder names
+      height = 38;
+      width = Math.min(320, Math.max(170, 110 + (node.label?.length || 4) * 9.5));
     }
 
     g.setNode(node.id, { width, height });
@@ -57,18 +65,24 @@ export function computeLayout(nodes: FolderNode[], edges: GraphEdge[], expandedN
     const layoutNodes = nodes.map((node, i) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
-      const width = 100 + (node.label?.length || 10) * 8;
-      let height = 40 + ((node.fanIn || 0) * 4);
+      let width: number;
+      let height: number;
+
       if (expandedNodes.has(node.id)) {
-        const maxVisibleRows = 12;
+        const maxVisibleRows = 7;
         const visibleRows = Math.min(node.files.length, maxVisibleRows);
-        height = 44 + (visibleRows * 25);
+        height = 56 + (visibleRows * 28);
+        width = 280;
+      } else {
+        height = 38;
+        width = Math.min(320, Math.max(170, 110 + (node.label?.length || 4) * 9.5));
       }
+
       return {
         ...node,
         x: col * 350,
         y: row * 200,
-        width: Math.max(width, expandedNodes.has(node.id) ? 250 : 0),
+        width,
         height
       };
     });
