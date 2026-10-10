@@ -33,6 +33,7 @@ export function PreviewExplorer({
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"structure" | "explanation">("structure");
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const handleSelectFile = useCallback(
     (filePath: string) => {
@@ -89,19 +90,41 @@ export function PreviewExplorer({
     <div className="flex flex-1 h-full overflow-hidden text-xs bg-white dark:bg-black">
       {/* Left rail - Categories */}
       <aside className="w-56 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0d14] flex flex-col overflow-y-auto flex-shrink-0">
-        <div className="px-3 py-2.5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#10121d]">
+        <div className="px-3 py-2.5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#10121d] flex items-center justify-between">
           <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">Categories</h2>
+          {selectedCategory && (
+            <button
+              type="button"
+              onClick={() => setSelectedCategory(null)}
+              className="text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
+            >
+              Reset
+            </button>
+          )}
         </div>
-        <div className="flex-1 p-3 flex flex-col gap-2">
-          {categories.map(({ lang, count }) => (
-            <div key={lang} className="flex items-center justify-between group">
-              <div className="flex items-center gap-2">
-                <div className={`w-2.5 h-2.5 rounded-xs ${colors[lang] || "bg-zinc-500"}`} />
-                <span className="text-zinc-700 dark:text-zinc-300">{lang}</span>
+        <div className="flex-1 p-3 flex flex-col gap-1.5">
+          {categories.map(({ lang, count }) => {
+            const isSelected = selectedCategory === lang;
+            return (
+              <div
+                key={lang}
+                onClick={() => setSelectedCategory((prev) => (prev === lang ? null : lang))}
+                className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
+                  isSelected
+                    ? "bg-indigo-50 dark:bg-indigo-600/30 text-indigo-900 dark:text-white font-semibold ring-1 ring-indigo-500/50"
+                    : "hover:bg-zinc-100 dark:hover:bg-zinc-800/60 text-zinc-700 dark:text-zinc-300"
+                }`}
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <div className={`w-2.5 h-2.5 rounded-xs shrink-0 ${colors[lang] || "bg-zinc-500"}`} />
+                  <span className="truncate">{lang}</span>
+                </div>
+                <span className="text-zinc-400 dark:text-zinc-500 font-mono text-[11px] shrink-0 ml-2">
+                  {count}
+                </span>
               </div>
-              <span className="text-zinc-400 dark:text-zinc-500 font-mono">{count}</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </aside>
 
@@ -115,6 +138,7 @@ export function PreviewExplorer({
           hoveredFile={hoveredFile}
           hoveredNodeId={hoveredNodeId}
           expandedNodes={expandedNodes}
+          selectedCategory={selectedCategory}
           onToggleNode={handleToggleNode}
           onSelectFile={handleSelectFile}
           onSelectNode={handleSelectNode}

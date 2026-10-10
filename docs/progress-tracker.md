@@ -48,3 +48,13 @@
 - [x] Bidirectional hover and selection synchronization between DetailPane and GraphView canvas
 - [x] Pure in-memory calculation with zero network requests on interaction or selection
 - [x] Validated types (`tsc`), lint (`eslint`), and production build (`next build`)
+
+## Phase 06: Graph maths, the rail, and insights
+- [x] Pure transitive walk over edge list with direction and depth limit (`lib/graph-math.ts`)
+- [x] Instant Blast radius and Dependency chain buttons in DetailPane returning 2 levels deep with no network requests or spinners
+- [x] Iterative cycle detection preventing call-stack recursion on large/dense graphs
+- [x] Four kinds of insights from edge facts using fixed sentences: files nothing imports (excluding framework-reached files), heavily depended-on files, import cycles, and oversized files
+- [x] Collapsible Insights section in DetailPane starting collapsed per spec
+- [x] Active left rail category filtering that dims non-matching files and folders rather than removing them
+- [x] Match count badges on open and collapsed folder nodes summing to the category total in the rail
+- [x] Validated types (`tsc`), lint (`eslint`), and production build (`next build`)
