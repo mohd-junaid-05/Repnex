@@ -1,7 +1,7 @@
 /**
  * Parser output types.
  * This is the contract: every phase after this reads these shapes.
- * No Next.js, React or database imports allowed here.
+ * No web framework, React or database imports allowed here.
  */
 
 /** A file discovered during the repository walk. */
@@ -94,12 +94,24 @@ export interface SkippedFile {
   reason: string;
 }
 
+/** A route extracted from framework conventions or decorators. */
+export interface ExtractedRoute {
+  /** Relative path of the file defining the route. */
+  filePath: string;
+  /** Full URL path pattern, e.g. "/users/:id". */
+  routePath: string;
+  /** Recovered HTTP methods, e.g. ["GET"] or ["POST"]. */
+  httpMethods: string[];
+}
+
 /** Complete output of a parse run. This is the shape written to disk. */
 export interface ParseResult {
   /** Absolute path to the repository root that was parsed. */
   repoRoot: string;
   /** When the parse started (ISO 8601). */
   parsedAt: string;
+  /** Framework identifier (e.g. 'nestjs', 'react', 'generic'). */
+  framework: string;
   /** All files discovered and parsed. */
   files: ParsedFile[];
   /** All resolved import edges, deduplicated. */
@@ -110,6 +122,10 @@ export interface ParseResult {
   coverage: CoverageReport;
   /** Distinct folders found. */
   folders: string[];
+  /** Routes extracted by framework adapter. */
+  routes: ExtractedRoute[];
+  /** File roles keyed by file path. */
+  fileRoles: Record<string, string>;
 }
 
 /**
@@ -118,8 +134,12 @@ export interface ParseResult {
  * The parser itself has no framework knowledge.
  */
 export interface FrameworkAdapter {
+  /** Framework identifier. */
+  id: string;
   /** Human-readable name of the framework. */
   name: string;
+  /** Checks if the repository matches this framework. */
+  detect(repoRoot: string, files: ParsedFile[]): boolean;
   /**
    * Given a file path relative to root, decide whether this file should be
    * included in the parse. Return true to include, false to exclude.
@@ -131,4 +151,8 @@ export interface FrameworkAdapter {
    * Only called when shouldInclude returned false.
    */
   excludeReason(relativePath: string): string;
+  /** Assign concrete framework roles to parsed files. */
+  assignRoles(repoRoot: string, files: ParsedFile[]): Record<string, string>;
+  /** Extract exact routes from parsed files. */
+  extractRoutes(repoRoot: string, files: ParsedFile[]): ExtractedRoute[];
 }

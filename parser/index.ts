@@ -10,12 +10,12 @@ import type { ParseResult, CoverageReport, FrameworkAdapter } from './types';
 import { walkRepository } from './walker';
 import { extractImports } from './extractor';
 import { computeFanMetrics } from './metrics';
-import { fallbackAdapter } from './adapters/fallback';
+import { detectAdapter, fallbackAdapter } from './adapters';
 
 export interface ParseOptions {
   /** Path to the repository root directory. */
   repoRoot: string;
-  /** Framework adapter to use. Defaults to the fallback (no framework). */
+  /** Framework adapter to use. Defaults to automatic detection. */
   adapter?: FrameworkAdapter;
 }
 
@@ -24,22 +24,26 @@ export interface ParseOptions {
  * This is the single function everything else calls.
  */
 export function parseRepository(options: ParseOptions): ParseResult {
-  const { repoRoot, adapter = fallbackAdapter } = options;
+  const { repoRoot } = options;
   const absoluteRoot = path.resolve(repoRoot);
 
-  // 1. Walk the repository
-  const { files, skippedFiles } = walkRepository(absoluteRoot, adapter);
+  // 1. Walk the repository with initial adapter or fallback
+  const initialAdapter = options.adapter ?? fallbackAdapter;
+  const { files, skippedFiles } = walkRepository(absoluteRoot, initialAdapter);
 
-  // 2. Find tsconfig if it exists
+  // 2. Detect adapter if not explicitly supplied (first match wins in fixed order)
+  const activeAdapter = options.adapter ?? detectAdapter(absoluteRoot, files);
+
+  // 3. Find tsconfig if it exists
   const tsconfigPath = findTsConfig(absoluteRoot);
 
-  // 3. Extract imports
+  // 4. Extract imports
   const { edges, unresolved } = extractImports(absoluteRoot, files, tsconfigPath);
 
-  // 4. Compute fan metrics
+  // 5. Compute fan metrics
   const fanMetrics = computeFanMetrics(files, edges);
 
-  // 5. Collect distinct folders
+  // 6. Collect distinct folders
   const folderSet = new Set<string>();
   for (const file of files) {
     if (file.folder) {
@@ -54,7 +58,7 @@ export function parseRepository(options: ParseOptions): ParseResult {
   }
   const folders = [...folderSet].sort();
 
-  // 6. Build coverage report
+  // 7. Build coverage report
   const externalCount = unresolved.filter((u) => u.reason === 'node-module').length;
   const coverage: CoverageReport = {
     totalFilesFound: files.length + skippedFiles.length,
@@ -67,14 +71,21 @@ export function parseRepository(options: ParseOptions): ParseResult {
     unresolvedImports: unresolved.filter((u) => u.reason !== 'node-module'),
   };
 
+  // 8. Framework roles & routes
+  const fileRoles = activeAdapter.assignRoles(absoluteRoot, files);
+  const routes = activeAdapter.extractRoutes(absoluteRoot, files);
+
   return {
     repoRoot: absoluteRoot,
     parsedAt: new Date().toISOString(),
+    framework: activeAdapter.id,
     files,
     edges,
     fanMetrics,
     coverage,
     folders,
+    routes,
+    fileRoles,
   };
 }
 
@@ -82,8 +93,8 @@ export function parseRepository(options: ParseOptions): ParseResult {
 function findTsConfig(repoRoot: string): string | null {
   const candidates = ['tsconfig.json', 'tsconfig.app.json', 'jsconfig.json'];
   for (const name of candidates) {
-    const p = path.join(repoRoot, name);
-    if (fs.existsSync(p)) return p;
+    const p = path.join(/*turbopackIgnore: true*/ repoRoot, name);
+    if (fs.existsSync(/*turbopackIgnore: true*/ p)) return p;
   }
   return null;
 }
@@ -98,6 +109,7 @@ export type {
   CoverageReport,
   SkippedFile,
   FrameworkAdapter,
+  ExtractedRoute,
   EdgeKind,
   FileLanguage,
   UnresolvedReason,

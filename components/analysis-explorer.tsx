@@ -7,17 +7,14 @@ import { GraphView } from "@/components/graph-view";
 import { DetailPane } from "@/components/detail-pane";
 import { CoverageBanner } from "@/components/coverage-banner";
 
-interface Category {
-  lang: string;
-  count: number;
-}
+import type { RailCategoryItem } from "@/lib/taxonomy";
 
 interface AnalysisExplorerProps {
   data: ParseResult;
   nodes: FolderNode[];
   edges: GraphEdge[];
   fileToNode: Record<string, string>;
-  categories: Category[];
+  categories: RailCategoryItem[];
 }
 
 /** Coordinate selection, hover, folder expansion, and coverage display for real analysis data. */
@@ -80,13 +77,6 @@ export function AnalysisExplorer({
     });
   }, []);
 
-  const colors: Record<string, string> = {
-    typescript: "bg-blue-500",
-    typescriptreact: "bg-emerald-500",
-    javascript: "bg-amber-500",
-    javascriptreact: "bg-rose-500",
-  };
-
   return (
     <div className="flex flex-1 h-full overflow-hidden text-xs bg-white dark:bg-black">
       {/* Left rail - Categories */}
@@ -104,12 +94,12 @@ export function AnalysisExplorer({
           )}
         </div>
         <div className="flex-1 p-3 flex flex-col gap-1.5">
-          {categories.map(({ lang, count }) => {
-            const isSelected = selectedCategory === lang;
+          {categories.map(({ id, label, count, colorClass }) => {
+            const isSelected = selectedCategory === label;
             return (
               <div
-                key={lang}
-                onClick={() => setSelectedCategory((prev) => (prev === lang ? null : lang))}
+                key={id}
+                onClick={() => setSelectedCategory((prev) => (prev === label ? null : label))}
                 className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
                   isSelected
                     ? "bg-indigo-50 dark:bg-indigo-600/30 text-indigo-900 dark:text-white font-semibold ring-1 ring-indigo-500/50"
@@ -117,8 +107,8 @@ export function AnalysisExplorer({
                 }`}
               >
                 <div className="flex items-center gap-2 truncate">
-                  <div className={`w-2.5 h-2.5 rounded-xs shrink-0 ${colors[lang] || "bg-zinc-500"}`} />
-                  <span className="truncate">{lang}</span>
+                  <div className={`w-2.5 h-2.5 rounded-xs shrink-0 ${colorClass || "bg-zinc-500"}`} />
+                  <span className="truncate">{label}</span>
                 </div>
                 <span className="text-zinc-400 dark:text-zinc-500 font-mono text-[11px] shrink-0 ml-2">
                   {count}

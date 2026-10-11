@@ -182,18 +182,76 @@ async function storeAnalysisData({
     }
   }
 
-  // 3. Store coverage report as an insight
-  const { error: insightError } = await supabase.from("insights").insert([
+  // 3. Store extracted routes
+  if (parseResult.routes.length > 0) {
+    const routeRowsToInsert = parseResult.routes
+      .map((route) => {
+        const fileId = pathToId.get(route.filePath);
+        if (!fileId) return null;
+        return {
+          analysis_id: analysisId,
+          org_id: orgId,
+          file_id: fileId,
+          route_path: route.routePath,
+          http_methods: route.httpMethods,
+        };
+      })
+      .filter((r): r is NonNullable<typeof r> => r !== null);
+
+    for (let i = 0; i < routeRowsToInsert.length; i += CHUNK_SIZE) {
+      const chunk = routeRowsToInsert.slice(i, i + CHUNK_SIZE);
+      const { error: routeError } = await supabase.from("routes").insert(chunk);
+      if (routeError) {
+        console.warn(`[pipeline] Warning: Failed to insert routes chunk:`, routeError.message);
+      }
+    }
+  }
+
+  // 4. Store file roles
+  const roleEntries = Object.entries(parseResult.fileRoles);
+  if (roleEntries.length > 0) {
+    const roleRowsToInsert = roleEntries
+      .map(([filePath, role]) => {
+        const fileId = pathToId.get(filePath);
+        if (!fileId) return null;
+        return {
+          analysis_id: analysisId,
+          org_id: orgId,
+          file_id: fileId,
+          role,
+        };
+      })
+      .filter((r): r is NonNullable<typeof r> => r !== null);
+
+    for (let i = 0; i < roleRowsToInsert.length; i += CHUNK_SIZE) {
+      const chunk = roleRowsToInsert.slice(i, i + CHUNK_SIZE);
+      const { error: roleError } = await supabase.from("file_roles").insert(chunk);
+      if (roleError) {
+        console.warn(`[pipeline] Warning: Failed to insert file roles chunk:`, roleError.message);
+      }
+    }
+  }
+
+  // 5. Store insights (coverage and framework)
+  const insightsToInsert = [
     {
       analysis_id: analysisId,
       org_id: orgId,
       kind: "coverage",
       payload: parseResult.coverage as unknown as Record<string, unknown>,
     },
-  ]);
+    {
+      analysis_id: analysisId,
+      org_id: orgId,
+      kind: "framework",
+      payload: { framework: parseResult.framework } as unknown as Record<string, unknown>,
+    },
+  ];
+
+  const { error: insightError } = await supabase.from("insights").insert(insightsToInsert);
 
   if (insightError) {
-    console.warn(`[pipeline] Warning: Failed to insert coverage insight:`, insightError.message);
+    console.warn(`[pipeline] Warning: Failed to insert insights:`, insightError.message);
   }
 }
 

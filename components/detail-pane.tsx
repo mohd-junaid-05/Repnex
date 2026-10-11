@@ -190,6 +190,29 @@ export function DetailPane({
               <h3 className="font-mono text-xs font-bold text-zinc-900 dark:text-zinc-100 break-all leading-snug">
                 {fileDetails.file.path}
               </h3>
+
+              {fileDetails.routes && fileDetails.routes.length > 0 && (
+                <div className="flex flex-col gap-1 p-2 rounded bg-zinc-100/70 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono mt-1">
+                  <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">
+                    Route Endpoint ({fileDetails.routes.length})
+                  </span>
+                  {fileDetails.routes.map((r, i) => (
+                    <div key={`file-route-${i}`} className="flex items-center gap-1.5 flex-wrap">
+                      {r.httpMethods.map((m) => (
+                        <span
+                          key={m}
+                          className="px-1 py-0.2 text-[9px] font-bold rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20"
+                        >
+                          {m}
+                        </span>
+                      ))}
+                      <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                        {r.routePath}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Transitive Walk / Direct Action Buttons (Phase 6) */}
@@ -648,6 +671,82 @@ export function DetailPane({
                 </span>
                 <span className="text-[10px] text-zinc-400 dark:text-zinc-500">no convention</span>
               </div>
+            </div>
+
+            {/* Extracted Routes Table (Phase 8) */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs">
+                  Extracted routes ({data.routes ? data.routes.length : 0})
+                </span>
+                <span className="text-[10px] text-zinc-400 font-mono">
+                  {repoSummary.framework}
+                </span>
+              </div>
+              {!data.routes || data.routes.length === 0 ? (
+                <div className="p-3 text-center rounded border border-dashed border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500 font-mono text-[11px]">
+                  No routes detected
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1 max-h-[220px] overflow-y-auto custom-scrollbar">
+                  {data.routes.map((route, idx) => {
+                    const isHovered = hoveredFile === route.filePath;
+                    return (
+                      <div
+                        key={`route-${route.filePath}-${route.routePath}-${idx}`}
+                        onClick={() => onSelectFile(route.filePath)}
+                        onMouseEnter={() => onHoverFile(route.filePath)}
+                        onMouseLeave={() => onHoverFile(null)}
+                        className={`px-2 py-1.5 rounded border text-[11px] font-mono cursor-pointer transition-colors flex flex-col gap-1 group ${
+                          isHovered
+                            ? "bg-indigo-500/20 border-indigo-500 text-indigo-900 dark:text-indigo-100 shadow-sm"
+                            : "bg-zinc-100/70 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800/80 hover:text-zinc-900 dark:hover:text-zinc-100"
+                        }`}
+                        title={`Click to open ${route.filePath}`}
+                      >
+                        <div className="flex items-center justify-between gap-1.5">
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {route.httpMethods.map((method) => {
+                              let badgeColor =
+                                "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20";
+                              if (method === "GET") {
+                                badgeColor =
+                                  "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
+                              } else if (method === "POST") {
+                                badgeColor =
+                                  "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
+                              } else if (method === "PUT") {
+                                badgeColor =
+                                  "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20";
+                              } else if (method === "DELETE") {
+                                badgeColor =
+                                  "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20";
+                              } else if (method === "PATCH") {
+                                badgeColor =
+                                  "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
+                              }
+                              return (
+                                <span
+                                  key={method}
+                                  className={`px-1 py-0.2 text-[9px] font-bold rounded border uppercase ${badgeColor}`}
+                                >
+                                  {method}
+                                </span>
+                              );
+                            })}
+                          </div>
+                          <span className="font-semibold text-zinc-900 dark:text-zinc-100 truncate text-[11px]">
+                            {route.routePath}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-zinc-400 dark:text-zinc-500 truncate">
+                          {route.filePath}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Ranked List 1: What the rest of the repository leans on most */}

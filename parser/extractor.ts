@@ -42,6 +42,7 @@ export function extractImports(
     // Use tsconfig if available, for path alias resolution
     tsConfigFilePath: tsConfigPath ?? undefined,
     skipAddingFilesFromTsConfig: true,
+    skipFileDependencyResolution: true,
     compilerOptions: tsConfigPath
       ? undefined
       : {
@@ -261,12 +262,12 @@ function resolveRelativePath(
   // This distinguishes between a file that was skipped vs one that's missing
   const absPath = path.join(absoluteRoot, normalised);
   for (const ext of extensions) {
-    if (fs.existsSync(absPath + ext) || fs.existsSync(path.join(absPath, 'index' + ext))) {
+    if (fs.existsSync(/*turbopackIgnore: true*/ absPath + ext) || fs.existsSync(/*turbopackIgnore: true*/ path.join(absPath, 'index' + ext))) {
       // The file exists but wasn't included in our walk — it was excluded
       return { type: 'unresolved', reason: 'file-not-found' };
     }
   }
-  if (fs.existsSync(absPath)) {
+  if (fs.existsSync(/*turbopackIgnore: true*/ absPath)) {
     return { type: 'unresolved', reason: 'file-not-found' };
   }
 

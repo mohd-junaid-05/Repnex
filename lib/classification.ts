@@ -1,5 +1,6 @@
-import type { ParsedFile, ParseResult } from "../parser/types";
+import type { ParsedFile, ParseResult, ExtractedRoute } from "../parser/types";
 import type { FolderNode } from "./folding";
+import { getCategoryStyle, getFrameworkDisplayName } from "./taxonomy";
 
 export type FileKind =
   | "hook"
@@ -14,6 +15,12 @@ export type FileKind =
   | "config"
   | "utility"
   | "adapter"
+  | "controllers"
+  | "services"
+  | "modules"
+  | "entities"
+  | "dtos"
+  | "guards"
   | "unidentified";
 
 export interface FileClassification {
@@ -24,6 +31,29 @@ export interface FileClassification {
   badgeBg: string;
   badgeText: string;
   borderClass: string;
+}
+
+/**
+ * Resolves a file's classification from repository taxonomy and role metadata if available,
+ * or falls back to convention-based regex classification.
+ */
+export function getFileClassification(file: ParsedFile, data?: ParseResult): FileClassification {
+  if (data?.fileRoles && data.fileRoles[file.path]) {
+    const roleName = data.fileRoles[file.path];
+    const style = getCategoryStyle(data.framework || "generic", roleName);
+    const isUnidentified =
+      roleName === "Modules" || roleName === "Plumbing" || roleName === "unidentified";
+    return {
+      kind: style.id as FileKind,
+      label: style.label,
+      identified: !isUnidentified,
+      colorClass: style.colorClass,
+      badgeBg: style.badgeBg,
+      badgeText: style.badgeText,
+      borderClass: style.borderClass,
+    };
+  }
+  return classifyFile(file);
 }
 
 /**
@@ -381,15 +411,14 @@ export interface RepoSummary {
  */
 export function computeRepoSummary(data: ParseResult): RepoSummary {
   const name = getRepoName(data.repoRoot);
-  const framework = detectFramework(data.files);
-  const routes = detectRoutes(data.files);
+  const framework = data.framework ? getFrameworkDisplayName(data.framework) : detectFramework(data.files);
+  const routesCount = data.routes ? data.routes.length : detectRoutes(data.files).length;
   const filesCount = data.files.length;
   const importsCount = data.edges.length;
-  const routesCount = routes.length;
 
   let unidentifiedCount = 0;
   const rankedItems: RankedItem[] = data.files.map((file) => {
-    const classification = classifyFile(file);
+    const classification = getFileClassification(file, data);
     if (!classification.identified) {
       unidentifiedCount++;
     }
@@ -438,6 +467,7 @@ export interface FileDetails {
   fanOut: number;
   dependencies: FileNeighbor[];
   dependents: FileNeighbor[];
+  routes: ExtractedRoute[];
 }
 
 /**
@@ -447,7 +477,8 @@ export function getFileDetails(filePath: string, data: ParseResult): FileDetails
   const file = data.files.find((f) => f.path === filePath);
   if (!file) return null;
 
-  const classification = classifyFile(file);
+  const classification = getFileClassification(file, data);
+  const fileRoutes = (data.routes || []).filter((r) => r.filePath === filePath);
 
   // Outgoing dependencies: files this file imports (edges where sourcePath === filePath)
   const outgoingMap = new Map<string, { kind: string; specifier: string }>();
@@ -471,7 +502,7 @@ export function getFileDetails(filePath: string, data: ParseResult): FileDetails
         };
       return {
         file: targetFile,
-        classification: classifyFile(targetFile),
+        classification: getFileClassification(targetFile, data),
         edgeKind: info.kind,
         specifier: info.specifier,
       };
@@ -500,7 +531,7 @@ export function getFileDetails(filePath: string, data: ParseResult): FileDetails
         };
       return {
         file: sourceFile,
-        classification: classifyFile(sourceFile),
+        classification: getFileClassification(sourceFile, data),
         edgeKind: info.kind,
         specifier: info.specifier,
       };
@@ -514,6 +545,7 @@ export function getFileDetails(filePath: string, data: ParseResult): FileDetails
     fanOut: dependencies.length,
     dependencies,
     dependents,
+    routes: fileRoutes,
   };
 }
 
@@ -553,7 +585,7 @@ export function getFolderDetails(
   data: ParseResult
 ): FolderDetails {
   const files: FolderFileItem[] = folderNode.files.map((f) => {
-    const classification = classifyFile(f);
+    const classification = getFileClassification(f, data);
     const metrics = data.fanMetrics[f.path] || { fanIn: f.fanIn, fanOut: f.fanOut };
     return {
       file: f,
