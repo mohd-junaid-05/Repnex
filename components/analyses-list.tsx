@@ -95,7 +95,15 @@ export function AnalysesList({ analyses: initialAnalyses }: { analyses: Analysis
 
         for (const analysis of activeAnalyses) {
           const ch = supabase.channel(`analysis:${analysis.id}`, {
-            config: { private: true },
+            config: {
+              private: true,
+              broadcast: {
+                replay: {
+                  since: Date.now() - 60000,
+                  limit: 10,
+                },
+              },
+            },
           });
 
           ch.on(

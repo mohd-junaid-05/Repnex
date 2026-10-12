@@ -33,6 +33,39 @@ interface DetailPaneProps {
   onHoverFile: (path: string | null) => void;
   onHoverNode: (nodeId: string | null) => void;
   onDeselect: () => void;
+  onReanalyse?: () => void;
+  isReanalysing?: boolean;
+}
+
+/** Extract file extension including dot, e.g. '.js'. */
+function getFileExt(filePath: string): string {
+  const lastDot = filePath.lastIndexOf(".");
+  if (lastDot === -1) return "";
+  return filePath.slice(lastDot);
+}
+
+/** Get color swatch matching file language and extension. */
+function getKindSwatch(filePath: string, language?: string): string {
+  const ext = getFileExt(filePath).toLowerCase();
+  if (ext === ".js" || ext === ".cjs" || ext === ".mjs") return "bg-rose-500";
+  if (ext === ".ts" || ext === ".cts" || ext === ".mts") return "bg-sky-500";
+  if (ext === ".tsx" || ext === ".jsx") return "bg-teal-400";
+  if (ext === ".json") return "bg-amber-400";
+  if (language === "javascript" || language === "javascriptreact") return "bg-rose-500";
+  if (language === "typescript" || language === "typescriptreact") return "bg-sky-500";
+  return "bg-zinc-400";
+}
+
+/** Split a relative path into folder prefix and filename. */
+function splitPath(filePath: string): { dir: string; filename: string } {
+  const lastSlash = filePath.lastIndexOf("/");
+  if (lastSlash === -1) {
+    return { dir: "", filename: filePath };
+  }
+  return {
+    dir: filePath.slice(0, lastSlash + 1),
+    filename: filePath.slice(lastSlash + 1),
+  };
 }
 
 /** Show repository, selected file, or selected folder details with navigation callbacks. */
@@ -47,6 +80,8 @@ export function DetailPane({
   onSelectFile,
   onHoverFile,
   onDeselect,
+  onReanalyse,
+  isReanalysing = false,
 }: DetailPaneProps) {
   // State for transitive walk view and collapsible insights
   const [activeWalk, setActiveWalk] = useState<"direct" | "blast-radius" | "dependency-chain">("direct");
@@ -80,8 +115,65 @@ export function DetailPane({
 
   return (
     <aside className="w-80 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0d14] flex flex-col h-full overflow-hidden flex-shrink-0 text-xs select-none">
+      {/* Target Identity Header */}
+      <div className="px-3 pt-2.5 pb-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0d14] flex-shrink-0">
+        <div className="flex items-center justify-between mb-0.5">
+          <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 dark:text-zinc-500">
+            {selectedFile ? "file" : selectedNodeId ? "folder" : "repository"}
+          </span>
+          <div className="flex items-center gap-1.5">
+            {onReanalyse && (
+              <button
+                type="button"
+                onClick={onReanalyse}
+                disabled={isReanalysing}
+                className="px-2 py-0.5 text-[10px] font-mono font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 rounded cursor-pointer transition-colors disabled:opacity-50 flex items-center gap-1"
+                title="Re-parse repository with latest parser & adapters"
+              >
+                <span className={isReanalysing ? "animate-spin inline-block" : ""}>↻</span>
+                <span>{isReanalysing ? "Re-parsing..." : "Re-parse"}</span>
+              </button>
+            )}
+            {(selectedFile || selectedNodeId) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveWalk("direct");
+                  onDeselect();
+                }}
+                className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors font-mono cursor-pointer border border-zinc-200 dark:border-zinc-700"
+                title="Return to repository summary"
+              >
+                Deselect
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="font-mono text-xs truncate">
+          {selectedFile ? (
+            (() => {
+              const { dir, filename } = splitPath(selectedFile);
+              return (
+                <>
+                  <span className="text-zinc-400 dark:text-zinc-500">{dir}</span>
+                  <span className="font-bold text-zinc-900 dark:text-zinc-100">{filename}</span>
+                </>
+              );
+            })()
+          ) : folderDetails ? (
+            <span className="font-bold text-zinc-900 dark:text-zinc-100">
+              {folderDetails.label}
+            </span>
+          ) : (
+            <span className="font-bold text-zinc-900 dark:text-zinc-100">
+              {repoSummary.name}
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* Tab Navigation Header */}
-      <div className="flex items-center justify-between px-3 pt-2.5 pb-0 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#10121d] flex-shrink-0">
+      <div className="flex items-center px-3 pt-2 pb-0 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#10121d] flex-shrink-0">
         <div className="flex gap-4">
           <button
             type="button"
@@ -106,19 +198,6 @@ export function DetailPane({
             Explanation
           </button>
         </div>
-        {(selectedFile || selectedNodeId) && (
-          <button
-            type="button"
-            onClick={() => {
-              setActiveWalk("direct");
-              onDeselect();
-            }}
-            className="text-[10px] px-1.5 py-0.5 mb-1.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors font-mono cursor-pointer border border-zinc-200 dark:border-zinc-700"
-            title="Return to repository summary"
-          >
-            Deselect
-          </button>
-        )}
       </div>
 
       {/* Pane Content Area */}
@@ -171,26 +250,115 @@ export function DetailPane({
           /* STRUCTURE TAB: SELECTED FILE VIEW                            */
           /* ============================================================ */
           <div className="flex flex-col gap-3">
-            {/* Header / File Identity */}
-            <div className="flex flex-col gap-1.5 pb-2.5 border-b border-zinc-200 dark:border-zinc-800/80">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span
-                  className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${fileDetails.classification.badgeBg} ${fileDetails.classification.badgeText} ${fileDetails.classification.borderClass} font-semibold`}
-                >
+            {/* Metadata Properties Grid */}
+            <div className="flex flex-col gap-2 py-1 border-b border-zinc-200 dark:border-zinc-800/80 text-xs">
+              {/* Kind */}
+              <div className="grid grid-cols-[100px_1fr] items-center">
+                <span className="text-zinc-400 dark:text-zinc-500 font-sans">Kind</span>
+                <div className="flex items-center gap-1.5 font-mono text-zinc-800 dark:text-zinc-200">
+                  <span
+                    className={`w-2.5 h-2.5 rounded-[2px] ${getKindSwatch(
+                      fileDetails.file.path,
+                      fileDetails.file.language
+                    )} shrink-0`}
+                  />
+                  <span>
+                    {getFileExt(fileDetails.file.path) || fileDetails.file.language}
+                  </span>
+                </div>
+              </div>
+
+              {/* Role */}
+              <div className="grid grid-cols-[100px_1fr] items-center">
+                <span className="text-zinc-400 dark:text-zinc-500 font-sans">Role</span>
+                <span className="text-zinc-800 dark:text-zinc-200 font-sans font-medium">
                   {fileDetails.classification.label}
                 </span>
-                <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
-                  {fileDetails.file.language}
-                </span>
-                <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500">•</span>
-                <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
-                  {fileDetails.file.lineCount} lines
+              </div>
+
+              {/* Folder */}
+              <div className="grid grid-cols-[100px_1fr] items-center">
+                <span className="text-zinc-400 dark:text-zinc-500 font-sans">Folder</span>
+                <span
+                  className="font-mono text-zinc-700 dark:text-zinc-300 truncate"
+                  title={fileDetails.file.folder || "."}
+                >
+                  {fileDetails.file.folder || "."}
                 </span>
               </div>
-              <h3 className="font-mono text-xs font-bold text-zinc-900 dark:text-zinc-100 break-all leading-snug">
-                {fileDetails.file.path}
-              </h3>
 
+              {/* Length */}
+              <div className="grid grid-cols-[100px_1fr] items-center">
+                <span className="text-zinc-400 dark:text-zinc-500 font-sans">Length</span>
+                <span className="font-mono text-zinc-700 dark:text-zinc-300">
+                  {fileDetails.file.lineCount > 0
+                    ? `${fileDetails.file.lineCount} lines`
+                    : "—"}
+                </span>
+              </div>
+
+              {/* Depends on */}
+              <div className="grid grid-cols-[100px_1fr] items-center">
+                <span className="text-zinc-400 dark:text-zinc-500 font-sans">Depends on</span>
+                <div className="font-mono">
+                  <span className="text-amber-500 dark:text-amber-400 font-semibold">
+                    {fileDetails.fanOut}
+                  </span>{" "}
+                  <span className="text-zinc-600 dark:text-zinc-400">
+                    {fileDetails.fanOut === 1 ? "file" : "files"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Depended on by */}
+              <div className="grid grid-cols-[100px_1fr] items-center">
+                <span className="text-zinc-400 dark:text-zinc-500 font-sans">Depended on by</span>
+                <div className="font-mono">
+                  <span className="text-emerald-500 dark:text-emerald-400 font-semibold">
+                    {fileDetails.fanIn}
+                  </span>{" "}
+                  <span className="text-zinc-600 dark:text-zinc-400">
+                    {fileDetails.fanIn === 1 ? "file" : "files"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Reached by */}
+              <div className="grid grid-cols-[100px_1fr] items-center">
+                <span className="text-zinc-400 dark:text-zinc-500 font-sans">Reached by</span>
+                <span className="font-mono text-zinc-700 dark:text-zinc-300">
+                  {fileDetails.reachedBy}
+                </span>
+              </div>
+
+              {/* Exports */}
+              <div className="grid grid-cols-[100px_1fr] items-start">
+                <span className="text-zinc-400 dark:text-zinc-500 font-sans">Exports</span>
+                <span className="font-mono text-zinc-700 dark:text-zinc-300 break-all leading-relaxed">
+                  {fileDetails.file.exports && fileDetails.file.exports.length > 0
+                    ? fileDetails.file.exports.join(", ")
+                    : "none"}
+                </span>
+              </div>
+
+              {/* Functions / Declarations */}
+              {fileDetails.file.functions && fileDetails.file.functions.length > 0 && (
+                <div className="grid grid-cols-[100px_1fr] items-start pt-0.5">
+                  <span className="text-zinc-400 dark:text-zinc-500 font-sans">Functions</span>
+                  <div className="flex flex-wrap gap-1 max-h-[80px] overflow-y-auto custom-scrollbar">
+                    {fileDetails.file.functions.map((fn) => (
+                      <span
+                        key={fn}
+                        className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-[10px] font-mono text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700"
+                      >
+                        {fn}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Route Endpoint */}
               {fileDetails.routes && fileDetails.routes.length > 0 && (
                 <div className="flex flex-col gap-1 p-2 rounded bg-zinc-100/70 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono mt-1">
                   <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">
@@ -215,42 +383,37 @@ export function DetailPane({
               )}
             </div>
 
-            {/* Transitive Walk / Direct Action Buttons (Phase 6) */}
-            <div className="grid grid-cols-3 gap-1 bg-zinc-100 dark:bg-zinc-900/70 p-1 rounded-lg border border-zinc-200 dark:border-zinc-800/80">
+            {/* Blast radius / Dependency chain Action Buttons */}
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => setActiveWalk("direct")}
-                className={`py-1 px-1.5 rounded text-[10px] font-mono font-medium transition-colors cursor-pointer text-center ${
-                  activeWalk === "direct"
-                    ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-bold"
-                    : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
-                }`}
-              >
-                Direct
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveWalk("blast-radius")}
-                className={`py-1 px-1.5 rounded text-[10px] font-mono font-medium transition-colors cursor-pointer text-center ${
+                onClick={() =>
+                  setActiveWalk(activeWalk === "blast-radius" ? "direct" : "blast-radius")
+                }
+                className={`py-1.5 px-3 rounded border text-xs font-mono font-medium transition-colors cursor-pointer text-center ${
                   activeWalk === "blast-radius"
-                    ? "bg-rose-500 text-white font-bold shadow-xs"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10"
+                    ? "bg-rose-500/20 border-rose-500 text-rose-600 dark:text-rose-300 font-semibold shadow-xs"
+                    : "bg-zinc-100/70 dark:bg-[#141622] border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800/80"
                 }`}
                 title="Everything that breaks 2 levels out if this file changes"
               >
-                Blast radius ({blastRadius.length})
+                Blast radius {blastRadius.length > 0 ? `(${blastRadius.length})` : ""}
               </button>
               <button
                 type="button"
-                onClick={() => setActiveWalk("dependency-chain")}
-                className={`py-1 px-1.5 rounded text-[10px] font-mono font-medium transition-colors cursor-pointer text-center ${
+                onClick={() =>
+                  setActiveWalk(
+                    activeWalk === "dependency-chain" ? "direct" : "dependency-chain"
+                  )
+                }
+                className={`py-1.5 px-3 rounded border text-xs font-mono font-medium transition-colors cursor-pointer text-center ${
                   activeWalk === "dependency-chain"
-                    ? "bg-amber-500 text-white font-bold shadow-xs"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10"
+                    ? "bg-amber-500/20 border-amber-500 text-amber-600 dark:text-amber-300 font-semibold shadow-xs"
+                    : "bg-zinc-100/70 dark:bg-[#141622] border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800/80"
                 }`}
                 title="Everything this file needs up to 2 levels deep"
               >
-                Dep chain ({dependencyChain.length})
+                Dependency chain {dependencyChain.length > 0 ? `(${dependencyChain.length})` : ""}
               </button>
             </div>
 
@@ -263,17 +426,23 @@ export function DetailPane({
                   <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs">
                     Blast radius ({blastRadius.length})
                   </span>
-                  <span className="text-[10px] text-rose-500 font-mono">2 levels deep</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveWalk("direct")}
+                    className="text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 font-mono cursor-pointer"
+                  >
+                    Close
+                  </button>
                 </div>
                 <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-tight">
-                  Everything that breaks if this file changes.
+                  Everything that breaks if this file changes (2 levels deep).
                 </p>
                 {blastRadius.length === 0 ? (
-                  <div className="text-[11px] text-zinc-400 dark:text-zinc-500 italic py-1 px-2 rounded bg-zinc-100/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60">
+                  <div className="text-[11px] text-zinc-400 dark:text-zinc-500 italic py-1 px-2 rounded bg-zinc-100/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 font-mono">
                     Nothing in the repository depends on this file.
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-1 max-h-[360px] overflow-y-auto custom-scrollbar">
+                  <div className="flex flex-col gap-1 max-h-[300px] overflow-y-auto custom-scrollbar">
                     {blastRadius.map((step) => {
                       const targetFile =
                         data.files.find((f) => f.path === step.path) || {
@@ -287,6 +456,7 @@ export function DetailPane({
                         };
                       const classification = classifyFile(targetFile);
                       const isHovered = hoveredFile === step.path;
+                      const { dir, filename } = splitPath(step.path);
                       return (
                         <div
                           key={`blast-${step.path}`}
@@ -303,7 +473,10 @@ export function DetailPane({
                             <span
                               className={`w-1.5 h-1.5 rounded-full ${classification.colorClass} shrink-0`}
                             />
-                            <span className="truncate">{step.path}</span>
+                            <span className="truncate">
+                              <span className="text-zinc-400 dark:text-zinc-500">{dir}</span>
+                              <span className="font-semibold text-zinc-900 dark:text-zinc-100">{filename}</span>
+                            </span>
                           </div>
                           <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-200/60 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 shrink-0">
                             {step.depth === 1 ? "depth 1" : "depth 2"}
@@ -323,17 +496,23 @@ export function DetailPane({
                   <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs">
                     Dependency chain ({dependencyChain.length})
                   </span>
-                  <span className="text-[10px] text-amber-500 font-mono">2 levels deep</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveWalk("direct")}
+                    className="text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 font-mono cursor-pointer"
+                  >
+                    Close
+                  </button>
                 </div>
                 <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-tight">
                   Everything this file needs up to 2 levels deep.
                 </p>
                 {dependencyChain.length === 0 ? (
-                  <div className="text-[11px] text-zinc-400 dark:text-zinc-500 italic py-1 px-2 rounded bg-zinc-100/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60">
+                  <div className="text-[11px] text-zinc-400 dark:text-zinc-500 italic py-1 px-2 rounded bg-zinc-100/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 font-mono">
                     No internal dependencies within 2 levels.
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-1 max-h-[360px] overflow-y-auto custom-scrollbar">
+                  <div className="flex flex-col gap-1 max-h-[300px] overflow-y-auto custom-scrollbar">
                     {dependencyChain.map((step) => {
                       const targetFile =
                         data.files.find((f) => f.path === step.path) || {
@@ -347,6 +526,7 @@ export function DetailPane({
                         };
                       const classification = classifyFile(targetFile);
                       const isHovered = hoveredFile === step.path;
+                      const { dir, filename } = splitPath(step.path);
                       return (
                         <div
                           key={`depchain-${step.path}`}
@@ -363,7 +543,10 @@ export function DetailPane({
                             <span
                               className={`w-1.5 h-1.5 rounded-full ${classification.colorClass} shrink-0`}
                             />
-                            <span className="truncate">{step.path}</span>
+                            <span className="truncate">
+                              <span className="text-zinc-400 dark:text-zinc-500">{dir}</span>
+                              <span className="font-semibold text-zinc-900 dark:text-zinc-100">{filename}</span>
+                            </span>
                           </div>
                           <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-200/60 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 shrink-0">
                             {step.depth === 1 ? "depth 1" : "depth 2"}
@@ -379,92 +562,25 @@ export function DetailPane({
               /* DIRECT DEPENDENTS / DEPENDENCIES VIEW                    */
               /* ======================================================== */
               <>
-                {/* In / Out Direction Metric Pills */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 dark:border-emerald-500/30 rounded-lg p-2 flex flex-col">
-                    <span className="text-[10px] uppercase font-mono tracking-wider text-emerald-700 dark:text-emerald-400">
-                      Dependents
-                    </span>
-                    <span className="text-sm font-bold font-mono text-emerald-600 dark:text-emerald-300">
-                      &lt;- {fileDetails.fanIn}
-                    </span>
-                    <span className="text-[9px] text-emerald-600/70 dark:text-emerald-400/70">
-                      things import this
-                    </span>
-                  </div>
-                  <div className="bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20 dark:border-amber-500/30 rounded-lg p-2 flex flex-col">
-                    <span className="text-[10px] uppercase font-mono tracking-wider text-amber-700 dark:text-amber-400">
-                      Dependencies
-                    </span>
-                    <span className="text-sm font-bold font-mono text-amber-600 dark:text-amber-300">
-                      {fileDetails.fanOut} -&gt;
-                    </span>
-                    <span className="text-[9px] text-amber-600/70 dark:text-amber-400/70">
-                      this imports
-                    </span>
-                  </div>
-                </div>
-
-                {/* List 1: Dependents (files that import this file) */}
+                {/* List 1: Outgoing Imports */}
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs">
-                      Dependents ({fileDetails.dependents.length})
+                      Imports
                     </span>
-                    <span className="text-[10px] text-zinc-400 font-mono">Incoming</span>
-                  </div>
-                  {fileDetails.dependents.length === 0 ? (
-                    <div className="text-[11px] text-zinc-400 dark:text-zinc-500 italic py-1 px-2 rounded bg-zinc-100/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60">
-                      Nothing imports this file directly.
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-1 max-h-[160px] overflow-y-auto custom-scrollbar">
-                      {fileDetails.dependents.map(({ file: depFile, classification }) => {
-                        const isHovered = hoveredFile === depFile.path;
-                        return (
-                          <div
-                            key={`dep-in-${depFile.path}`}
-                            onClick={() => onSelectFile(depFile.path)}
-                            onMouseEnter={() => onHoverFile(depFile.path)}
-                            onMouseLeave={() => onHoverFile(null)}
-                            className={`px-2 py-1.5 rounded border text-[11px] font-mono cursor-pointer transition-colors flex items-center justify-between group ${
-                              isHovered
-                                ? "bg-emerald-500/20 border-emerald-500 text-emerald-900 dark:text-emerald-100 shadow-sm"
-                                : "bg-zinc-100/70 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800/80 hover:text-zinc-900 dark:hover:text-zinc-100"
-                            }`}
-                          >
-                            <div className="flex items-center gap-1.5 truncate mr-2">
-                              <span
-                                className={`w-1.5 h-1.5 rounded-full ${classification.colorClass} shrink-0`}
-                              />
-                              <span className="truncate">{depFile.path}</span>
-                            </div>
-                            <span className="text-[10px] text-zinc-400 shrink-0">
-                              {depFile.lineCount > 0 ? `${depFile.lineCount}L` : ""}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* List 2: Dependencies (files this file imports) */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs">
-                      Dependencies ({fileDetails.dependencies.length})
+                    <span className="text-xs text-amber-500 dark:text-amber-400 font-mono font-medium">
+                      {fileDetails.dependencies.length} &rarr;
                     </span>
-                    <span className="text-[10px] text-zinc-400 font-mono">Outgoing</span>
                   </div>
                   {fileDetails.dependencies.length === 0 ? (
-                    <div className="text-[11px] text-zinc-400 dark:text-zinc-500 italic py-1 px-2 rounded bg-zinc-100/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60">
+                    <div className="text-[11px] text-zinc-400 dark:text-zinc-500 italic py-1 px-2 rounded bg-zinc-100/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 font-mono">
                       No internal repository imports.
                     </div>
                   ) : (
-                    <div className="flex flex-col gap-1 max-h-[160px] overflow-y-auto custom-scrollbar">
-                      {fileDetails.dependencies.map(({ file: depFile, classification }) => {
+                    <div className="flex flex-col gap-1 max-h-[180px] overflow-y-auto custom-scrollbar">
+                      {fileDetails.dependencies.map(({ file: depFile, edgeKind }) => {
                         const isHovered = hoveredFile === depFile.path;
+                        const { dir, filename } = splitPath(depFile.path);
                         return (
                           <div
                             key={`dep-out-${depFile.path}`}
@@ -477,14 +593,57 @@ export function DetailPane({
                                 : "bg-zinc-100/70 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800/80 hover:text-zinc-900 dark:hover:text-zinc-100"
                             }`}
                           >
-                            <div className="flex items-center gap-1.5 truncate mr-2">
-                              <span
-                                className={`w-1.5 h-1.5 rounded-full ${classification.colorClass} shrink-0`}
-                              />
-                              <span className="truncate">{depFile.path}</span>
+                            <div className="truncate mr-2">
+                              <span className="text-zinc-400 dark:text-zinc-500">{dir}</span>
+                              <span className="font-semibold text-zinc-900 dark:text-zinc-100">{filename}</span>
                             </div>
-                            <span className="text-[10px] text-zinc-400 shrink-0">
-                              {depFile.lineCount > 0 ? `${depFile.lineCount}L` : ""}
+                            <span className="text-[10px] text-zinc-400 dark:text-zinc-500 shrink-0">
+                              {edgeKind || "import"}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* List 2: Incoming Dependents */}
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs">
+                      Imported by
+                    </span>
+                    <span className="text-xs text-emerald-500 dark:text-emerald-400 font-mono font-medium">
+                      &larr; {fileDetails.dependents.length}
+                    </span>
+                  </div>
+                  {fileDetails.dependents.length === 0 ? (
+                    <div className="text-[11px] text-zinc-400 dark:text-zinc-500 italic py-1 px-2 rounded bg-zinc-100/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 font-mono">
+                      Nothing imports this file directly.
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-1 max-h-[180px] overflow-y-auto custom-scrollbar">
+                      {fileDetails.dependents.map(({ file: depFile, edgeKind }) => {
+                        const isHovered = hoveredFile === depFile.path;
+                        const { dir, filename } = splitPath(depFile.path);
+                        return (
+                          <div
+                            key={`dep-in-${depFile.path}`}
+                            onClick={() => onSelectFile(depFile.path)}
+                            onMouseEnter={() => onHoverFile(depFile.path)}
+                            onMouseLeave={() => onHoverFile(null)}
+                            className={`px-2 py-1.5 rounded border text-[11px] font-mono cursor-pointer transition-colors flex items-center justify-between group ${
+                              isHovered
+                                ? "bg-emerald-500/20 border-emerald-500 text-emerald-900 dark:text-emerald-100 shadow-sm"
+                                : "bg-zinc-100/70 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800/80 hover:text-zinc-900 dark:hover:text-zinc-100"
+                            }`}
+                          >
+                            <div className="truncate mr-2">
+                              <span className="text-zinc-400 dark:text-zinc-500">{dir}</span>
+                              <span className="font-semibold text-zinc-900 dark:text-zinc-100">{filename}</span>
+                            </div>
+                            <span className="text-[10px] text-zinc-400 dark:text-zinc-500 shrink-0">
+                              {edgeKind || "import"}
                             </span>
                           </div>
                         );
@@ -914,6 +1073,76 @@ export function DetailPane({
             </div>
           </div>
         )}
+      </div>
+
+      {/* Footer Actions / Utility Row */}
+      <div className="px-3 py-2 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#10121d] flex items-center justify-between text-zinc-400 dark:text-zinc-500 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+            title="Helpful"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017a2 2 0 01-2-2V9a2 2 0 012-2h1.272a2 2 0 001.789-1.106l.894-1.789A2 2 0 0117.001 3v1a2 2 0 01-2 2h-1z" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+            title="Unhelpful"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 012 2v10a2 2 0 01-2 2h-1.272a2 2 0 00-1.789 1.106l-.894 1.789A2 2 0 016.999 21v-1a2 2 0 012-2h1z" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+            title="Comment"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </button>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              if (selectedFile) {
+                navigator.clipboard?.writeText(selectedFile);
+              }
+            }}
+            className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+            title="Copy path"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => onTabChange("explanation")}
+            className="hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+            title="AI Explanation"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+            title="More actions"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="1" />
+              <circle cx="19" cy="12" r="1" />
+              <circle cx="5" cy="12" r="1" />
+            </svg>
+          </button>
+        </div>
       </div>
     </aside>
   );

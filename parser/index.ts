@@ -37,8 +37,18 @@ export function parseRepository(options: ParseOptions): ParseResult {
   // 3. Find tsconfig if it exists
   const tsconfigPath = findTsConfig(absoluteRoot);
 
-  // 4. Extract imports
-  const { edges, unresolved } = extractImports(absoluteRoot, files, tsconfigPath);
+  // 4. Extract imports, module exports, and declared functions
+  const { edges, unresolved, fileExports, fileFunctions } = extractImports(absoluteRoot, files, tsconfigPath);
+
+  // Attach exported names and declared functions to files
+  for (const file of files) {
+    if (fileExports[file.path] && fileExports[file.path].length > 0) {
+      file.exports = fileExports[file.path];
+    }
+    if (fileFunctions[file.path] && fileFunctions[file.path].length > 0) {
+      file.functions = fileFunctions[file.path];
+    }
+  }
 
   // 5. Compute fan metrics
   const fanMetrics = computeFanMetrics(files, edges);

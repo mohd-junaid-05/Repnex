@@ -7,7 +7,9 @@ interface CoverageBannerProps {
   coverage: CoverageReport;
 }
 
-export function CoverageBanner({ coverage }: CoverageBannerProps) {
+export function CoverageBanner({
+  coverage,
+}: CoverageBannerProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const resolved = coverage.resolvedImports || 0;
@@ -47,13 +49,15 @@ export function CoverageBanner({ coverage }: CoverageBannerProps) {
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setIsExpanded((prev) => !prev)}
-            className="text-[11px] font-mono text-amber-800 dark:text-amber-300 hover:underline cursor-pointer shrink-0"
-          >
-            {isExpanded ? "Collapse" : "Details"}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsExpanded((prev) => !prev)}
+              className="text-[11px] font-mono text-amber-800 dark:text-amber-300 hover:underline cursor-pointer shrink-0"
+            >
+              {isExpanded ? "Collapse" : "Details"}
+            </button>
+          </div>
         </div>
 
         {/* Expanded detailed breakdown */}

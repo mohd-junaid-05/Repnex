@@ -83,3 +83,15 @@
 - [x] Interactive DetailPane route table with HTTP method badges, exact paths, and click-to-open file navigation
 - [x] Zero references to framework strings in parser core (verified acceptance check 5)
 - [x] Validated types (`tsc`), lint (`eslint`), and production build (`next build`)
+
+## Phase 09: CommonJS and Express
+- [x] Collected `require()` calls with literal string arguments into parsed edges with `require` edge kind (`parser/extractor.ts`)
+- [x] Deduplicated mixed `require()` and `import` calls cleanly per file without duplicate edges
+- [x] Read exported names from CommonJS modules (`module.exports = ...`, `module.exports.*`, `exports.*`) and ESM exports (`parser/extractor.ts`, `parser/types.ts`)
+- [x] Implemented Express adapter with singular and plural folder conventions (Routes, Controllers, Middleware, Services, Models, Views, Entry, Configuration, Utilities, Tests, Types, Modules) (`parser/adapters/express.ts`)
+- [x] Emitted empty route table for Express per exact-or-absent route constraint
+- [x] Registered Express adapter in deterministic evaluation order (Next.js -> NestJS -> Express -> React -> Fallback)
+- [x] Configured Express taxonomy, badge colors, and display names (`lib/taxonomy.ts`, `lib/classification.ts`)
+- [x] Validated acceptance checks (real graph and coverage denominator on Express fixture, byte-identical edge list re-run comparison)
+- [x] Validated types (`tsc`), lint (`eslint`), and production build (`next build`)
+
