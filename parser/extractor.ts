@@ -31,7 +31,12 @@ export function extractImports(
   repoRoot: string,
   files: ParsedFile[],
   tsConfigPath: string | null,
-): { edges: ParsedEdge[]; unresolved: UnresolvedImport[] } {
+): {
+  edges: ParsedEdge[];
+  unresolved: UnresolvedImport[];
+  fileExports: Record<string, string[]>;
+  fileFunctions: Record<string, string[]>;
+} {
   const absoluteRoot = path.resolve(repoRoot);
 
   // Build a set of known file paths for fast lookup
@@ -67,12 +72,26 @@ export function extractImports(
 
   const edges: ParsedEdge[] = [];
   const unresolved: UnresolvedImport[] = [];
+  const fileExports: Record<string, string[]> = {};
+  const fileFunctions: Record<string, string[]> = {};
   const edgeKeys = new Set<string>();
 
   for (const file of files) {
     const absPath = path.join(absoluteRoot, file.path);
     const sourceFile = project.getSourceFile(absPath);
     if (!sourceFile) continue;
+
+    // Read exported names
+    const exportedNames = extractModuleExports(sourceFile);
+    if (exportedNames.length > 0) {
+      fileExports[file.path] = exportedNames;
+    }
+
+    // Read declared functions and major methods
+    const declaredFunctions = extractFileFunctions(sourceFile);
+    if (declaredFunctions.length > 0) {
+      fileFunctions[file.path] = declaredFunctions;
+    }
 
     const rawImports = extractRawImports(sourceFile);
 
@@ -107,7 +126,7 @@ export function extractImports(
     }
   }
 
-  return { edges, unresolved };
+  return { edges, unresolved, fileExports, fileFunctions };
 }
 
 /** Extract all raw import specifiers from a source file. */
@@ -129,6 +148,7 @@ function extractRawImports(sourceFile: SourceFile): RawImport[] {
   }
 
   // 3. Dynamic imports: import('x') with a literal string
+  // 4. CommonJS require: require('x') with a literal string
   const callExpressions = sourceFile.getDescendantsOfKind(
     SyntaxKind.CallExpression,
   );
@@ -163,10 +183,191 @@ function extractRawImports(sourceFile: SourceFile): RawImport[] {
           });
         }
       }
+    } else if (
+      expression.getKind() === SyntaxKind.Identifier &&
+      expression.getText() === 'require'
+    ) {
+      const args = call.getArguments();
+      if (args.length > 0) {
+        const firstArg = args[0];
+        if (firstArg.getKind() === SyntaxKind.StringLiteral) {
+          const specifier = firstArg.asKind(SyntaxKind.StringLiteral);
+          if (specifier) {
+            imports.push({
+              specifier: specifier.getLiteralValue(),
+              kind: 'require',
+            });
+          }
+        } else if (firstArg.getKind() === SyntaxKind.NoSubstitutionTemplateLiteral) {
+          const tpl = firstArg.asKind(SyntaxKind.NoSubstitutionTemplateLiteral);
+          if (tpl) {
+            imports.push({
+              specifier: tpl.getLiteralValue(),
+              kind: 'require',
+            });
+          }
+        }
+      }
     }
   }
 
   return imports;
+}
+
+/** Extract exported names from a source file (both CommonJS and ESM). */
+export function extractModuleExports(sourceFile: SourceFile): string[] {
+  const exportNames = new Set<string>();
+
+  // 1. CommonJS exports: module.exports = ..., module.exports.foo = ..., exports.bar = ...
+  const binaryExpressions = sourceFile.getDescendantsOfKind(SyntaxKind.BinaryExpression);
+  for (const bin of binaryExpressions) {
+    if (bin.getOperatorToken().getKind() === SyntaxKind.EqualsToken) {
+      const left = bin.getLeft();
+      const leftText = left.getText();
+
+      // module.exports.foo = ...
+      if (leftText.startsWith('module.exports.') && leftText.length > 'module.exports.'.length) {
+        const prop = leftText.slice('module.exports.'.length).trim();
+        if (/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(prop)) {
+          exportNames.add(prop);
+        }
+      }
+      // exports.foo = ...
+      else if (leftText.startsWith('exports.') && leftText.length > 'exports.'.length) {
+        const prop = leftText.slice('exports.'.length).trim();
+        if (/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(prop)) {
+          exportNames.add(prop);
+        }
+      }
+      // module.exports = ...
+      else if (leftText === 'module.exports' || leftText === 'exports') {
+        const right = bin.getRight();
+        const rightKind = right.getKind();
+
+        if (rightKind === SyntaxKind.ObjectLiteralExpression) {
+          const obj = right.asKind(SyntaxKind.ObjectLiteralExpression);
+          if (obj) {
+            for (const prop of obj.getProperties()) {
+              if ('getName' in prop && typeof prop.getName === 'function') {
+                const name = prop.getName();
+                if (name) exportNames.add(name);
+              }
+            }
+          }
+        } else if (
+          rightKind === SyntaxKind.FunctionExpression ||
+          rightKind === SyntaxKind.ClassExpression
+        ) {
+          const funcOrClass = right as { getName?: () => string | undefined };
+          const name = typeof funcOrClass.getName === 'function' ? funcOrClass.getName() : undefined;
+          exportNames.add(name || 'default');
+        } else if (rightKind === SyntaxKind.Identifier) {
+          exportNames.add(right.getText());
+        } else {
+          exportNames.add('default');
+        }
+      }
+    }
+  }
+
+  // 2. ESM exports
+  for (const decl of sourceFile.getExportDeclarations()) {
+    for (const named of decl.getNamedExports()) {
+      exportNames.add(named.getName());
+    }
+  }
+  for (const fn of sourceFile.getFunctions()) {
+    if (fn.isExported()) {
+      exportNames.add(fn.getName() || 'default');
+    }
+  }
+  for (const cls of sourceFile.getClasses()) {
+    if (cls.isExported()) {
+      exportNames.add(cls.getName() || 'default');
+    }
+  }
+  for (const stmt of sourceFile.getVariableStatements()) {
+    if (stmt.isExported()) {
+      for (const decl of stmt.getDeclarationList().getDeclarations()) {
+        exportNames.add(decl.getName());
+      }
+    }
+  }
+  if (sourceFile.getExportAssignments().length > 0) {
+    exportNames.add('default');
+  }
+
+  return [...exportNames].sort();
+}
+
+/** Extract declared functions, arrow functions, and classes from a source file. */
+export function extractFileFunctions(sourceFile: SourceFile): string[] {
+  const functionNames = new Set<string>();
+
+  // 1. Function declarations: function foo() {}
+  for (const fn of sourceFile.getFunctions()) {
+    const name = fn.getName();
+    if (name) functionNames.add(name);
+  }
+
+  // 2. Variable declarations assigned to functions: const foo = () => {}, const bar = function() {}
+  for (const stmt of sourceFile.getVariableStatements()) {
+    for (const decl of stmt.getDeclarationList().getDeclarations()) {
+      const init = decl.getInitializer();
+      if (init) {
+        const kind = init.getKind();
+        if (
+          kind === SyntaxKind.ArrowFunction ||
+          kind === SyntaxKind.FunctionExpression
+        ) {
+          functionNames.add(decl.getName());
+        }
+      }
+    }
+  }
+
+  // 3. Class declarations and their methods: class Foo { bar() {} }
+  for (const cls of sourceFile.getClasses()) {
+    const clsName = cls.getName();
+    if (clsName) {
+      functionNames.add(clsName);
+    }
+    for (const method of cls.getMethods()) {
+      const methodName = method.getName();
+      if (methodName) {
+        functionNames.add(clsName ? `${clsName}.${methodName}` : methodName);
+      }
+    }
+  }
+
+  // 4. CommonJS function assignments: exports.foo = function() {}, module.exports.bar = () => {}
+  const binaryExpressions = sourceFile.getDescendantsOfKind(SyntaxKind.BinaryExpression);
+  for (const bin of binaryExpressions) {
+    if (bin.getOperatorToken().getKind() === SyntaxKind.EqualsToken) {
+      const leftText = bin.getLeft().getText();
+      const right = bin.getRight();
+      const rightKind = right.getKind();
+      const isFn =
+        rightKind === SyntaxKind.ArrowFunction ||
+        rightKind === SyntaxKind.FunctionExpression;
+
+      if (isFn) {
+        if (leftText.startsWith('module.exports.') && leftText.length > 'module.exports.'.length) {
+          const prop = leftText.slice('module.exports.'.length).trim();
+          if (/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(prop)) {
+            functionNames.add(prop);
+          }
+        } else if (leftText.startsWith('exports.') && leftText.length > 'exports.'.length) {
+          const prop = leftText.slice('exports.'.length).trim();
+          if (/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(prop)) {
+            functionNames.add(prop);
+          }
+        }
+      }
+    }
+  }
+
+  return [...functionNames].sort();
 }
 
 type ResolveResult =

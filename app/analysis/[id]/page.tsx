@@ -11,10 +11,14 @@ import type {
   CoverageReport,
   FileLanguage,
   ExtractedRoute,
+  EdgeKind,
 } from "@/parser/types";
 import { AnalysisProgress } from "@/components/analysis-progress";
 import { AnalysisExplorer } from "@/components/analysis-explorer";
 import * as path from "node:path";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 interface AnalysisPageProps {
   params: Promise<{ id: string }>;
@@ -70,8 +74,8 @@ export default async function AnalysisPage({ params }: AnalysisPageProps) {
     { data: roleRows },
     { data: insightRows },
   ] = await Promise.all([
-    supabase.from("files").select("id, path, language").eq("analysis_id", id),
-    supabase.from("edges").select("id, source_id, target_id, import_path").eq("analysis_id", id),
+    supabase.from("files").select("id, path, language, line_count, exports, functions").eq("analysis_id", id),
+    supabase.from("edges").select("id, source_id, target_id, import_path, kind").eq("analysis_id", id),
     supabase.from("routes").select("id, file_id, route_path, http_methods").eq("analysis_id", id),
     supabase.from("file_roles").select("id, file_id, role").eq("analysis_id", id),
     supabase.from("insights").select("kind, payload").eq("analysis_id", id),
@@ -93,8 +97,10 @@ export default async function AnalysisPage({ params }: AnalysisPageProps) {
       path: f.path,
       folder,
       language: (f.language as FileLanguage) || "typescript",
-      lineCount: 0,
+      lineCount: f.line_count ?? 0,
       contentHash: "",
+      exports: f.exports ?? [],
+      functions: f.functions ?? [],
     };
   });
 
@@ -108,7 +114,7 @@ export default async function AnalysisPage({ params }: AnalysisPageProps) {
         sourcePath,
         targetPath,
         importSpecifier: e.import_path,
-        kind: "import",
+        kind: (e.kind as EdgeKind) || "import",
       };
     })
     .filter((e): e is ParsedEdge => e !== null);
@@ -223,6 +229,7 @@ export default async function AnalysisPage({ params }: AnalysisPageProps) {
       edges={edges}
       fileToNode={fileToNodeObj}
       categories={categories}
+      repoUrl={repoUrl}
     />
   );
 }

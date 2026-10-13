@@ -16,6 +16,10 @@ export interface ParsedFile {
   lineCount: number;
   /** SHA-256 hex digest of the file contents. */
   contentHash: string;
+  /** Names exported by the module (CommonJS module.exports/exports or ESM exports). */
+  exports?: string[];
+  /** Major functions or declarations extracted from the file. */
+  functions?: string[];
 }
 
 export type FileLanguage =
@@ -25,7 +29,7 @@ export type FileLanguage =
   | 'javascriptreact';
 
 /** The kind of import relationship between two files. */
-export type EdgeKind = 'import' | 're-export' | 'dynamic-import';
+export type EdgeKind = 'import' | 're-export' | 'dynamic-import' | 'require';
 
 /** A directed edge from one file to another, representing a resolved import. */
 export interface ParsedEdge {

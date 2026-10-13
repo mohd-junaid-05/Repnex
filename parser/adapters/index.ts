@@ -6,15 +6,17 @@
 import type { FrameworkAdapter, ParsedFile } from '../types';
 import { nextjsAdapter } from './nextjs';
 import { nestjsAdapter } from './nestjs';
+import { expressAdapter } from './express';
 import { reactAdapter } from './react';
 import { fallbackAdapter } from './fallback';
 
-export { nextjsAdapter, nestjsAdapter, reactAdapter, fallbackAdapter };
+export { nextjsAdapter, nestjsAdapter, expressAdapter, reactAdapter, fallbackAdapter };
 
-/** Fixed detection order: Next.js -> NestJS -> React -> Generic */
+/** Fixed detection order: Next.js -> NestJS -> Express -> React -> Generic */
 export const ALL_ADAPTERS: FrameworkAdapter[] = [
   nextjsAdapter,
   nestjsAdapter,
+  expressAdapter,
   reactAdapter,
   fallbackAdapter,
 ];

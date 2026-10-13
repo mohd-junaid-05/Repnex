@@ -181,9 +181,22 @@ export const nextjsAdapter: FrameworkAdapter = {
         continue;
       }
 
-      // Configuration
+      // Middleware
       if (
         name.startsWith('middleware.') ||
+        p === 'middleware.ts' ||
+        p === 'src/middleware.ts' ||
+        p === 'middleware.js' ||
+        p === 'src/middleware.js' ||
+        p.endsWith('/middleware.ts') ||
+        p.endsWith('/middleware.js')
+      ) {
+        roles[file.path] = 'Middleware';
+        continue;
+      }
+
+      // Configuration
+      if (
         name.includes('.config.') ||
         name.startsWith('tsconfig') ||
         name.startsWith('.env')

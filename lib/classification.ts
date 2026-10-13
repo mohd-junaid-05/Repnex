@@ -9,6 +9,7 @@ export type FileKind =
   | "component"
   | "page"
   | "route"
+  | "routes"
   | "layout"
   | "entry"
   | "types"
@@ -21,6 +22,9 @@ export type FileKind =
   | "entities"
   | "dtos"
   | "guards"
+  | "middleware"
+  | "models"
+  | "views"
   | "unidentified";
 
 export interface FileClassification {
@@ -468,6 +472,7 @@ export interface FileDetails {
   dependencies: FileNeighbor[];
   dependents: FileNeighbor[];
   routes: ExtractedRoute[];
+  reachedBy: string;
 }
 
 /**
@@ -538,6 +543,13 @@ export function getFileDetails(filePath: string, data: ParseResult): FileDetails
     })
     .sort((a, b) => a.file.path.localeCompare(b.file.path));
 
+  const reachedBy =
+    fileRoutes.length > 0
+      ? "routes"
+      : dependents.length === 0
+      ? "entry point"
+      : "imports only";
+
   return {
     file,
     classification,
@@ -546,6 +558,7 @@ export function getFileDetails(filePath: string, data: ParseResult): FileDetails
     dependencies,
     dependents,
     routes: fileRoutes,
+    reachedBy,
   };
 }
 

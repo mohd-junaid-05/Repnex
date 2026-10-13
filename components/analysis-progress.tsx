@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { useSupabase } from "@/lib/client-supabase";
@@ -49,29 +49,131 @@ export function AnalysisProgress({ initialAnalysis }: AnalysisProgressProps) {
   const router = useRouter();
   const { getToken } = useAuth();
   const supabase = useSupabase();
+  const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
 
-  // If initial status is complete, reload to show map
+  // When status reaches complete, reload into the canvas view
   useEffect(() => {
     if (status === "complete") {
-      router.refresh();
+      const timer = setTimeout(() => {
+        router.refresh();
+        window.location.reload();
+      }, 700);
+      return () => clearTimeout(timer);
     }
   }, [status, router]);
 
-  // Subscribe to Realtime private channel for stage updates
+  // Clean up any pending stage animation timers on unmount
+  useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach((t) => clearTimeout(t));
+      timeoutsRef.current = [];
+    };
+  }, []);
+
+  // Gracefully transition through any remaining stages so the user sees all steps complete
+  const applyStageProgress = useCallback(
+    (newStatus: string, newStage: string, errMessage?: string | null) => {
+      if (newStatus === "failed") {
+        timeoutsRef.current.forEach((t) => clearTimeout(t));
+        timeoutsRef.current = [];
+        setStatus("failed");
+        if (newStage) setStage(newStage);
+        if (errMessage) setErrorMessage(errMessage);
+        return;
+      }
+
+      if (newStatus === "complete") {
+        const stageKeys = ["fetching", "parsing", "storing", "complete"];
+        setStage((currentStage) => {
+          const startIdx = stageKeys.indexOf(currentStage);
+          if (startIdx < 0 || startIdx >= 3) {
+            setStatus("complete");
+            return "complete";
+          }
+
+          // Step through skipped stages sequentially (300ms each)
+          timeoutsRef.current.forEach((t) => clearTimeout(t));
+          timeoutsRef.current = [];
+
+          let delay = 0;
+          for (let i = startIdx + 1; i < stageKeys.length; i++) {
+            delay += 300;
+            const nextKey = stageKeys[i];
+            const t = setTimeout(() => {
+              setStage(nextKey);
+              if (nextKey === "complete") {
+                setStatus("complete");
+              }
+            }, delay);
+            timeoutsRef.current.push(t);
+          }
+          return currentStage;
+        });
+        return;
+      }
+
+      // Live intermediate stage update
+      if (newStatus) setStatus(newStatus);
+      if (newStage) setStage(newStage);
+    },
+    []
+  );
+
+  // Query server API for current analysis status
+  const checkStatus = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/analyze/${initialAnalysis.id}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data && data.status) {
+        applyStageProgress(data.status, data.stage, data.error_message);
+      }
+    } catch (err) {
+      console.warn("[analysis-progress] Status check error:", err);
+    }
+  }, [initialAnalysis.id, applyStageProgress]);
+
+  // Subscribe to Realtime private channel and maintain liveness check
   useEffect(() => {
     if (status === "complete" || status === "failed") return;
 
+    let isMounted = true;
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
+    // 1. Check current database status on mount (deferred to avoid synchronous setState in effect)
+    const initTimer = setTimeout(() => {
+      if (isMounted) {
+        checkStatus();
+      }
+    }, 0);
+
+    // 2. Set up fallback check every 1500ms while running/pending
+    const pollInterval = setInterval(() => {
+      if (isMounted) {
+        checkStatus();
+      }
+    }, 1500);
+
+    // 3. Set up Realtime private channel subscription with replay
     const setupSubscription = async () => {
       try {
         const token = await getToken({ template: "supabase" });
-        if (token) {
+        if (token && isMounted) {
           await supabase.realtime.setAuth(token);
         }
 
+        if (!isMounted) return;
+
         channel = supabase.channel(`analysis:${initialAnalysis.id}`, {
-          config: { private: true },
+          config: {
+            private: true,
+            broadcast: {
+              replay: {
+                since: Date.now() - 60000,
+                limit: 10,
+              },
+            },
+          },
         });
 
         channel
@@ -86,20 +188,16 @@ export function AnalysisProgress({ initialAnalysis }: AnalysisProgressProps) {
                 error_message?: string | null;
               };
             }) => {
+              if (!isMounted) return;
               const data = payload.payload;
-              if (data.status) setStatus(data.status);
-              if (data.stage) setStage(data.stage);
-              if (data.error_message) setErrorMessage(data.error_message);
-
-              if (data.status === "complete") {
-                // Refresh server page to load the completed explorer view
-                setTimeout(() => {
-                  router.refresh();
-                }, 500);
-              }
+              applyStageProgress(data.status, data.stage, data.error_message);
             }
           )
-          .subscribe();
+          .subscribe((subStatus) => {
+            if (subStatus === "SUBSCRIBED" && isMounted) {
+              checkStatus();
+            }
+          });
       } catch (err) {
         console.error("[realtime] Failed to subscribe to analysis channel:", err);
       }
@@ -108,11 +206,14 @@ export function AnalysisProgress({ initialAnalysis }: AnalysisProgressProps) {
     setupSubscription();
 
     return () => {
+      isMounted = false;
+      clearTimeout(initTimer);
+      clearInterval(pollInterval);
       if (channel) {
         supabase.removeChannel(channel);
       }
     };
-  }, [initialAnalysis.id, status, getToken, supabase, router]);
+  }, [initialAnalysis.id, status, getToken, supabase, checkStatus, applyStageProgress]);
 
   const handleRetry = async () => {
     setIsRetrying(true);

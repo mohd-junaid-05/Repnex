@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import type { ParseResult } from "@/parser/types";
 import type { FolderNode, GraphEdge } from "@/lib/folding";
 import { GraphView } from "@/components/graph-view";
@@ -15,6 +16,7 @@ interface AnalysisExplorerProps {
   edges: GraphEdge[];
   fileToNode: Record<string, string>;
   categories: RailCategoryItem[];
+  repoUrl?: string;
 }
 
 /** Coordinate selection, hover, folder expansion, and coverage display for real analysis data. */
@@ -24,7 +26,9 @@ export function AnalysisExplorer({
   edges,
   fileToNode,
   categories,
+  repoUrl,
 }: AnalysisExplorerProps) {
+  const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [hoveredFile, setHoveredFile] = useState<string | null>(null);
@@ -32,6 +36,36 @@ export function AnalysisExplorer({
   const [activeTab, setActiveTab] = useState<"structure" | "explanation">("structure");
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isReanalysing, setIsReanalysing] = useState(false);
+
+  const handleReanalyse = useCallback(async () => {
+    if (!repoUrl || isReanalysing) return;
+    setIsReanalysing(true);
+
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ repoUrl, forceRerun: true }),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || "Failed to start re-analysis");
+      }
+
+      const result = await res.json();
+      if (result.analysisId) {
+        router.push(`/analysis/${result.analysisId}`);
+      } else {
+        router.refresh();
+      }
+    } catch (err) {
+      console.error("[reanalyse]", err);
+      alert(err instanceof Error ? err.message : "Failed to re-analyse repository.");
+      setIsReanalysing(false);
+    }
+  }, [repoUrl, isReanalysing, router]);
 
   const handleSelectFile = useCallback(
     (filePath: string) => {
@@ -156,6 +190,8 @@ export function AnalysisExplorer({
         onHoverFile={setHoveredFile}
         onHoverNode={setHoveredNodeId}
         onDeselect={handleDeselect}
+        onReanalyse={repoUrl ? handleReanalyse : undefined}
+        isReanalysing={isReanalysing}
       />
     </div>
   );

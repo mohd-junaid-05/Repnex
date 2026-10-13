@@ -8,6 +8,7 @@ export type PipelineStatus = "pending" | "running" | "complete" | "failed";
 export interface PipelineResult {
   analysisId: string;
   projectId: string;
+  projectName?: string;
   isExisting: boolean;
   status: PipelineStatus;
   stage?: PipelineStage;
@@ -133,6 +134,9 @@ async function storeAnalysisData({
     org_id: orgId,
     path: file.path,
     language: file.language,
+    line_count: file.lineCount,
+    exports: file.exports ?? [],
+    functions: file.functions ?? [],
   }));
 
   const pathToId = new Map<string, string>();
@@ -169,6 +173,7 @@ async function storeAnalysisData({
         source_id: sourceId,
         target_id: targetId,
         import_path: edge.importSpecifier,
+        kind: edge.kind,
       };
     })
     .filter((e): e is NonNullable<typeof e> => e !== null);
@@ -325,12 +330,18 @@ export async function submitRepositoryForAnalysis({
         return {
           analysisId: existingAnalysis.id,
           projectId,
+          projectName,
           isExisting: true,
           status: existingAnalysis.status as PipelineStatus,
           stage: existingAnalysis.stage as PipelineStage,
         };
       }
     }
+  }
+
+  // Remove previous analysis records for this project so each repository only ever has one analysis in this account
+  if (projectId) {
+    await supabase.from("analyses").delete().eq("project_id", projectId);
   }
 
   // 3. Create new pending analysis row
@@ -352,6 +363,7 @@ export async function submitRepositoryForAnalysis({
   return {
     analysisId: newAnalysis.id,
     projectId,
+    projectName,
     isExisting: false,
     status: "pending",
     stage: "fetching",

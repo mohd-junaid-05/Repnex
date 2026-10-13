@@ -47,6 +47,18 @@ export default async function Home() {
     console.error("[dashboard] analyses query failed:", error.message);
   }
 
+  // Deduplicate by project so each repository only appears once (newest analysis)
+  const seenProjects = new Set<string>();
+  const uniqueAnalyses = (analyses ?? []).filter((analysis) => {
+    const project = Array.isArray(analysis.projects)
+      ? analysis.projects[0]
+      : analysis.projects;
+    const key = project?.repo_url || analysis.id;
+    if (seenProjects.has(key)) return false;
+    seenProjects.add(key);
+    return true;
+  });
+
   return (
     <div className="flex flex-col flex-1 bg-zinc-50 font-sans dark:bg-black overflow-y-auto">
       <main className="flex flex-1 flex-col w-full max-w-4xl mx-auto px-6 py-10 gap-8">
@@ -73,7 +85,7 @@ export default async function Home() {
           <h2 className="text-xs font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-4">
             Analyses
           </h2>
-          <AnalysesList analyses={analyses ?? []} />
+          <AnalysesList analyses={uniqueAnalyses} />
         </section>
       </main>
     </div>
