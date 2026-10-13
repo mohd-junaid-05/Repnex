@@ -14,6 +14,7 @@ import type { ParseResult } from './types';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+/** Parse the CLI repository path, print a summary, and optionally write and verify JSON output. */
 function main(): void {
   const args = process.argv.slice(2);
 
@@ -72,6 +73,7 @@ function main(): void {
   }
 }
 
+/** Print parse coverage, unresolved imports, folders, and the highest fan-in/out files. */
 function printSummary(result: ParseResult): void {
   const { files, edges, coverage, folders, fanMetrics } = result;
 

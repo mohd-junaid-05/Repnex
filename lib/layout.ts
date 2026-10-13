@@ -8,6 +8,10 @@ export interface LayoutNode extends FolderNode {
   height: number;
 }
 
+/**
+ * Return folder nodes with top-left positions and dimensions based on expansion state.
+ * Use a left-to-right Dagre layout, falling back to a grid if layout fails.
+ */
 export function computeLayout(nodes: FolderNode[], edges: GraphEdge[], expandedNodes: Set<string>): { nodes: LayoutNode[] } {
   const g = new dagre.graphlib.Graph();
   g.setGraph({ rankdir: 'LR', align: 'UL', ranksep: 100, nodesep: 50 });

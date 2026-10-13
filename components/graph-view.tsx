@@ -50,6 +50,7 @@ interface FolderNodeData extends Record<string, unknown> {
   isNodeHovered: boolean;
 }
 
+/** Render a collapsible folder node with file rows and their connection handles. */
 function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderNodeData; selected?: boolean }) {
   const {
     node,
@@ -254,6 +255,7 @@ const nodeTypes = {
   folder: FolderNodeComponent,
 };
 
+/** Manage graph layout, selection highlights, and edges within a React Flow context. */
 function GraphInner({
   initialNodes,
   initialEdges,
@@ -527,6 +529,7 @@ function GraphInner({
   );
 }
 
+/** Provide an isolated React Flow context for the interactive dependency graph. */
 export function GraphView(props: GraphViewProps) {
   return (
     <ReactFlowProvider>

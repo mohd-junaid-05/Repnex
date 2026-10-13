@@ -19,6 +19,7 @@ interface PreviewExplorerProps {
   categories: Category[];
 }
 
+/** Coordinate selection, hover, and folder expansion across the graph and detail pane. */
 export function PreviewExplorer({
   data,
   nodes,

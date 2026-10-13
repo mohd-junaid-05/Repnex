@@ -28,6 +28,7 @@ interface DetailPaneProps {
   onDeselect: () => void;
 }
 
+/** Show repository, selected file, or selected folder details with navigation callbacks. */
 export function DetailPane({
   data,
   nodes,

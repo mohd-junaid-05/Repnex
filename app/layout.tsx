@@ -28,6 +28,7 @@ export const metadata: Metadata = {
   description: "Repository dependency mapping and architecture visualization",
 };
 
+/** Wrap pages with authentication, theme support, and shared navigation. */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
