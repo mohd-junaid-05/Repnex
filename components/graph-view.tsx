@@ -28,6 +28,7 @@ export interface GraphViewProps {
   hoveredFile: string | null;
   hoveredNodeId: string | null;
   expandedNodes: Set<string>;
+  selectedCategory?: string | null;
   onToggleNode: (id: string) => void;
   onSelectFile: (path: string) => void;
   onSelectNode: (nodeId: string) => void;
@@ -48,6 +49,13 @@ interface FolderNodeData extends Record<string, unknown> {
   isDimmed: boolean;
   activeFiles: Set<string> | null;
   isNodeHovered: boolean;
+  selectedCategory: string | null;
+  categoryMatchCount: number;
+}
+
+function fileMatchesCategory(file: { language: string; path: string }, category: string | null): boolean {
+  if (!category) return true;
+  return file.language.toLowerCase() === category.toLowerCase();
 }
 
 /** Render a collapsible folder node with file rows and their connection handles. */
@@ -64,6 +72,8 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
     isDimmed,
     activeFiles,
     isNodeHovered,
+    selectedCategory,
+    categoryMatchCount,
   } = data;
   const updateNodeInternals = useUpdateNodeInternals();
   const [scrollTop, setScrollTop] = useState(0);
@@ -91,7 +101,7 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
             : containsHoveredFile || isNodeHovered
             ? "border-cyan-500 dark:border-cyan-400/80 shadow-cyan-500/10 shadow-md ring-1 ring-cyan-400/40"
             : "border-zinc-200 dark:border-indigo-900/40"
-        } rounded-xl text-xs font-mono overflow-hidden w-[270px] h-full flex flex-col relative shadow-md dark:shadow-2xl transition-shadow duration-200 ${
+        } rounded-xl text-xs font-mono overflow-hidden w-[270px] h-full flex flex-col relative shadow-md dark:shadow-2xl transition-all duration-200 ${
           isDimmed ? "opacity-25 grayscale" : "opacity-100"
         }`}
       >
@@ -131,9 +141,15 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
             <span className="font-bold text-zinc-900 dark:text-zinc-100 text-xs tracking-tight truncate">
               {node.label}
             </span>
-            <div className="flex items-center gap-3 text-[10px] text-zinc-500 dark:text-zinc-400">
-              <span>{node.files.length} files</span>
-              <div className="flex gap-2 items-center font-mono">
+            <div className="flex items-center gap-2 text-[10px] text-zinc-500 dark:text-zinc-400">
+              {selectedCategory ? (
+                <span className="font-mono font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1 py-0.2 rounded border border-indigo-500/20">
+                  {categoryMatchCount} matched
+                </span>
+              ) : (
+                <span>{node.files.length} files</span>
+              )}
+              <div className="flex gap-1.5 items-center font-mono">
                 <span className="text-emerald-600 dark:text-emerald-400">&lt;-{node.fanIn}</span>
                 <span className="text-amber-600 dark:text-amber-400">{node.fanOut}-&gt;</span>
               </div>
@@ -158,7 +174,8 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
             const isFileSelected = selectedFile === f.path;
             const isFileHovered = hoveredFile === f.path;
             const isFileActive = activeFiles ? activeFiles.has(f.path) : true;
-            const isFileDimmed = activeFiles && !isFileActive;
+            const isCategoryMatch = fileMatchesCategory(f, selectedCategory);
+            const isFileDimmed = (activeFiles && !isFileActive) || (selectedCategory && !isCategoryMatch);
             const name = f.path.split("/").pop() || f.path;
 
             // Dynamic UX color coding for file swatch box
@@ -184,7 +201,7 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
                     : isFileHovered
                     ? "bg-cyan-50 dark:bg-cyan-500/20 text-cyan-900 dark:text-cyan-200 ring-1 ring-cyan-400/50"
                     : isFileDimmed
-                    ? "text-zinc-400 dark:text-zinc-600"
+                    ? "text-zinc-400 dark:text-zinc-600 opacity-25 grayscale"
                     : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
                 }`}
                 onClick={(e) => {
@@ -223,7 +240,7 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
           : containsHoveredFile || isNodeHovered
           ? "border-cyan-500 dark:border-cyan-400/80 shadow-cyan-500/10 shadow-md ring-1 ring-cyan-400/40"
           : "border-zinc-200 dark:border-indigo-900/40 hover:border-zinc-300 dark:hover:border-indigo-500/60"
-      } rounded-lg text-xs font-mono px-3 py-2 cursor-grab active:cursor-grabbing shadow-xs dark:shadow-none transition-shadow duration-200 flex items-center justify-between select-none ${
+      } rounded-lg text-xs font-mono px-3 py-2 cursor-grab active:cursor-grabbing shadow-xs dark:shadow-none transition-all duration-200 flex items-center justify-between select-none ${
         isDimmed ? "opacity-25 grayscale" : "opacity-100"
       }`}
       style={{ height: "100%", width: "100%" }}
@@ -243,6 +260,11 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
         <span className="font-semibold text-zinc-800 dark:text-zinc-200 truncate">{node.label}</span>
       </div>
       <div className="flex items-center gap-1.5 ml-2 text-[10px] font-mono shrink-0">
+        {selectedCategory && (
+          <span className="font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1 py-0.5 rounded border border-indigo-500/20 mr-1">
+            {categoryMatchCount}
+          </span>
+        )}
         <span className="text-emerald-600 dark:text-emerald-400">&lt;-{node.fanIn}</span>
         <span className="text-amber-600 dark:text-amber-400">{node.fanOut}-&gt;</span>
       </div>
@@ -255,7 +277,6 @@ const nodeTypes = {
   folder: FolderNodeComponent,
 };
 
-/** Manage graph layout, selection highlights, and edges within a React Flow context. */
 function GraphInner({
   initialNodes,
   initialEdges,
@@ -264,6 +285,7 @@ function GraphInner({
   hoveredFile,
   hoveredNodeId,
   expandedNodes,
+  selectedCategory = null,
   onToggleNode,
   onSelectFile,
   onSelectNode,
@@ -297,6 +319,7 @@ function GraphInner({
         const existing = prevMap.get(n.id);
         // If node already exists, preserve its current dragged position, only update dimensions
         const position = existing ? existing.position : { x: n.x, y: n.y };
+        const matchCount = n.files.filter((f) => fileMatchesCategory(f, selectedCategory)).length;
 
         return {
           id: n.id,
@@ -316,9 +339,11 @@ function GraphInner({
             hoveredFile,
             onHoverFile,
             onHoverNode,
-            isDimmed: false,
+            isDimmed: selectedCategory ? matchCount === 0 : false,
             activeFiles: null,
             isNodeHovered: hoveredNodeId === n.id,
+            selectedCategory,
+            categoryMatchCount: matchCount,
           },
         };
       });
@@ -330,7 +355,7 @@ function GraphInner({
         fitView({ padding: 0.2, duration: 600 });
       }, 60);
     }
-  }, [initialNodes, initialEdges, expandedNodes, onToggleNode, onSelectFile, onHoverFile, onHoverNode]);
+  }, [initialNodes, initialEdges, expandedNodes, selectedCategory, onToggleNode, onSelectFile, onHoverFile, onHoverNode]);
 
   // 2. Dynamic state, highlighting, edges & theme updates (without mutating node positions)
   useEffect(() => {
@@ -369,11 +394,29 @@ function GraphInner({
           activeFiles.add(e.targetFile);
         }
       });
+    } else if (selectedCategory) {
+      initialNodes.forEach((n) => {
+        const matches = n.files.filter((f) => fileMatchesCategory(f, selectedCategory));
+        if (matches.length > 0) {
+          activeNodes.add(n.id);
+          matches.forEach((f) => activeFiles.add(f.path));
+        }
+      });
     }
 
     setNodes((prevNodes) =>
       prevNodes.map((n) => {
-        const isDimmed = hasSelectionOrHover && !activeNodes.has(n.id);
+        const matchCount = (n.data?.node as FolderNode)?.files.filter((f) =>
+          fileMatchesCategory(f, selectedCategory)
+        ).length ?? 0;
+
+        let isDimmed = false;
+        if (hasSelectionOrHover) {
+          isDimmed = !activeNodes.has(n.id);
+        } else if (selectedCategory) {
+          isDimmed = matchCount === 0;
+        }
+
         const isSelected = selectedNodeId === n.id;
         const isNodeHovered = hoveredNodeId === n.id;
 
@@ -387,6 +430,8 @@ function GraphInner({
             isDimmed,
             activeFiles: hasSelectionOrHover ? activeFiles : null,
             isNodeHovered,
+            selectedCategory,
+            categoryMatchCount: matchCount,
           },
         };
       })
@@ -427,7 +472,18 @@ function GraphInner({
       );
 
       const isEdgeActive = isSelectedEdge || isHoveredEdge;
-      const isDimmed = hasSelectionOrHover && !isEdgeActive;
+      let isDimmed = false;
+      if (hasSelectionOrHover) {
+        isDimmed = !isEdgeActive;
+      } else if (selectedCategory) {
+        const sourceMatch = sourceNode?.files.some(
+          (f) => f.path === e.sourceFile && fileMatchesCategory(f, selectedCategory)
+        );
+        const targetMatch = targetNode?.files.some(
+          (f) => f.path === e.targetFile && fileMatchesCategory(f, selectedCategory)
+        );
+        isDimmed = !(sourceMatch || targetMatch);
+      }
       const bothExpanded = sourceExpanded && targetExpanded;
 
       let edgeColor = isDark ? "#27272a" : "#cbd5e1";
@@ -499,8 +555,8 @@ function GraphInner({
     selectedFile,
     hoveredFile,
     hoveredNodeId,
+    selectedCategory,
     isDark,
-    setNodes,
     setEdges,
   ]);
 
