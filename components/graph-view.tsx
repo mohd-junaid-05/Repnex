@@ -53,9 +53,15 @@ interface FolderNodeData extends Record<string, unknown> {
   categoryMatchCount: number;
 }
 
-function fileMatchesCategory(file: { language: string; path: string }, category: string | null): boolean {
+function fileMatchesCategory(
+  file: { role?: string; language?: string; path: string },
+  category: string | null
+): boolean {
   if (!category) return true;
-  return file.language.toLowerCase() === category.toLowerCase();
+  if (file.role) {
+    return file.role.toLowerCase() === category.toLowerCase();
+  }
+  return file.language?.toLowerCase() === category.toLowerCase();
 }
 
 /** Render a collapsible folder node with file rows and their connection handles. */

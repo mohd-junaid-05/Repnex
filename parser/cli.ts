@@ -50,7 +50,7 @@ function main(): void {
 
   printSummary(result);
 
-  if (outputPath) {
+    if (outputPath) {
     fs.writeFileSync(outputPath, JSON.stringify(result, null, 2), 'utf-8');
     console.log('');
     console.log(`Full result written to: ${path.resolve(outputPath)}`);
@@ -60,14 +60,18 @@ function main(): void {
     const filesMatch = readBack.files.length === result.files.length;
     const edgesMatch = readBack.edges.length === result.edges.length;
     const foldersMatch = readBack.folders.length === result.folders.length;
+    const frameworkMatch = readBack.framework === result.framework;
+    const routesMatch = readBack.routes.length === result.routes.length;
 
-    if (filesMatch && edgesMatch && foldersMatch) {
+    if (filesMatch && edgesMatch && foldersMatch && frameworkMatch && routesMatch) {
       console.log('Round-trip verification: OK');
     } else {
       console.error('Round-trip verification: FAILED');
       console.error(`  files: ${readBack.files.length} vs ${result.files.length}`);
       console.error(`  edges: ${readBack.edges.length} vs ${result.edges.length}`);
       console.error(`  folders: ${readBack.folders.length} vs ${result.folders.length}`);
+      console.error(`  framework: ${readBack.framework} vs ${result.framework}`);
+      console.error(`  routes: ${readBack.routes.length} vs ${result.routes.length}`);
       process.exit(1);
     }
   }
@@ -75,7 +79,30 @@ function main(): void {
 
 /** Print parse coverage, unresolved imports, folders, and the highest fan-in/out files. */
 function printSummary(result: ParseResult): void {
-  const { files, edges, coverage, folders, fanMetrics } = result;
+  const { edges, coverage, folders, fanMetrics, framework, routes, fileRoles } = result;
+
+  console.log('=== Framework ===');
+  console.log(`  Framework: ${framework}`);
+  console.log(`  Routes:    ${routes.length}`);
+  if (routes.length > 0) {
+    for (const r of routes.slice(0, 5)) {
+      console.log(`    - [${r.httpMethods.join(',')}] ${r.routePath} (${r.filePath})`);
+    }
+    if (routes.length > 5) {
+      console.log(`    ... and ${routes.length - 5} more`);
+    }
+  }
+
+  const roleCounts = new Map<string, number>();
+  for (const role of Object.values(fileRoles)) {
+    roleCounts.set(role, (roleCounts.get(role) ?? 0) + 1);
+  }
+  console.log('');
+  console.log('=== Roles ===');
+  for (const [role, count] of roleCounts) {
+    console.log(`  ${role}: ${count}`);
+  }
+  console.log('');
 
   console.log('=== Files ===');
   console.log(`  Found:   ${coverage.totalFilesFound}`);

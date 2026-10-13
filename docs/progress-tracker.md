@@ -58,3 +58,28 @@
 - [x] Active left rail category filtering that dims non-matching files and folders rather than removing them
 - [x] Match count badges on open and collapsed folder nodes summing to the category total in the rail
 - [x] Validated types (`tsc`), lint (`eslint`), and production build (`next build`)
+
+## Phase 07: Ingestion pipeline
+- [x] Fetch public repository as archive from GitHub API without repository scope or storing tokens
+- [x] Record commit hash with archive to track upstream freshness
+- [x] Multi-stage analysis pipeline (fetch, select, parse, store) with fail-safe error recording
+- [x] Prevent duplicate analyses: redirect to existing analysis for already-analyzed repositories
+- [x] Realtime progress page driven by Supabase Postgres triggers broadcasting stage updates
+- [x] Channel declaration and subscription authorization policy in Supabase migration
+- [x] Replace checked-in static preview with database-backed explorer
+- [x] Stale analysis detection for interrupted runs and collapsible coverage banner
+- [x] Validated types (`tsc`), lint (`eslint`), and production build (`next build`)
+
+## Phase 08: Framework adapters
+- [x] Pure rail taxonomy separated from parser/filesystem code (`lib/taxonomy.ts`)
+- [x] Next.js adapter: path convention roles (Page routes, API endpoints, Server actions) and exact App/Pages router route extraction
+- [x] NestJS adapter: suffix-based roles (Controllers, Services, Modules, etc.) and decorator-based exact route extraction (`@Controller`, HTTP methods)
+- [x] React adapter: view, hook, component, and utility roles
+- [x] Generic fallback adapter: entry, module, config, and test roles with empty route extraction
+- [x] Adapter registry with deterministic detection order (Next.js -> NestJS -> React -> Fallback)
+- [x] Strict route constraint: emit only exact recoverable method and path pattern without guessing or inference
+- [x] Persist extracted routes to `routes` table and file roles to `file_roles` table
+- [x] Reshape left rail with concrete framework roles in fixed reading order (routable surfaces -> internal layers -> plumbing)
+- [x] Interactive DetailPane route table with HTTP method badges, exact paths, and click-to-open file navigation
+- [x] Zero references to framework strings in parser core (verified acceptance check 5)
+- [x] Validated types (`tsc`), lint (`eslint`), and production build (`next build`)

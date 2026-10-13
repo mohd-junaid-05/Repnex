@@ -3,6 +3,7 @@ import { ParseResult, ParsedFile } from "../parser/types";
 export interface GraphFile extends ParsedFile {
   fanIn: number;
   fanOut: number;
+  role?: string;
 }
 
 export interface FolderNode {
@@ -212,6 +213,7 @@ export function computeFoldedGraph(result: ParseResult) {
         ...f,
         fanIn: fileFanIn,
         fanOut: fileFanOut,
+        role: result.fileRoles?.[f.path] || '',
       };
     });
 

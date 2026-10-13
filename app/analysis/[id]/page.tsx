@@ -3,7 +3,15 @@ import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { computeFoldedGraph } from "@/lib/folding";
 import { computeFanMetrics } from "@/parser/metrics";
-import type { ParseResult, ParsedFile, ParsedEdge, CoverageReport, FileLanguage } from "@/parser/types";
+import { computeRailCategories } from "@/lib/taxonomy";
+import type {
+  ParseResult,
+  ParsedFile,
+  ParsedEdge,
+  CoverageReport,
+  FileLanguage,
+  ExtractedRoute,
+} from "@/parser/types";
 import { AnalysisProgress } from "@/components/analysis-progress";
 import { AnalysisExplorer } from "@/components/analysis-explorer";
 import * as path from "node:path";
@@ -54,16 +62,20 @@ export default async function AnalysisPage({ params }: AnalysisPageProps) {
     );
   }
 
-  // 3. Status is complete: fetch files and edges to build ParseResult
-  const { data: fileRows } = await supabase
-    .from("files")
-    .select("id, path, language")
-    .eq("analysis_id", id);
-
-  const { data: edgeRows } = await supabase
-    .from("edges")
-    .select("id, source_id, target_id, import_path")
-    .eq("analysis_id", id);
+  // 3. Status is complete: fetch files, edges, routes, roles, and insights to build ParseResult
+  const [
+    { data: fileRows },
+    { data: edgeRows },
+    { data: routeRows },
+    { data: roleRows },
+    { data: insightRows },
+  ] = await Promise.all([
+    supabase.from("files").select("id, path, language").eq("analysis_id", id),
+    supabase.from("edges").select("id, source_id, target_id, import_path").eq("analysis_id", id),
+    supabase.from("routes").select("id, file_id, route_path, http_methods").eq("analysis_id", id),
+    supabase.from("file_roles").select("id, file_id, role").eq("analysis_id", id),
+    supabase.from("insights").select("kind, payload").eq("analysis_id", id),
+  ]);
 
   const filesList = fileRows ?? [];
   const edgesList = edgeRows ?? [];
@@ -101,6 +113,56 @@ export default async function AnalysisPage({ params }: AnalysisPageProps) {
     })
     .filter((e): e is ParsedEdge => e !== null);
 
+  // Reconstruct extracted routes
+  const routes: ExtractedRoute[] = (routeRows ?? [])
+    .map((r): ExtractedRoute | null => {
+      const filePath = idToPath.get(r.file_id);
+      if (!filePath) return null;
+      return {
+        filePath,
+        routePath: r.route_path,
+        httpMethods: (r.http_methods as string[]) || [],
+      };
+    })
+    .filter((r): r is ExtractedRoute => r !== null);
+
+  // Reconstruct file roles map
+  const fileRoles: Record<string, string> = {};
+  for (const r of roleRows ?? []) {
+    const filePath = idToPath.get(r.file_id);
+    if (filePath) {
+      fileRoles[filePath] = r.role;
+    }
+  }
+
+  // Determine framework: from insights or from roles
+  let framework = "generic";
+  const fwInsight = (insightRows ?? []).find((i) => i.kind === "framework");
+  if (
+    fwInsight?.payload &&
+    typeof fwInsight.payload === "object" &&
+    "framework" in fwInsight.payload
+  ) {
+    framework = String((fwInsight.payload as { framework: string }).framework);
+  } else {
+    const rolesList = Object.values(fileRoles);
+    if (
+      rolesList.includes("Page routes") ||
+      rolesList.includes("API endpoints") ||
+      rolesList.includes("Server actions")
+    ) {
+      framework = "nextjs";
+    } else if (
+      rolesList.includes("Controllers") ||
+      rolesList.includes("Services") ||
+      rolesList.includes("Modules")
+    ) {
+      framework = "nestjs";
+    } else if (rolesList.includes("Views") || rolesList.includes("Components")) {
+      framework = "react";
+    }
+  }
+
   // Collect distinct folders
   const folderSet = new Set<string>();
   for (const file of parsedFiles) {
@@ -130,30 +192,27 @@ export default async function AnalysisPage({ params }: AnalysisPageProps) {
     unresolvedImports: [],
   };
 
-  const coverage: CoverageReport = (analysis.coverage as unknown as CoverageReport) || defaultCoverage;
+  const coverage: CoverageReport =
+    (analysis.coverage as unknown as CoverageReport) || defaultCoverage;
 
   const parseResult: ParseResult = {
     repoRoot: repoUrl,
     parsedAt: analysis.finished_at || analysis.created_at,
+    framework,
     files: parsedFiles,
     edges: parsedEdges,
     fanMetrics,
     coverage,
     folders,
+    routes,
+    fileRoles,
   };
 
   // Compute folded graph
   const { nodes, edges, fileToNode } = computeFoldedGraph(parseResult);
 
-  // Compute language categories
-  const categoriesMap = new Map<string, number>();
-  parseResult.files.forEach((f) => {
-    categoriesMap.set(f.language, (categoriesMap.get(f.language) || 0) + 1);
-  });
-  const categories = Array.from(categoriesMap.entries()).map(([lang, count]) => ({
-    lang,
-    count,
-  }));
+  // Compute framework categories for left rail
+  const categories = computeRailCategories(framework, fileRoles);
 
   const fileToNodeObj = Object.fromEntries(fileToNode.entries());
 
