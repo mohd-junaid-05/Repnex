@@ -5,13 +5,14 @@ import type { ParseResult } from "@/parser/types";
 import type { FolderNode, GraphEdge } from "@/lib/folding";
 import { GraphView } from "@/components/graph-view";
 import { DetailPane } from "@/components/detail-pane";
+import { CoverageBanner } from "@/components/coverage-banner";
 
 interface Category {
   lang: string;
   count: number;
 }
 
-interface PreviewExplorerProps {
+interface AnalysisExplorerProps {
   data: ParseResult;
   nodes: FolderNode[];
   edges: GraphEdge[];
@@ -19,14 +20,14 @@ interface PreviewExplorerProps {
   categories: Category[];
 }
 
-/** Coordinate selection, hover, and folder expansion across the graph and detail pane. */
-export function PreviewExplorer({
+/** Coordinate selection, hover, folder expansion, and coverage display for real analysis data. */
+export function AnalysisExplorer({
   data,
   nodes,
   edges,
   fileToNode,
   categories,
-}: PreviewExplorerProps) {
+}: AnalysisExplorerProps) {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [hoveredFile, setHoveredFile] = useState<string | null>(null);
@@ -130,6 +131,8 @@ export function PreviewExplorer({
 
       {/* Middle - Canvas */}
       <main className="flex-1 relative bg-slate-50 dark:bg-[#090a0f] overflow-hidden flex flex-col">
+        {data.coverage && <CoverageBanner coverage={data.coverage} />}
+
         <GraphView
           initialNodes={nodes}
           initialEdges={edges}

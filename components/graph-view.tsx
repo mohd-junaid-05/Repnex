@@ -89,9 +89,12 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
   const containsHoveredFile = !!(hoveredFile && node.files.some((f) => f.path === hoveredFile));
 
   if (expanded) {
-    const cardHeight = 44 + Math.min(node.files.length, 12) * 26 + 8;
-    const minTop = 48; // Just below header (44px)
-    const maxTop = cardHeight - 12; // Above bottom card border
+    const maxVisible = 7;
+    const isScrollable = node.files.length > maxVisible;
+    const visibleCount = Math.min(node.files.length, maxVisible);
+    const cardHeight = 56 + visibleCount * 28;
+    const minTop = 48; // Below header
+    const maxTop = cardHeight - 14; // Above bottom border
 
     return (
       <div
@@ -101,7 +104,7 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
             : containsHoveredFile || isNodeHovered
             ? "border-cyan-500 dark:border-cyan-400/80 shadow-cyan-500/10 shadow-md ring-1 ring-cyan-400/40"
             : "border-zinc-200 dark:border-indigo-900/40"
-        } rounded-xl text-xs font-mono overflow-hidden w-[270px] h-full flex flex-col relative shadow-md dark:shadow-2xl transition-all duration-200 ${
+        } rounded-xl text-xs font-mono overflow-hidden w-full h-full flex flex-col relative shadow-md dark:shadow-2xl transition-all duration-200 ${
           isDimmed ? "opacity-25 grayscale" : "opacity-100"
         }`}
       >
@@ -109,7 +112,7 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
 
         {/* Dynamic Clamped Handles overlay for each file row */}
         {node.files.map((f, i) => {
-          const rowTop = 44 + 4 + i * 26 + 13 - scrollTop;
+          const rowTop = 46 + 4 + i * 28 + 14 - scrollTop;
           const clampedTop = Math.max(minTop, Math.min(maxTop, rowTop));
 
           return (
@@ -132,13 +135,17 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
           );
         })}
 
+        {/* Header */}
         <div
-          className="bg-zinc-50 dark:bg-[#131522] px-3 py-2 border-b border-zinc-200 dark:border-indigo-900/40 cursor-grab active:cursor-grabbing flex items-center justify-between gap-1 hover:bg-zinc-100 dark:hover:bg-[#181a2b] transition-colors shrink-0 z-10 select-none"
+          className="bg-zinc-50 dark:bg-[#131522] px-3 py-1.5 h-[46px] border-b border-zinc-200 dark:border-indigo-900/40 cursor-grab active:cursor-grabbing flex items-center justify-between gap-1 hover:bg-zinc-100 dark:hover:bg-[#181a2b] transition-colors shrink-0 z-10 select-none"
           onMouseEnter={() => onHoverNode(node.id)}
           onMouseLeave={() => onHoverNode(null)}
         >
           <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-            <span className="font-bold text-zinc-900 dark:text-zinc-100 text-xs tracking-tight truncate">
+            <span
+              className="font-bold text-zinc-900 dark:text-zinc-100 text-xs tracking-tight truncate"
+              title={node.label}
+            >
               {node.label}
             </span>
             <div className="flex items-center gap-2 text-[10px] text-zinc-500 dark:text-zinc-400">
@@ -158,7 +165,7 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
           <button
             type="button"
             onClick={onToggle}
-            className="nodrag text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1 rounded hover:bg-zinc-200/70 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
+            className="nodrag text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1 rounded hover:bg-zinc-200/70 dark:hover:bg-zinc-800 cursor-pointer transition-colors shrink-0"
             title="Collapse folder"
           >
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -166,8 +173,12 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
             </svg>
           </button>
         </div>
+
+        {/* File List */}
         <div
-          className="flex-1 min-h-0 overflow-y-auto nowheel nodrag custom-scrollbar flex flex-col bg-zinc-50/50 dark:bg-[#0d0e15]/90 py-1 z-10"
+          className={`flex-1 min-h-0 ${
+            isScrollable ? "overflow-y-auto" : "overflow-hidden"
+          } nowheel nodrag custom-scrollbar flex flex-col bg-zinc-50/50 dark:bg-[#0d0e15]/90 py-1 z-10`}
           onScroll={handleScroll}
         >
           {node.files.map((f) => {
@@ -195,7 +206,7 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
             return (
               <div
                 key={f.path}
-                className={`px-3 py-1 shrink-0 h-[26px] cursor-pointer truncate flex items-center justify-between group transition-colors relative ${
+                className={`px-3 py-1 shrink-0 h-[28px] cursor-pointer truncate flex items-center justify-between group transition-colors relative ${
                   isFileSelected
                     ? "bg-indigo-50 dark:bg-indigo-600/35 text-indigo-900 dark:text-white font-semibold ring-1 ring-indigo-500/50"
                     : isFileHovered
@@ -240,13 +251,13 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
           : containsHoveredFile || isNodeHovered
           ? "border-cyan-500 dark:border-cyan-400/80 shadow-cyan-500/10 shadow-md ring-1 ring-cyan-400/40"
           : "border-zinc-200 dark:border-indigo-900/40 hover:border-zinc-300 dark:hover:border-indigo-500/60"
-      } rounded-lg text-xs font-mono px-3 py-2 cursor-grab active:cursor-grabbing shadow-xs dark:shadow-none transition-all duration-200 flex items-center justify-between select-none ${
+      } rounded-lg text-xs font-mono px-2.5 py-1.5 cursor-grab active:cursor-grabbing shadow-xs dark:shadow-none transition-all duration-200 flex items-center justify-between select-none ${
         isDimmed ? "opacity-25 grayscale" : "opacity-100"
       }`}
       style={{ height: "100%", width: "100%" }}
     >
       <Handle type="target" position={Position.Left} className="opacity-0" />
-      <div className="flex items-center gap-1.5 truncate mr-2">
+      <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-2">
         <button
           type="button"
           onClick={onToggle}
@@ -257,11 +268,13 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </button>
-        <span className="font-semibold text-zinc-800 dark:text-zinc-200 truncate">{node.label}</span>
+        <span className="font-semibold text-zinc-800 dark:text-zinc-200 truncate" title={node.label}>
+          {node.label}
+        </span>
       </div>
-      <div className="flex items-center gap-1.5 ml-2 text-[10px] font-mono shrink-0">
+      <div className="flex items-center gap-1.5 text-[10px] font-mono shrink-0">
         {selectedCategory && (
-          <span className="font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1 py-0.5 rounded border border-indigo-500/20 mr-1">
+          <span className="font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1 py-0.5 rounded border border-indigo-500/20 mr-0.5">
             {categoryMatchCount}
           </span>
         )}
