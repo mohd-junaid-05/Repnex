@@ -456,7 +456,19 @@ function GraphInner({
       })
     );
 
+    const nodeMap = new Map(initialNodes.map((n) => [n.id, n]));
     const flowEdgesMap = new Map<string, FlowEdge>();
+
+    interface EdgeGroup {
+      source: string;
+      target: string;
+      sourceHandle: string | null;
+      targetHandle: string | null;
+      edges: GraphEdge[];
+      hasCategoryMatch: boolean;
+    }
+
+    const edgeGroups = new Map<string, EdgeGroup>();
 
     initialEdges.forEach((e) => {
       const isInternal = e.source === e.target;
@@ -465,13 +477,13 @@ function GraphInner({
       const sourceExpanded = expandedNodes.has(e.source);
       const targetExpanded = expandedNodes.has(e.target);
 
-      const sourceNode = initialNodes.find((n) => n.id === e.source);
-      const targetNode = initialNodes.find((n) => n.id === e.target);
+      const sourceNode = nodeMap.get(e.source);
+      const targetNode = nodeMap.get(e.target);
 
       const sourceFileVisible =
-        sourceExpanded && sourceNode && sourceNode.files.some((f) => f.path === e.sourceFile);
+        sourceExpanded && !!sourceNode?.files.some((f) => f.path === e.sourceFile);
       const targetFileVisible =
-        targetExpanded && targetNode && targetNode.files.some((f) => f.path === e.targetFile);
+        targetExpanded && !!targetNode?.files.some((f) => f.path === e.targetFile);
 
       const sourceHandle = sourceFileVisible ? `src-${e.sourceFile}` : null;
       const targetHandle = targetFileVisible ? `tgt-${e.targetFile}` : null;
@@ -480,14 +492,50 @@ function GraphInner({
         targetHandle ? ":" + targetHandle : ""
       }`;
 
-      const isSelectedEdge = !!(
-        (selectedFile && (e.sourceFile === selectedFile || e.targetFile === selectedFile)) ||
-        (selectedNodeId && (e.source === selectedNodeId || e.target === selectedNodeId))
+      let group = edgeGroups.get(edgeId);
+      if (!group) {
+        group = {
+          source: e.source,
+          target: e.target,
+          sourceHandle,
+          targetHandle,
+          edges: [],
+          hasCategoryMatch: false,
+        };
+        edgeGroups.set(edgeId, group);
+      }
+      group.edges.push(e);
+
+      if (selectedCategory && !group.hasCategoryMatch) {
+        const sourceMatch = sourceNode?.files.some(
+          (f) => f.path === e.sourceFile && fileMatchesCategory(f, selectedCategory)
+        );
+        const targetMatch = targetNode?.files.some(
+          (f) => f.path === e.targetFile && fileMatchesCategory(f, selectedCategory)
+        );
+        if (sourceMatch || targetMatch) {
+          group.hasCategoryMatch = true;
+        }
+      }
+    });
+
+    const activeFile = selectedFile || hoveredFile;
+
+    edgeGroups.forEach((group, edgeId) => {
+      const sourceExpanded = expandedNodes.has(group.source);
+      const targetExpanded = expandedNodes.has(group.target);
+      const bothExpanded = sourceExpanded && targetExpanded;
+
+      const isSelectedEdge = group.edges.some(
+        (e) =>
+          (selectedFile && (e.sourceFile === selectedFile || e.targetFile === selectedFile)) ||
+          (selectedNodeId && (e.source === selectedNodeId || e.target === selectedNodeId))
       );
 
-      const isHoveredEdge = !!(
-        (hoveredFile && (e.sourceFile === hoveredFile || e.targetFile === hoveredFile)) ||
-        (hoveredNodeId && (e.source === hoveredNodeId || e.target === hoveredNodeId))
+      const isHoveredEdge = group.edges.some(
+        (e) =>
+          (hoveredFile && (e.sourceFile === hoveredFile || e.targetFile === hoveredFile)) ||
+          (hoveredNodeId && (e.source === hoveredNodeId || e.target === hoveredNodeId))
       );
 
       const isEdgeActive = isSelectedEdge || isHoveredEdge;
@@ -495,28 +543,19 @@ function GraphInner({
       if (hasSelectionOrHover) {
         isDimmed = !isEdgeActive;
       } else if (selectedCategory) {
-        const sourceMatch = sourceNode?.files.some(
-          (f) => f.path === e.sourceFile && fileMatchesCategory(f, selectedCategory)
-        );
-        const targetMatch = targetNode?.files.some(
-          (f) => f.path === e.targetFile && fileMatchesCategory(f, selectedCategory)
-        );
-        isDimmed = !(sourceMatch || targetMatch);
+        isDimmed = !group.hasCategoryMatch;
       }
-      const bothExpanded = sourceExpanded && targetExpanded;
 
       let edgeColor = isDark ? "#27272a" : "#cbd5e1";
       let strokeWidth = 0.75;
       let opacity = isDark ? 0.45 : 0.7;
 
-      const activeFile = selectedFile || hoveredFile;
-
       if (activeFile) {
-        if (e.targetFile === activeFile) {
+        if (group.edges.some((e) => e.targetFile === activeFile)) {
           edgeColor = isDark ? "#22c55e" : "#16a34a"; // Emerald green for incoming import
           strokeWidth = 1.5;
           opacity = 0.95;
-        } else if (e.sourceFile === activeFile) {
+        } else if (group.edges.some((e) => e.sourceFile === activeFile)) {
           edgeColor = isDark ? "#f59e0b" : "#d97706"; // Amber gold for outgoing export
           strokeWidth = 1.5;
           opacity = 0.95;
@@ -537,32 +576,22 @@ function GraphInner({
         opacity = isDark ? 0.15 : 0.25;
       }
 
-      if (!flowEdgesMap.has(edgeId)) {
-        flowEdgesMap.set(edgeId, {
-          id: edgeId,
-          source: e.source,
-          target: e.target,
-          sourceHandle,
-          targetHandle,
-          type: "default",
-          animated: false,
-          style: {
-            stroke: edgeColor,
-            strokeWidth,
-            opacity,
-            zIndex: isEdgeActive ? 20 : bothExpanded ? 10 : 0,
-          },
-          className: "transition-all duration-300",
-        });
-      } else if (isEdgeActive || bothExpanded) {
-        const fe = flowEdgesMap.get(edgeId)!;
-        fe.style = {
+      flowEdgesMap.set(edgeId, {
+        id: edgeId,
+        source: group.source,
+        target: group.target,
+        sourceHandle: group.sourceHandle,
+        targetHandle: group.targetHandle,
+        type: "default",
+        animated: false,
+        style: {
           stroke: edgeColor,
           strokeWidth,
           opacity,
-          zIndex: isEdgeActive ? 20 : 10,
-        };
-      }
+          zIndex: isEdgeActive ? 20 : bothExpanded ? 10 : 0,
+        },
+        className: "transition-all duration-300",
+      });
     });
 
     setEdges(Array.from(flowEdgesMap.values()));
@@ -577,6 +606,7 @@ function GraphInner({
     selectedCategory,
     isDark,
     setEdges,
+    setNodes,
   ]);
 
   return (
