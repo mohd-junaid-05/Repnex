@@ -44,7 +44,7 @@ export default async function Home() {
     .limit(100);
 
   if (error) {
-    console.error("[dashboard] analyses query failed:", error.message);
+    console.error("[dashboard] analyses query failed:", error.message, error.details ?? "");
   }
 
   // Deduplicate by project so each repository only appears once (newest analysis)

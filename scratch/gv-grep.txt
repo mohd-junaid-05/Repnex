@@ -1,0 +1,15 @@
+﻿15	useReactFlow,
+26	selectedFile: string | null;
+44	selectedFile: string | null;
+73	selectedFile,
+191	const isFileSelected = selectedFile === f.path;
+302	selectedFile,
+317	const { fitView } = useReactFlow();
+356	selectedFile,
+374	fitView({ padding: 0.2, duration: 600 });
+384	const targetFile = selectedFile || hoveredFile;
+447	selectedFile,
+522	const activeFile = selectedFile || hoveredFile;
+531	(selectedFile && (e.sourceFile === selectedFile || e.targetFile === selectedFile)) ||
+603	selectedFile,
+618	onNodeClick={handleNodeClick}

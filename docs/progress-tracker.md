@@ -95,3 +95,15 @@
 - [x] Validated acceptance checks (real graph and coverage denominator on Express fixture, byte-identical edge list re-run comparison)
 - [x] Validated types (`tsc`), lint (`eslint`), and production build (`next build`)
 
+## Phase 10: Explain, cached and traced
+- [x] Single traced AI client pinned to exact model (`gemini-3.5-flash`) (`lib/ai/client.ts`)
+- [x] File explanation prompt built strictly from real graph neighbours (`lib/ai/explain.ts`, `app/api/explain/route.ts`)
+- [x] Folded folder explanation with folder digest and cross-folder connections (`lib/ai/explain.ts`, `app/api/explain/route.ts`)
+- [x] Non-structural role assignment for unclassified files (`lib/ai/explain.ts`, `app/api/explain/role/route.ts`)
+- [x] Database and in-memory cache keyed on content hash; cache read lives inside traced call
+- [x] Persistent explanation pane state across file and folder selections
+- [x] Constrained markdown AST renderer: inline code, bold, bullets, repo path links, and zero stray markdown characters (`lib/render-explanation.ts`)
+- [x] Fixed browser Out-of-Memory freeze by scoping inline markdown regex per invocation and parsing bold inner content non-recursively
+- [x] Staleness detection against remote repository HEAD with re-analyse trigger
+- [x] Validated types (`tsc`)
+

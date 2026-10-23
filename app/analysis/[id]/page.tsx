@@ -66,22 +66,43 @@ export default async function AnalysisPage({ params }: AnalysisPageProps) {
     );
   }
 
-  // 3. Status is complete: fetch files, edges, routes, roles, and insights to build ParseResult
+  interface DbFileRow {
+    id: string;
+    path: string;
+    language: string | null;
+    line_count: number | null;
+    content_hash?: string | null;
+    exports?: string[] | null;
+    functions?: string[] | null;
+  }
+
+  let filesList: DbFileRow[] = [];
+  const primaryQuery = await supabase
+    .from("files")
+    .select("id, path, language, line_count, content_hash, exports, functions")
+    .eq("analysis_id", id);
+
+  if (primaryQuery.error && primaryQuery.error.message.includes("content_hash")) {
+    const fallbackQuery = await supabase
+      .from("files")
+      .select("id, path, language, line_count, exports, functions")
+      .eq("analysis_id", id);
+    filesList = (fallbackQuery.data as DbFileRow[] | null) ?? [];
+  } else {
+    filesList = (primaryQuery.data as DbFileRow[] | null) ?? [];
+  }
+
   const [
-    { data: fileRows },
     { data: edgeRows },
     { data: routeRows },
     { data: roleRows },
     { data: insightRows },
   ] = await Promise.all([
-    supabase.from("files").select("id, path, language, line_count, exports, functions").eq("analysis_id", id),
     supabase.from("edges").select("id, source_id, target_id, import_path, kind").eq("analysis_id", id),
     supabase.from("routes").select("id, file_id, route_path, http_methods").eq("analysis_id", id),
     supabase.from("file_roles").select("id, file_id, role").eq("analysis_id", id),
     supabase.from("insights").select("kind, payload").eq("analysis_id", id),
   ]);
-
-  const filesList = fileRows ?? [];
   const edgesList = edgeRows ?? [];
 
   // Map file IDs to file paths
@@ -93,12 +114,13 @@ export default async function AnalysisPage({ params }: AnalysisPageProps) {
   const parsedFiles: ParsedFile[] = filesList.map((f) => {
     const rawFolder = path.posix.dirname(f.path);
     const folder = rawFolder === "." ? "" : rawFolder;
+    const contentHash = ((f as { content_hash?: string }).content_hash) || "";
     return {
       path: f.path,
       folder,
       language: (f.language as FileLanguage) || "typescript",
       lineCount: f.line_count ?? 0,
-      contentHash: "",
+      contentHash,
       exports: f.exports ?? [],
       functions: f.functions ?? [],
     };
@@ -224,6 +246,7 @@ export default async function AnalysisPage({ params }: AnalysisPageProps) {
 
   return (
     <AnalysisExplorer
+      analysisId={analysis.id}
       data={parseResult}
       nodes={nodes}
       edges={edges}
