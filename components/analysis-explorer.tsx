@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { ParseResult } from "@/parser/types";
 import type { FolderNode, GraphEdge } from "@/lib/folding";
@@ -11,6 +11,7 @@ import { CoverageBanner } from "@/components/coverage-banner";
 import type { RailCategoryItem } from "@/lib/taxonomy";
 
 interface AnalysisExplorerProps {
+  analysisId?: string;
   data: ParseResult;
   nodes: FolderNode[];
   edges: GraphEdge[];
@@ -19,8 +20,15 @@ interface AnalysisExplorerProps {
   repoUrl?: string;
 }
 
-/** Coordinate selection, hover, folder expansion, and coverage display for real analysis data. */
+interface StoredExplanation {
+  content: string;
+  stale: boolean;
+  cacheHit: boolean;
+}
+
+/** Coordinate selection, hover, folder expansion, coverage, and AI explanations. */
 export function AnalysisExplorer({
+  analysisId,
   data,
   nodes,
   edges,
@@ -37,6 +45,28 @@ export function AnalysisExplorer({
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isReanalysing, setIsReanalysing] = useState(false);
+
+  // In-memory cache of explanations keyed by target (filePath or folderId).
+  // "An explanation already fetched stays in the pane. Move the selection away, come back,
+  // and it is still there without a second click. A cache nobody can feel is not a cache."
+  const [explanations, setExplanations] = useState<Record<string, StoredExplanation>>({});
+  const [loadingKey, setLoadingKey] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState<Record<string, string>>({});
+  const [isAssigningRole, setIsAssigningRole] = useState(false);
+  const [fileRoles, setFileRoles] = useState<Record<string, string>>(data.fileRoles || {});
+  const [tracingConfigured, setTracingConfigured] = useState<boolean>(true);
+
+  // Check tracing configuration status on mount
+  useEffect(() => {
+    fetch("/api/explain")
+      .then((r) => r.json())
+      .then((d) => {
+        if (typeof d.tracingConfigured === "boolean") {
+          setTracingConfigured(d.tracingConfigured);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleReanalyse = useCallback(async () => {
     if (!repoUrl || isReanalysing) return;
@@ -111,6 +141,167 @@ export function AnalysisExplorer({
     });
   }, []);
 
+  // Compute active target key for explanations
+  const activeTargetKey = selectedFile
+    ? selectedFile
+    : selectedNodeId !== null
+    ? selectedNodeId === ""
+      ? "root"
+      : selectedNodeId
+    : null;
+
+  const currentExplanation = activeTargetKey ? explanations[activeTargetKey] ?? null : null;
+  const isLoadingExplanation = activeTargetKey !== null && loadingKey === activeTargetKey;
+  const explanationError = activeTargetKey ? errorKey[activeTargetKey] ?? "" : "";
+
+  // Explain action: explain file or folded folder
+  const handleExplain = useCallback(async () => {
+    if (!analysisId) return;
+
+    if (selectedFile) {
+      const key = selectedFile;
+      setLoadingKey(key);
+      setErrorKey((prev) => ({ ...prev, [key]: "" }));
+      try {
+        const res = await fetch("/api/explain", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            analysisId,
+            targetType: "file",
+            targetKey: selectedFile,
+          }),
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          throw new Error(json.error || "Failed to explain file.");
+        }
+        setExplanations((prev) => ({
+          ...prev,
+          [key]: {
+            content: json.content,
+            stale: Boolean(json.stale),
+            cacheHit: Boolean(json.cacheHit),
+          },
+        }));
+        if (typeof json.tracingConfigured === "boolean") {
+          setTracingConfigured(json.tracingConfigured);
+        }
+      } catch (err) {
+        setErrorKey((prev) => ({
+          ...prev,
+          [key]: err instanceof Error ? err.message : "Failed to explain file.",
+        }));
+      } finally {
+        setLoadingKey(null);
+      }
+    } else if (selectedNodeId !== null) {
+      const folderNode = nodes.find((n) => n.id === selectedNodeId);
+      if (!folderNode) return;
+      const key = selectedNodeId === "" ? "root" : selectedNodeId;
+      setLoadingKey(key);
+      setErrorKey((prev) => ({ ...prev, [key]: "" }));
+
+      const folderFilesSet = new Set(folderNode.files.map((f) => f.path));
+      const incomingFromSet = new Set<string>();
+      const outgoingToSet = new Set<string>();
+
+      for (const edge of data.edges) {
+        const sourceIn = folderFilesSet.has(edge.sourcePath);
+        const targetIn = folderFilesSet.has(edge.targetPath);
+        if (!sourceIn && targetIn) {
+          incomingFromSet.add(edge.sourcePath);
+        } else if (sourceIn && !targetIn) {
+          outgoingToSet.add(edge.targetPath);
+        }
+      }
+
+      const filesPayload = folderNode.files.map((f) => ({
+        path: f.path,
+        role: fileRoles[f.path] || undefined,
+        fanIn: data.fanMetrics[f.path]?.fanIn ?? f.fanIn,
+        fanOut: data.fanMetrics[f.path]?.fanOut ?? f.fanOut,
+        contentHash: f.contentHash,
+      }));
+
+      try {
+        const res = await fetch("/api/explain", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            analysisId,
+            targetType: "folder",
+            targetKey: folderNode.id,
+            files: filesPayload,
+            incomingFrom: Array.from(incomingFromSet).sort(),
+            outgoingTo: Array.from(outgoingToSet).sort(),
+          }),
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          throw new Error(json.error || "Failed to explain folder.");
+        }
+        setExplanations((prev) => ({
+          ...prev,
+          [key]: {
+            content: json.content,
+            stale: Boolean(json.stale),
+            cacheHit: Boolean(json.cacheHit),
+          },
+        }));
+        if (typeof json.tracingConfigured === "boolean") {
+          setTracingConfigured(json.tracingConfigured);
+        }
+      } catch (err) {
+        setErrorKey((prev) => ({
+          ...prev,
+          [key]: err instanceof Error ? err.message : "Failed to explain folder.",
+        }));
+      } finally {
+        setLoadingKey(null);
+      }
+    }
+  }, [analysisId, selectedFile, selectedNodeId, nodes, data.edges, data.fanMetrics, fileRoles]);
+
+  // Role assignment: classify file no adapter identified
+  const handleAssignRole = useCallback(async () => {
+    if (!analysisId || !selectedFile || isAssigningRole) return;
+    setIsAssigningRole(true);
+    try {
+      const res = await fetch("/api/explain/role", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          analysisId,
+          filePath: selectedFile,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || "Failed to assign role.");
+      }
+      if (json.role) {
+        setFileRoles((prev) => ({
+          ...prev,
+          [selectedFile]: json.role,
+        }));
+      }
+    } catch (err) {
+      console.error("[assignRole]", err);
+      alert(err instanceof Error ? err.message : "Failed to assign role.");
+    } finally {
+      setIsAssigningRole(false);
+    }
+  }, [analysisId, selectedFile, isAssigningRole]);
+
+  // Merge updated dynamic fileRoles into parse data so labels update instantly
+  const activeData: ParseResult = useMemo(() => {
+    return {
+      ...data,
+      fileRoles,
+    };
+  }, [data, fileRoles]);
+
   return (
     <div className="flex flex-1 h-full overflow-hidden text-xs bg-white dark:bg-black">
       {/* Left rail - Categories */}
@@ -177,7 +368,7 @@ export function AnalysisExplorer({
 
       {/* Right rail - Detail pane */}
       <DetailPane
-        data={data}
+        data={activeData}
         nodes={nodes}
         selectedFile={selectedFile}
         selectedNodeId={selectedNodeId}
@@ -192,6 +383,13 @@ export function AnalysisExplorer({
         onDeselect={handleDeselect}
         onReanalyse={repoUrl ? handleReanalyse : undefined}
         isReanalysing={isReanalysing}
+        explanation={currentExplanation}
+        isLoadingExplanation={isLoadingExplanation}
+        explanationError={explanationError}
+        onExplain={handleExplain}
+        isAssigningRole={isAssigningRole}
+        onAssignRole={handleAssignRole}
+        tracingConfigured={tracingConfigured}
       />
     </div>
   );

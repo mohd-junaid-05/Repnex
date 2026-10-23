@@ -18,6 +18,7 @@ import {
   InsightsSummary,
   TransitiveStep,
 } from "@/lib/graph-math";
+import { ExplanationPanel } from "@/components/explanation-panel";
 
 interface DetailPaneProps {
   data: ParseResult;
@@ -35,6 +36,13 @@ interface DetailPaneProps {
   onDeselect: () => void;
   onReanalyse?: () => void;
   isReanalysing?: boolean;
+  explanation?: { content: string; stale: boolean; cacheHit: boolean } | null;
+  isLoadingExplanation?: boolean;
+  explanationError?: string;
+  onExplain?: () => void;
+  isAssigningRole?: boolean;
+  onAssignRole?: () => void;
+  tracingConfigured?: boolean;
 }
 
 /** Extract file extension including dot, e.g. '.js'. */
@@ -82,10 +90,19 @@ export function DetailPane({
   onDeselect,
   onReanalyse,
   isReanalysing = false,
+  explanation = null,
+  isLoadingExplanation = false,
+  explanationError = "",
+  onExplain = () => {},
+  isAssigningRole = false,
+  onAssignRole = () => {},
+  tracingConfigured = true,
 }: DetailPaneProps) {
   // State for transitive walk view and collapsible insights
   const [activeWalk, setActiveWalk] = useState<"direct" | "blast-radius" | "dependency-chain">("direct");
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
+
+  const fileSet = React.useMemo(() => new Set(data.files.map((f) => f.path)), [data.files]);
 
   // Pre-calculate summary, selected details, and insights
   const repoSummary: RepoSummary = React.useMemo(() => computeRepoSummary(data), [data]);
@@ -122,6 +139,21 @@ export function DetailPane({
             {selectedFile ? "file" : selectedNodeId ? "folder" : "repository"}
           </span>
           <div className="flex items-center gap-1.5">
+            {(selectedFile || selectedNodeId) && activeTab === "structure" && (
+              <button
+                type="button"
+                onClick={() => {
+                  onTabChange("explanation");
+                  if (!explanation) {
+                    onExplain();
+                  }
+                }}
+                className="px-2 py-0.5 text-[10px] font-mono font-medium text-indigo-700 dark:text-indigo-300 hover:text-indigo-900 dark:hover:text-indigo-100 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-800 rounded cursor-pointer transition-colors flex items-center gap-1"
+                title="Explain this target in context of its real neighbours"
+              >
+                Explain
+              </button>
+            )}
             {onReanalyse && (
               <button
                 type="button"
@@ -203,48 +235,29 @@ export function DetailPane({
       {/* Pane Content Area */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3 flex flex-col gap-4 text-zinc-800 dark:text-zinc-200">
         {activeTab === "explanation" ? (
-          /* ============================================================ */
-          /* EXPLANATION TAB: EMPTY STATE (Phase 5)                       */
-          /* ============================================================ */
-          <div className="flex flex-col gap-3 h-full">
-            <div className="p-3 bg-zinc-50 dark:bg-zinc-900/60 rounded-lg border border-zinc-200 dark:border-zinc-800">
-              <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 dark:text-zinc-500 mb-1">
-                Target
-              </div>
-              <div className="font-mono text-xs text-zinc-900 dark:text-zinc-100 font-semibold break-all">
-                {selectedFile
-                  ? selectedFile
-                  : folderDetails
-                  ? `Folder: ${folderDetails.label}`
-                  : `Repository: ${repoSummary.name}`}
-              </div>
-            </div>
-
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-4 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-50/50 dark:bg-zinc-900/20">
-              <div className="w-8 h-8 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-500 dark:text-indigo-400 mb-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-xs mb-1">
-                No explanation generated yet
-              </span>
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-[220px]">
-                Explanations will be populated when an analysis is run with model explanation enabled.
-              </p>
-            </div>
-          </div>
+          <ExplanationPanel
+            targetKind={selectedFile ? "file" : folderDetails ? "folder" : "repo"}
+            targetLabel={
+              selectedFile
+                ? selectedFile
+                : folderDetails
+                ? folderDetails.folderId || folderDetails.label
+                : repoSummary.name
+            }
+            explanation={explanation}
+            isLoading={isLoadingExplanation}
+            errorText={explanationError}
+            fileSet={fileSet}
+            onSelectFile={onSelectFile}
+            onExplain={onExplain}
+            showRoleAssign={Boolean(selectedFile && fileDetails && !fileDetails.classification.identified)}
+            currentRoleLabel={fileDetails?.classification.label}
+            assigningRole={isAssigningRole}
+            onAssignRole={onAssignRole}
+            onReanalyse={onReanalyse}
+            isReanalysing={Boolean(isReanalysing)}
+            tracingConfigured={tracingConfigured}
+          />
         ) : selectedFile && fileDetails ? (
           /* ============================================================ */
           /* STRUCTURE TAB: SELECTED FILE VIEW                            */

@@ -1,0 +1,84 @@
+﻿982	/** Optional. Input only. Immutable. An optional time after which, when using the resulting token, messages in BidiGenerateContent sessions will be rejected. (Gemini may preemptively close the session after this time.) If not set then this defaults to 30 minutes in the future. If set, this value must be less than 20 hours in the future. */
+1050	GenerateContentResponse.automatic_function_calling_history.
+1185	private createInlinedGenerateContentRequest;
+1302	per line. The responses will be GenerateContentResponse messages formatted
+1382	/** Specifies the function Behavior. If not specified, the system keeps the current function call behavior. This field is currently only supported by the BidiGenerateContent method. */
+1475	usageMetadata?: CachedContentUsageMetadata;
+1479	export declare interface CachedContentUsageMetadata {
+1532	*    'systemInstruction': 'What is the sum of the two pdfs?',
+1743	constructor(apiClient: ApiClient, modelsModule: Models, model: string, config?: types.GenerateContentConfig, history?: types.Content[]);
+1766	sendMessage(params: types.SendMessageParameters): Promise<types.GenerateContentResponse>;
+1791	sendMessageStream(params: types.SendMessageParameters): Promise<AsyncGenerator<types.GenerateContentResponse>>;
+1908	_createRequest(context: HookContext, conf: RequestConfig, options?: RequestOptions): Result<Request, InvalidRequestError | UnexpectedClientError>;
+1910	context: HookContext;
+2202	export declare interface Content {
+2216	export declare interface ContentEmbedding {
+2227	export declare interface ContentEmbeddingStatistics {
+2321	systemInstruction?: ContentUnion;
+2613	systemInstruction?: ContentUnion;
+2664	config?: GenerateContentConfig;
+3036	export declare function createPartFromText(text: string): Part;
+5815	/** Optional. Specifies the function Behavior. If not specified, the system keeps the current function call behavior. This field is currently only supported by the BidiGenerateContent method. */
+5852	/** Optional. Display name of the blob. Used to provide a label or filename to distinguish blobs. This field is only returned in PromptMessage for prompt management. It is currently used in the Gemini GenerateContent calls only when server side tools (code_execution, google_search, and url_context) are enabled. This field is not supported in Gemini API. */
+5860	/** Optional. Display name of the file data. Used to provide a label or filename to distinguish file datas. This field is only returned in PromptMessage for prompt management. It is currently used in the Gemini GenerateContent calls only when server side tools (code_execution, google_search, and url_context) are enabled. */
+6121	export declare interface GenerateContentConfig {
+6137	systemInstruction?: ContentUnion;
+6296	export declare interface GenerateContentParameters {
+6305	config?: GenerateContentConfig;
+6308	/** Response message for PredictionService.GenerateContent. */
+6309	export declare class GenerateContentResponse {
+6324	promptFeedback?: GenerateContentResponsePromptFeedback;
+6328	usageMetadata?: GenerateContentResponseUsageMetadata;
+6344	* const response = await ai.models.generateContent({
+6394	*  const response = await ai.models.generateContent({
+6422	* const response = await ai.models.generateContent({
+6445	* const response = await ai.models.generateContent({
+6465	export declare class GenerateContentResponsePromptFeedback {
+6475	export declare class GenerateContentResponseUsageMetadata {
+7393	export declare class GoogleGenAI {
+7431	declare class GoogleGenAI_2 extends ClientSDK {
+8617	/** The image generation configuration to be used in GenerateContentConfig. */
+8971	config?: GenerateContentConfig;
+8978	response?: GenerateContentResponse;
+10805	systemInstruction?: ContentUnion;
+10812	/** Configures the realtime input behavior in BidiGenerateContent. */
+10853	Note that in the unary and server-streaming GenerateContent APIs function
+10855	GenerateContent APIs function calling happens over this dedicated set of
+10921	systemInstruction?: ContentUnion;
+10939	/** Configures the realtime input behavior in BidiGenerateContent. */
+11369	usageMetadata?: UsageMetadata;
+11413	/** Sent in response to a `LiveGenerateContentSetup` message from the client. */
+11799	/** Represents a breakdown of token usage by modality. This message is used in CountTokensResponse and GenerateContentResponse.UsageMetadata to provide a detailed view of how many tokens are used by each modality (e.g., text, image, video) in a request. This is particularly useful for multimodal models, allowing you to track and manage token consumption for billing and quota purposes. */
+11950	private generateContentWithContinuation;
+11951	private generateContentStreamWithContinuation;
+11982	* const response = await ai.models.generateContent({
+11992	generateContent: (params: types.GenerateContentParameters) => Promise<types.GenerateContentResponse>;
+11994	* This logic is needed for GenerateContentConfig only.
+11995	* Previously we made GenerateContentConfig.responseSchema field to accept
+12032	* const response = await ai.models.generateContentStream({
+12044	generateContentStream: (params: types.GenerateContentParameters) => Promise<AsyncGenerator<types.GenerateContentResponse>>;
+12143	private generateContentInternal;
+12144	private generateContentStreamInternal;
+13721	/** ReinforcementTuningCloudRunRewardScorer allows users to implement a reward function through GCP Cloud Run. Comparing with ReinforcementTuningCodeExecutionRewardScorer that runs in a Sandbox and has no internet access, Cloud Run reward scorer is fully controlled by users. The Cloud Run service should implement the following HTTP API: HTTP method: `POST` HTTP request body: ``` { "example": ReinforcementTuningExample, "response": Content, "metadata": { "step": int "tuning_job_id": int64 } } ``` * `example` is a ReinforcementTuningExample in ProtoJSON format, (i.e., the format is the same as as one line in the training/validation dataset except that the keys must be in camel case). System instructions (i.e., `example.get("systemInstruction")`) and references (i.e., `example.get("references")`) are also included in the `example` provided that they are set in the training/validation dataset. * `response` is a Content in ProtoJSON format (i.e., keys must be in camel case), which is the same as the Online Prediction response for Gemini models. HTTP response body: { "reward": float, "user_requested_aux_info": str // Optional } where the field "user_requested_aux_info" is any (optional) string provided by users for assisting debugging. It's in snake case. This field is mostly useful when calling the GenAiTuningService.ValidateReinforcementTuningReward API, where the proto field (not Cloud Run HTTP response body) userRequestedAuxInfo will be populated if the Cloud Run reward function sets this field in the HTTP response. The following are examples for the HTTP request and response body. Example HTTP request body: ``` { "example": { "contents": [ { "role": "user", "parts": [ { "text": "What is the capital of France?" } ] } ], "references": { "answer": "Paris" } }, "response": { "parts": [ { "text": "London" } ] }, "metadata": { "step": 1, "tuning_job_id": 123456789 } } ``` Example HTTP response body: ``` { "reward": -1.0 } ``` Note: Reward output by Cloud Run reward function is clipped to be within `[-1, 1]`, i.e., `reward = max(min(reward, 1.0), -1.0)`. This data type is not supported in Gemini API. */
+13727	/** ReinforcementTuningCodeExecutionRewardScorer allows users to implement a function to evaluate rewards for the sample response. The function signature is as follows: ``` def evaluate(example: dict[str, Any], response: dict[str, Any]) -> float: ... ``` `example` is a ReinforcementTuningExample in ProtoJSON format, (i.e., the format is the same as as one line in the training/validation dataset except that the keys must be in camel case). System instructions (i.e., `example.get("systemInstruction")`) and references (i.e., `example.get("references")`) are also included in the `example` provided that they are set in the training/validation dataset. `response` is a Content in ProtoJSON format (i.e., keys must be in camel case), which is the same as the Online Prediction response for Gemini models. Note: Reward output by the `evaluate` function is clipped to be within `[-1, 1]`, i.e., `reward = max(min(reward, 1.0), -1.0)`. This data type is not supported in Gemini API. */
+13739	/** Corresponds to system_instruction in user-facing GenerateContentRequest. */
+13740	systemInstruction?: Content;
+13741	/** Optional. Corresponds to tools in user-facing GenerateContentRequest. */
+13825	/** A string or a regular expression to match against for evaluating rewards. Users can also provide a references map of `{key: value}` whose `value` will be used to replace the placeholder {{references.key}} in the expression. For example, if the following `references` are defined in the training / validation dataset: ``` { "systemInstruction": ..., "contents": ..., "references": { "concise_answer": "Yes", "verbose_answer": "The answer is Yes" } } ``` and if users define the following StringMatchExpression: { "matchOperation": "REGEX_CONTAINS", "expression": ".*{{references.concise_answer}}.*" } On evaluating the reward for each sample response, this StringMatchExpression will be substituted as: ``` { "matchOperation": "REGEX_CONTAINS", "expression": ".*Yes.*" } ``` */
+14885	config?: GenerateContentConfig;
+15152	instructions and `BidiGenerateContentSetup.prefix_turns` will not be
+15841	text: string;
+15853	text: string;
+16052	*           'systemInstruction': 'Always answer in English.',
+16060	* // responseModalities, systemInstruction, temperature in this example) when
+16069	*           'systemInstruction': 'Always answer in English.',
+16078	* // responseModalities, systemInstruction in this example) when using the
+16087	*           'systemInstruction': 'Always answer in English.',
+17419	GenerateContentConfig,
+17420	GenerateContentParameters,
+17452	GenerateContentResponsePromptFeedback,
+17454	GenerateContentResponseUsageMetadata,
+17456	GenerateContentResponse,
+17612	CachedContentUsageMetadata,
+17721	UsageMetadata,
+18414	export declare interface UsageMetadata {

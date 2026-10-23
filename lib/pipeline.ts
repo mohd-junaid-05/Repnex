@@ -135,6 +135,7 @@ async function storeAnalysisData({
     path: file.path,
     language: file.language,
     line_count: file.lineCount,
+    content_hash: file.contentHash,
     exports: file.exports ?? [],
     functions: file.functions ?? [],
   }));

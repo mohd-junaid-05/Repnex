@@ -145,3 +145,28 @@ export async function fetchRepositoryArchive(
     cleanup,
   };
 }
+
+/**
+ * Fetch the latest commit SHA for a public GitHub repository without downloading the archive.
+ * Used for staleness checking.
+ */
+export async function fetchRepositoryHeadCommit(repoInput: string): Promise<string | null> {
+  const parsed = parseGitHubUrl(repoInput);
+  if (!parsed) return null;
+
+  const { owner, repo } = parsed;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits/HEAD`, {
+      headers: {
+        "User-Agent": "repnex-cartograph-analyzer",
+        Accept: "application/vnd.github.v3+json",
+      },
+    });
+
+    if (!res.ok) return null;
+    const data = (await res.json()) as { sha?: string };
+    return data.sha ?? null;
+  } catch {
+    return null;
+  }
+}
