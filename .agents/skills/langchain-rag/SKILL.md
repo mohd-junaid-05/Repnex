@@ -39,7 +39,7 @@ End-to-end RAG pipeline: load documents, split into chunks, embed, store, retrie
 
 ```python
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_community.vectorstores import InMemoryVectorStore
+from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 

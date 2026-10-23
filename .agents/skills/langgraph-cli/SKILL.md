@@ -102,12 +102,14 @@ langgraph up --wait                        # block until services are healthy
 
 ### `langgraph deploy`
 
-Build and deploy to LangGraph Platform (LangSmith Deployments). Requires Docker. On Apple Silicon (M1/M2/M3), Docker Buildx is also required for cross-compiling to `linux/amd64`.
+Build and deploy to LangGraph Platform (LangSmith Deployments). Remote builds work without local Docker and are selected automatically when Docker is unavailable. Local builds require Docker; on Apple Silicon, Docker Buildx is also required for cross-compiling to `linux/amd64`.
 
 ```bash
 langgraph deploy                           # deploy, name defaults to directory name
 langgraph deploy --name my-agent           # explicit deployment name
-langgraph deploy --deployment-type prod    # production deployment (default: dev)
+langgraph deploy --deployment-type serverless # serverless deployment (default)
+langgraph deploy --deployment-type dedicated  # always-on capacity
+langgraph deploy --remote                  # build remotely without local Docker
 langgraph deploy --tag v1.2.0              # custom image tag (default: latest)
 langgraph deploy --deployment-id <id>      # update an existing deployment by ID
 langgraph deploy --config ./langgraph.json # explicit config path
@@ -238,8 +240,8 @@ The configuration file used by all CLI commands (`dev`, `build`, `up`, `deploy`)
 
 ## Gotchas
 
-- **`langgraph deploy` requires Docker** — On Apple Silicon (M1/M2/M3), Docker Buildx is also required for cross-compiling to `linux/amd64`.
-- **`langgraph deploy` can only update its own deployments** — Deployments created through the LangSmith UI or GitHub integration cannot be updated with `langgraph deploy`. Use the UI for those.
+- **`langgraph deploy` supports remote builds without Docker** — Use `--remote` explicitly; it is the default when local Docker is unavailable. Local Apple Silicon builds require Docker Buildx for `linux/amd64`.
+- **`langgraph deploy` can update existing deployments** — This includes deployments created through the LangSmith UI or GitHub integration; select one with `--deployment-id`.
 - **`dependencies` must include all packages** — The `dependencies` array in `langgraph.json` must point to where your package config lives (e.g., `"."` for root). The actual packages are resolved from `pyproject.toml`, `requirements.txt`, or `package.json` at that location.
 - **`langgraph dev` runs without Docker** — It runs directly in your environment. If your code depends on system packages (e.g., `ffmpeg`), they must be installed locally. Use `langgraph up` to validate Docker builds.
 - **JavaScript CLI** — Use `npx @langchain/langgraph-cli <command>` (or `langgraphjs` if installed globally via `npm install -g @langchain/langgraph-cli`).

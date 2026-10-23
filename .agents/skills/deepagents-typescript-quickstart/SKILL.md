@@ -26,9 +26,9 @@ Apply these on top of the quickstart (they keep setup minimal and model-agnostic
 
    | Provider | Built-in search tool |
    |----------|----------------------|
-   | Anthropic | `@langchain/anthropic` `tools.webSearch_*()` (or equivalent dict) |
-   | OpenAI | `{ type: "web_search" }` |
-   | Google | `{ google_search: {} }` |
+   | Anthropic (`@langchain/anthropic`) | `{ type: "web_search_20250305", name: "web_search" }` |
+   | OpenAI (`@langchain/openai`) | `{ type: "web_search_preview" }` |
+   | Google (`@langchain/google-genai`) | `{ googleSearch: {} }` |
 
    Prefer Anthropic / OpenAI / Google so provider search is available. Only secret: that provider's API key in `.env` (gitignored). Skip LangSmith tracing unless they ask.
 

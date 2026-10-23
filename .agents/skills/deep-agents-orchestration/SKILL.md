@@ -4,13 +4,13 @@ description: "INVOKE THIS SKILL when using subagents, task planning, or human ap
 ---
 
 <overview>
-Deep Agents include three orchestration capabilities:
+Deep Agents support three orchestration capabilities, enabled through configuration:
 
-1. **SubAgentMiddleware**: Delegate work via `task` tool to specialized agents
-2. **TodoListMiddleware**: Plan and track tasks via `write_todos` tool
-3. **HumanInTheLoopMiddleware**: Require approval before sensitive operations
+1. **SubAgentMiddleware**: Added when synchronous subagents are configured; exposes `task` for delegation.
+2. **TodoListMiddleware**: Opt-in middleware exposing `write_todos` for planning and task tracking.
+3. **HumanInTheLoopMiddleware**: Enabled through `interrupt_on` to require approval for configured tool calls.
 
-All three are automatically included in `create_deep_agent()`.
+`create_deep_agent()` assembles the middleware stack from this configuration.
 </overview>
 
 ---
@@ -30,7 +30,7 @@ All three are automatically included in `create_deep_agent()`.
 <how-subagents-work>
 Main agent has `task` tool -> creates fresh subagent -> subagent executes autonomously -> returns final report.
 
-**Default subagent**: "general-purpose" - automatically available with same tools/config as main agent.
+**Default subagent**: "general-purpose" inherits the main agent's tools/config when enabled by the harness profile. SubAgentMiddleware and `task` are absent when no synchronous subagents are available.
 </how-subagents-work>
 
 <ex-custom-subagents>

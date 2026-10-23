@@ -6,14 +6,14 @@ description: "INVOKE THIS SKILL when building ANY Deep Agents application. Cover
 <overview>
 Deep Agents are an opinionated agent framework built on LangChain/LangGraph with built-in middleware:
 
-- **Task Planning**: TodoListMiddleware for breaking down complex tasks
+- **Task Planning**: Opt-in TodoListMiddleware for breaking down complex tasks
 - **Context Management**: Filesystem tools with pluggable backends
-- **Task Delegation**: SubAgent middleware for spawning specialized agents
+- **Task Delegation**: SubAgentMiddleware when subagents are configured
 - **Long-term Memory**: Persistent storage across threads via Store
 - **Human-in-the-loop**: Approval workflows for sensitive operations
 - **Skills**: On-demand loading of specialized capabilities
 
-The agent harness provides these capabilities automatically - you configure, not implement.
+The agent harness provides these capabilities through built-in and opt-in middleware; configure the capabilities you need.
 </overview>
 
 <when-to-use>
@@ -31,10 +31,10 @@ The agent harness provides these capabilities automatically - you configure, not
 
 | If you need to... | Middleware | Notes |
 |------------------|------------|-------|
-| Track complex tasks | TodoListMiddleware | Default enabled |
+| Track complex tasks | TodoListMiddleware | Opt-in via middleware |
 | Manage file context | FilesystemMiddleware | Configure backend |
-| Delegate work | SubAgentMiddleware | Add custom subagents |
-| Add human approval | HumanInTheLoopMiddleware | Requires checkpointer |
+| Delegate work | SubAgentMiddleware | Added when subagents are configured |
+| Add human approval | HumanInTheLoopMiddleware | Enable with `interrupt_on`; requires checkpointer |
 | Load skills | SkillsMiddleware | Provide skill directories |
 | Access memory | MemoryMiddleware | Requires Store instance |
 
@@ -140,11 +140,12 @@ const agent = await createDeepAgent({
 </ex-full-configuration>
 
 <built-in-tools>
-Every deep agent has access to:
+Every deep agent includes filesystem tools: `ls`, `read_file`, `write_file`, `edit_file`, `glob`, `grep`.
 
-1. **Planning**: `write_todos` - Track multi-step tasks
-2. **Filesystem**: `ls`, `read_file`, `write_file`, `edit_file`, `glob`, `grep`
-3. **Delegation**: `task` - Spawn specialized subagents
+Optional tools depend on configuration:
+
+- **Planning**: `write_todos` when TodoListMiddleware is explicitly enabled.
+- **Delegation**: `task` when synchronous subagents are configured and SubAgentMiddleware is added.
 </built-in-tools>
 
 ---
@@ -284,9 +285,12 @@ agent = create_deep_agent(
 
 ### What Agents CANNOT Configure
 
-- Core middleware removal (TodoList, Filesystem, SubAgent always present)
-- The write_todos, task, or filesystem tool names
-- The SKILL.md frontmatter format
+- Removal of protected core middleware such as FilesystemMiddleware
+- Built-in filesystem tool names
+
+TodoListMiddleware and `write_todos` are opt-in. SubAgentMiddleware and `task` are included only when synchronous subagents are configured; their built-in tool name is fixed when included.
+
+The SKILL.md frontmatter format is fixed.
 </boundaries>
 
 <fix-checkpointer-for-interrupts>

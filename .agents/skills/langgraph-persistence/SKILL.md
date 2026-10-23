@@ -348,14 +348,14 @@ function createSubAgent(model: string, { name, ...kwargs }: { name: string; [key
   return new StateGraph(new StateSchema({ messages: MessagesValue }))
     .addNode(name, agent)  // unique name -> stable namespace
     .addEdge(START, name)
-    .compile();
+    .compile({ checkpointer: true });
 }
 
 const fruitAgent = createSubAgent("gpt-4.1-mini", {
-  name: "fruit_agent", tools: [fruitInfo], prompt: "...", checkpointer: true,
+  name: "fruit_agent", tools: [fruitInfo], prompt: "...",
 });
 const veggieAgent = createSubAgent("gpt-4.1-mini", {
-  name: "veggie_agent", tools: [veggieInfo], prompt: "...", checkpointer: true,
+  name: "veggie_agent", tools: [veggieInfo], prompt: "...",
 });
 ```
 </typescript>
@@ -399,9 +399,9 @@ graph.invoke({"user_id": "alice"}, {"configurable": {"thread_id": "thread-2"}}) 
 Use a Store for cross-thread memory to share user preferences across conversations.
 
 ```typescript
-import { MemoryStore } from "@langchain/langgraph";
+import { InMemoryStore } from "@langchain/langgraph";
 
-const store = new MemoryStore();
+const store = new InMemoryStore();
 
 // Save user preference (available across ALL threads)
 await store.put(["alice", "preferences"], "language", { preference: "short responses" });

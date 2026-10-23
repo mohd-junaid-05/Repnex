@@ -23,5 +23,5 @@ ALTER TABLE public.explanations
   ADD COLUMN IF NOT EXISTS commit_sha text;
 
 -- Lookup path for a cache hit: one analysis, one target, one model.
-CREATE INDEX IF NOT EXISTS idx_explanations_cache_lookup
+CREATE UNIQUE INDEX IF NOT EXISTS idx_explanations_cache_lookup
   ON public.explanations (analysis_id, target_type, target_key, model);

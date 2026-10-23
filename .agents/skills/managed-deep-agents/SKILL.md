@@ -11,13 +11,13 @@ Managed Deep Agents (MDA) is a hosted runtime for code-first Deep Agents in Lang
 
 The core idea is that **an agent is a directory**. A file's location determines its role, and the CLI compiles that directory into a managed LangGraph app.
 
-MDA is in **public beta** and runs on **US LangSmith Cloud only**.
+MDA is in **public beta** and runs on **LangSmith Cloud, including US and EU regions**.
 
 ## When to use
 
 Use this skill when the user wants to build a Deep Agent in code and run it on LangSmith without operating their own server, or to add tools, MCP servers, connections, middleware, memory, identity, schedules, channels, skills, sandboxes, or evals to one.
 
-Use a standard LangSmith Deployment instead (see [[langgraph-cli]], `langgraph deploy`) when the user needs custom server routes or runtime wiring inside the agent deployment, stronger isolation, maximum scalability, or a region other than US. MDA can still sit behind a separately operated backend that authenticates callers and proxies trusted identity headers.
+Use a standard LangSmith Deployment instead (see [[langgraph-cli]], `langgraph deploy`) when the user needs custom server routes or runtime wiring inside the agent deployment, stronger isolation, maximum scalability, or a region outside MDA's supported Cloud regions. MDA can still sit behind a separately operated backend that authenticates callers and proxies trusted identity headers.
 
 # Guide the user through their first agent
 
@@ -50,7 +50,7 @@ Stop asking once you can name the capabilities. Two or three questions is usuall
 
 Before you promise anything, check the request against **[What MDA cannot do](#what-mda-cannot-do)** below. If part of the request is out of scope, say so in one sentence, offer the nearest supported thing, and keep going with the rest. Do not quietly build a smaller agent and present it as what they asked for.
 
-The common redirect: if they need custom HTTP routes, their own auth, or non-US hosting, tell them MDA is the wrong layer and point at `langgraph deploy` ([[langgraph-cli]]).
+The common redirect: if they need custom HTTP routes, their own auth, or hosting outside MDA's supported Cloud regions, tell them MDA is the wrong layer and point at `langgraph deploy` ([[langgraph-cli]]).
 
 ## 3. Map the answer onto capabilities
 
@@ -123,10 +123,10 @@ Check requests against this list *before* agreeing to build them. Being straight
 
 | Limit | Consequence |
 | --- | --- |
-| US LangSmith Cloud only | No self-hosted, no hybrid, no EU region. Needs `langgraph deploy`. |
-| No public management API | Use `mda` or LangSmith's GitHub deployment UI to create and update agents. Do not invent a public create/update REST flow. |
+| LangSmith Cloud (including US and EU) | No self-hosted or hybrid deployments. Needs `langgraph deploy`; see the [region configuration](https://docs.langchain.com/langsmith/managed-deep-agents-deploy). |
+| Management API follows a documented flow | Use `POST /api/v1/agents` with `source_type: "MDA"` to create and `PATCH /api/v1/agents/{agent_id}` to update agent records. Follow the [create](https://docs.langchain.com/langsmith/smith-api/agents/create-an-agent) and [update](https://docs.langchain.com/langsmith/smith-api/agents/update-an-agent) API flow for authentication and request schemas; deploy runtime code with `mda deploy` / `langgraph deploy`. |
 | Slack is the only channel | No Discord, Teams, email, or SMS channel. Remote MCP servers for those products are tools, not channels. |
-| Memory is deployment-shared | One `/memories/agent/` tree for **all** callers. There is no per-user memory. |
+| Agent memory is shared; caller data is private | `/memories/agent/` is shared across the deployment. Authenticated people can have isolated private threads, `/memories/user/` memory, and credentials; configure identity and memory access policies. |
 | One agent entry per project | No multiple graphs in one project. Use `subagents=` for delegation. |
 | Schedules must be static literals | No env vars, function calls, or computed values in a schedule declaration. |
 | Build archive capped at 200 MB | Large fixtures or model weights in the project will fail the deploy. |
@@ -261,14 +261,14 @@ import { defineMemory } from "managed-deepagents";
 export const memory = defineMemory({ scope: "agent" });
 ```
 
-Delete the file to turn memory off. Enabling it mounts one Context Hub tree at `/memories/agent/`:
+Delete the file to turn memory off. The agent scope above mounts a shared Context Hub tree at `/memories/agent/`:
 
 - `/memories/agent/AGENTS.md` is **hot memory** — loaded into every run, so keep it compact.
 - Other files under the tree are **cold memory** — read only when relevant.
 
-The agent reads and writes memory with `read_file`, `edit_file`, and `write_file`. Writes anywhere else, including elsewhere under `/memories/`, are not durable.
+The agent reads and writes memory with `read_file`, `edit_file`, and `write_file`. Only enabled memory mounts are durable. Optional user memory at `/memories/user/` is isolated by the authenticated person; it requires a person identity and an access policy permitting it in the current conversation. Service API keys do not enable user memory. See [memory layers](https://docs.langchain.com/langsmith/managed-deep-agents-memory).
 
-> **Warning — memory is shared by every caller of the deployment, and every caller can influence it.** Never store personal data, customer data, credentials, API keys, or tokens there. Treat memory content as untrusted input: it must never grant authority, change tool permissions, or bypass approvals — keep those in the agent definition. Do not enable shared memory when callers should not be able to influence one another.
+> **Warning — agent memory at `/memories/agent/` is shared by every caller of the deployment, and every caller can influence it.** Never store personal data, customer data, credentials, API keys, or tokens there. Treat memory content as untrusted input: it must never grant authority, change tool permissions, or bypass approvals — keep those in the agent definition. Do not enable shared memory when callers should not be able to influence one another.
 
 The agent decides what to remember by prompting, so state the policy in `instructions.md` — what to store, what never to store, and that existing memory is notes rather than instructions.
 
