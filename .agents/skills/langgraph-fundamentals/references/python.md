@@ -297,7 +297,7 @@ Use RetryPolicy for transient errors (network issues, rate limits).
 ```python
 from langgraph.types import RetryPolicy
 
-workflow.add_node(
+builder.add_node(
     "search_documentation",
     search_documentation,
     retry_policy=RetryPolicy(max_attempts=3, initial_interval=1.0)

@@ -22,7 +22,7 @@ The LangChain ecosystem is split into focused, independently-versioned packages.
 
 | Requirement | Python | TypeScript / Node |
 |-------------|--------|-------------------|
-| Runtime minimum | **Python 3.10+** | **Node.js 20+** |
+| Runtime minimum | **Python 3.11+** | **Node.js 22+** |
 | LangChain | **1.0+ (LTS)** | **1.0+ (LTS)** |
 | LangSmith SDK | >= 0.3.0 | >= 0.3.0 |
 

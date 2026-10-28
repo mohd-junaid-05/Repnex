@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { z } from "zod";
 import * as crypto from "node:crypto";
 import { createSupabaseClient } from "@/lib/supabase";
 import {
@@ -13,13 +14,18 @@ import { isTracingConfigured } from "@/lib/ai/client";
 import { fetchRepositoryHeadCommit } from "@/lib/github";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-interface FolderFileInput {
-  path: string;
-  role?: string | null;
-  fanIn?: number | null;
-  fanOut?: number | null;
-  contentHash?: string | null;
-}
+const explainRequestSchema = z.discriminatedUnion("targetType", [
+  z.object({
+    analysisId: z.uuid(),
+    targetType: z.literal("file"),
+    targetKey: z.string().min(1),
+  }),
+  z.object({
+    analysisId: z.uuid(),
+    targetType: z.literal("folder"),
+    targetKey: z.string(),
+  }),
+]);
 
 interface CommonCtx {
   analysisId: string;
@@ -48,17 +54,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = (await req.json()) as Record<string, unknown>;
-    const analysisId = body?.analysisId as string | undefined;
-    const targetType = body?.targetType as string | undefined;
-    const targetKey = body?.targetKey as string | undefined;
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Malformed JSON body." }, { status: 400 });
+    }
 
-    if (!analysisId || !targetKey || (targetType !== "file" && targetType !== "folder")) {
+    const parsed = explainRequestSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "analysisId, a targetKey, and targetType 'file' or 'folder' are required." },
+        { error: "Invalid explanation request.", issues: parsed.error.issues },
         { status: 400 }
       );
     }
+    const { analysisId, targetType, targetKey } = parsed.data;
 
     const supabase = await createSupabaseClient();
 
@@ -86,7 +96,7 @@ export async function POST(req: Request) {
     const result =
       targetType === "file"
         ? await handleFile(targetKey, ctx)
-        : await handleFolder(targetKey, body, ctx);
+        : await handleFolder(targetKey, ctx);
 
     return NextResponse.json({ ...result, stale, tracingConfigured: isTracingConfigured() });
   } catch (err: unknown) {
@@ -191,30 +201,56 @@ async function neighbourList(
   neighbours.sort((a, b) => a.path.localeCompare(b.path));
   return neighbours;
 }
-async function handleFolder(
-  folderPath: string,
-  body: Record<string, unknown>,
-  ctx: CommonCtx
-) {
+async function handleFolder(folderPath: string, ctx: CommonCtx) {
   const { supabase, analysisId, orgId, commitSha, repoName } = ctx;
 
-  const rawFiles = (body?.files ?? []) as FolderFileInput[];
-  const incomingFrom = (body?.incomingFrom ?? []) as string[];
-  const outgoingTo = (body?.outgoingTo ?? []) as string[];
+  const [fileResult, edgeResult, roleResult] = await Promise.all([
+    supabase.from("files").select("id, path, content_hash", { count: "exact" })
+      .eq("analysis_id", analysisId).limit(10000),
+    supabase.from("edges").select("source_id, target_id", { count: "exact" })
+      .eq("analysis_id", analysisId).limit(10000),
+    supabase.from("file_roles").select("file_id, role", { count: "exact" })
+      .eq("analysis_id", analysisId).limit(10000),
+  ]);
+  for (const result of [fileResult, edgeResult, roleResult]) {
+    if (result.error) throw new Error(result.error.message);
+    // Refuse incomplete graph context if the server caps a result set.
+    if (result.count !== result.data?.length) {
+      throw new Error("Analysis is too large to load complete folder context.");
+    }
+  }
 
-  if (rawFiles.length === 0) {
+  const allFiles = fileResult.data ?? [];
+  const folderFiles = allFiles.filter((file) =>
+    folderPath === "" || file.path.startsWith(`${folderPath}/`)
+  );
+  if (folderFiles.length === 0) {
     throw new Error("Folder contains no files to explain.");
   }
 
-  const contentHashes = rawFiles.map((f) => ({ path: f.path, hash: f.contentHash ?? "" }));
-  const digest = computeFolderDigest(contentHashes);
+  const idToPath = new Map<string, string>(allFiles.map((file) => [file.id, file.path]));
+  const folderIds = new Set(folderFiles.map((file) => file.id));
+  const roles = new Map<string, string>((roleResult.data ?? []).map((row) => [row.file_id, row.role]));
+  const incoming = new Set<string>();
+  const outgoing = new Set<string>();
+  for (const edge of edgeResult.data ?? []) {
+    const sourceIn = folderIds.has(edge.source_id);
+    const targetIn = folderIds.has(edge.target_id);
+    const sourcePath = idToPath.get(edge.source_id);
+    const targetPath = idToPath.get(edge.target_id);
+    if (!sourcePath || !targetPath) continue;
+    if (!sourceIn && targetIn) incoming.add(sourcePath);
+    if (sourceIn && !targetIn) outgoing.add(targetPath);
+  }
 
-  const files: NeighbourInfo[] = rawFiles.map((f) => ({
-    path: f.path,
-    role: f.role ?? undefined,
-    fanIn: f.fanIn ?? undefined,
-    fanOut: f.fanOut ?? undefined,
-  }));
+  const digest = computeFolderDigest(folderFiles.map((file) => ({
+    path: file.path, hash: file.content_hash ?? "",
+  })));
+  const files: NeighbourInfo[] = folderFiles
+    .map((file) => ({ path: file.path, role: roles.get(file.id) }))
+    .sort((a, b) => a.path.localeCompare(b.path));
+  const incomingFrom = [...incoming].sort();
+  const outgoingTo = [...outgoing].sort();
 
   const params: ExplainFolderParams = {
     analysisId,

@@ -303,7 +303,7 @@ for await (const chunk of graph.stream({ data: "test" }, { streamMode: "custom" 
 Use retryPolicy for transient errors.
 
 ```typescript
-workflow.addNode(
+builder.addNode(
   "searchDocumentation",
   searchDocumentation,
   {

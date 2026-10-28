@@ -78,7 +78,7 @@ export const explainFile = traceable(
     const { supabase } = params;
 
     // Cache read happens inside the traced call.
-    const { data: existing } = await supabase
+    const { data: existing, error: cacheReadError } = await supabase
       .from("explanations")
       .select("content, content_hash")
       .eq("analysis_id", params.analysisId)
@@ -87,11 +87,9 @@ export const explainFile = traceable(
       .eq("model", MODEL_NAME)
       .maybeSingle();
 
-    const shownPaths = [
-      params.filePath,
-      ...params.imports.map((i) => i.path),
-      ...params.dependents.map((d) => d.path),
-    ];
+    if (cacheReadError) {
+      console.error("[ai] Failed to read explanation cache:", cacheReadError.message);
+    }
 
     if (existing && existing.content_hash === params.digest) {
       return {
@@ -114,25 +112,7 @@ export const explainFile = traceable(
       prompt: buildFilePrompt(params),
     });
 
-    const inventedPathCheck = checkInventedPaths(text, shownPaths);
-
-    // Live evaluator: attach feedback directly to the LangSmith trace run
-    const runTree = getCurrentRunTree();
-    if (runTree && isTracingConfigured()) {
-      try {
-        const client = new Client();
-        await client.createFeedback(runTree.id, "invented_path", {
-          score: inventedPathCheck.score,
-          comment: inventedPathCheck.passed
-            ? "All paths verified against shown neighbours"
-            : `Invented: ${inventedPathCheck.inventedPaths.join(", ")}`,
-        });
-      } catch {
-        // Non-fatal if feedback write fails
-      }
-    }
-
-    const { error } = await supabase.from("explanations").insert({
+    const { error } = await supabase.from("explanations").upsert({
       org_id: params.orgId,
       analysis_id: params.analysisId,
       file_id: params.fileId,
@@ -142,7 +122,7 @@ export const explainFile = traceable(
       content_hash: params.digest,
       commit_sha: params.commitSha,
       content: text,
-    });
+    }, { onConflict: "analysis_id,target_type,target_key,model" });
 
     if (error) {
       console.error(`[ai] Failed to cache explanation for ${params.filePath}:`, error.message);
@@ -175,7 +155,7 @@ export const explainFolder = traceable(
   async (params: ExplainFolderParams): Promise<ExplainResult> => {
     const { supabase } = params;
 
-    const { data: existing } = await supabase
+    const { data: existing, error: cacheReadError } = await supabase
       .from("explanations")
       .select("content, content_hash")
       .eq("analysis_id", params.analysisId)
@@ -184,12 +164,9 @@ export const explainFolder = traceable(
       .eq("model", MODEL_NAME)
       .maybeSingle();
 
-    const folderShownPaths = [
-      params.folderPath,
-      ...params.files.map((f) => f.path),
-      ...params.incomingFrom,
-      ...params.outgoingTo,
-    ];
+    if (cacheReadError) {
+      console.error("[ai] Failed to read explanation cache:", cacheReadError.message);
+    }
 
     if (existing && existing.content_hash === params.digest) {
       return {
@@ -212,25 +189,7 @@ export const explainFolder = traceable(
       prompt: buildFolderPrompt(params),
     });
 
-    const inventedPathCheck = checkInventedPaths(text, folderShownPaths);
-
-    // Live evaluator: attach feedback directly to the LangSmith trace run
-    const runTree = getCurrentRunTree();
-    if (runTree && isTracingConfigured()) {
-      try {
-        const client = new Client();
-        await client.createFeedback(runTree.id, "invented_path", {
-          score: inventedPathCheck.score,
-          comment: inventedPathCheck.passed
-            ? "All paths verified against folder files"
-            : `Invented: ${inventedPathCheck.inventedPaths.join(", ")}`,
-        });
-      } catch {
-        // Non-fatal if feedback write fails
-      }
-    }
-
-    const { error } = await supabase.from("explanations").insert({
+    const { error } = await supabase.from("explanations").upsert({
       org_id: params.orgId,
       analysis_id: params.analysisId,
       file_id: params.fileId,
@@ -240,7 +199,7 @@ export const explainFolder = traceable(
       content_hash: params.digest,
       commit_sha: params.commitSha,
       content: text,
-    });
+    }, { onConflict: "analysis_id,target_type,target_key,model" });
 
     if (error) {
       console.error(`[ai] Failed to cache folder explanation for ${params.folderPath}:`, error.message);
@@ -291,7 +250,8 @@ export interface AssignRoleParams {
 }
 
 export interface AssignRoleResult {
-  role: AssignableRole;
+  /** Stored adapter roles are preserved; only new model roles are restricted. */
+  role: string;
   cacheHit: boolean;
   model: string;
 }
@@ -305,22 +265,20 @@ export const assignRole = traceable(
   async (params: AssignRoleParams): Promise<AssignRoleResult> => {
     const { supabase } = params;
 
-    // Cache read happens inside the traced call. If an acceptable role is
-    // already stored, that is the hit; no model call happens.
-    const { data: existing } = await supabase
-      .from("file_roles")
-      .select("role, id")
-      .eq("analysis_id", params.analysisId)
-      .eq("file_id", params.fileId ?? "")
-      .maybeSingle();
+    // Preserve adapter roles as well as cached model roles inside the trace.
+    const { data: existing, error: roleReadError } = params.fileId
+      ? await supabase
+          .from("file_roles")
+          .select("role, id")
+          .eq("analysis_id", params.analysisId)
+          .eq("file_id", params.fileId)
+          .maybeSingle()
+      : { data: null, error: null };
+    if (roleReadError) throw new Error(roleReadError.message);
 
     const existingRole = existing?.role as string | undefined;
-    if (
-      params.fileId &&
-      existingRole &&
-      ASSIGNABLE_ROLES.includes(existingRole as AssignableRole)
-    ) {
-      return { role: existingRole as AssignableRole, cacheHit: true, model: MODEL_NAME };
+    if (existingRole !== undefined) {
+      return { role: existingRole, cacheHit: true, model: MODEL_NAME };
     }
 
     const { text } = await generateText({
