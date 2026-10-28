@@ -1,0 +1,573 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "timestamp": "2026-10-28T10:51:37.207Z",
+  "datasetSize": 10,
+  "aggregateScores": {
+    "v1": {
+      "grounding": 3.8,
+      "utility": 1,
+      "clarity": 4.1,
+      "overall": 2.967,
+      "cleanCount": 0,
+      "hallucinationFreeRatePct": 0
+    },
+    "v2": {
+      "grounding": 4.8,
+      "utility": 4.6,
+      "clarity": 4.7,
+      "overall": 4.7,
+      "cleanCount": 10,
+      "hallucinationFreeRatePct": 100
+    },
+    "deltaOverall": 1.73,
+    "pctImprovement": 58.4
+  },
+  "comparisons": [
+    {
+      "id": "exp-1",
+      "filePath": "app/components/ui/button.tsx",
+      "v1": {
+        "text": "Based on the file path (`app/components/ui/button.tsx`), known role (`component`), and its dependents (such as `app/components/navbar.tsx`), here is a detailed explanation of what this file does and how it fits into the **Roomify** project.\n\n---\n\n### 1. What the File Does\nThe `button.tsx` file is a **reusable UI component** responsible for rendering buttons throughout the Roomify application. \n\nBecause it is located in a `ui/` directory, it serves as a \"primitive\" or \"base\" component—meaning it is designed to be a generic, highly customizable building block rather than a page-specific button. It typically wraps standard HTML `<button>` elements (or uses libraries like Radix UI or `class-variance-authority` if utilizing a system like shadcn/ui) to ensure consistent styling, states (like hover, focus, and disabled), and accessibility features across the entire app.\n\n### 2. How It Fits Into the Project\n* **Design System / UI Foundation:** In modern React/Next.js applications (especially those built with Tailwind CSS), `ui/` folders usually contain the design system components. Having a centralized `button.tsx` ensures that all buttons in Roomify share the same visual language, padding, border radius, and typography.\n* **Used by Higher-Level Components:** As noted in your context, `app/components/navbar.tsx` depends on this file. This means the navigation bar uses this button component for actions like \"Sign In,\" \"Sign Up,\" \"Book Room,\" or user profile actions. Other parts of the application (like landing pages, forms, and modals) will also import and reuse this button.\n* **Maintainability:** If the project's design needs to change (e.g., changing the primary button color from blue to purple, or updating the font weight), developers only need to update the styles in this single file rather than hunting down every `<button>` tag across the codebase.",
+        "scores": {
+          "grounding": 4,
+          "utility": 1,
+          "clarity": 4,
+          "overallScore": 3,
+          "reasoning": "The explanation accurately identifies the role of the button component and its relationship with the navbar. However, it completely fails the narrow-pane utility and formatting constraints by using prohibited markdown headings ('### 1. What the File Does', '### 2. How It Fits Into the Project'), horizontal rules ('---'), and a verbose, essay-like structure that breaks readability in a narrow side-pane.",
+          "inventedPathCheck": {
+            "passed": false,
+            "score": 0.5,
+            "totalTokensChecked": 6,
+            "validPaths": [
+              "app/components/ui/button.tsx",
+              "app/components/navbar.tsx",
+              "button.tsx"
+            ],
+            "inventedPaths": [
+              "ui/",
+              "shadcn/ui",
+              "React/Next.js"
+            ]
+          }
+        }
+      },
+      "v2": {
+        "text": "- The file `app/components/ui/button.tsx` acts as a reusable UI component providing button functionality within the project.\n- It has no imports of its own within the repository.\n- It is consumed by `app/components/navbar.tsx`, where the button component is integrated into the navigation bar interface.",
+        "scores": {
+          "grounding": 5,
+          "utility": 5,
+          "clarity": 5,
+          "overallScore": 5,
+          "reasoning": "The explanation is well-grounded in the provided neighbour (`app/components/navbar.tsx`), uses concise bullet points with inline code and bold formatting suitable for narrow panes, and clearly explains the architectural role of the button component.",
+          "inventedPathCheck": {
+            "passed": true,
+            "score": 1,
+            "totalTokensChecked": 2,
+            "validPaths": [
+              "app/components/ui/button.tsx",
+              "app/components/navbar.tsx"
+            ],
+            "inventedPaths": []
+          }
+        }
+      }
+    },
+    {
+      "id": "exp-2",
+      "filePath": "lib/ai.action.ts",
+      "v1": {
+        "text": "Based on the file path (`lib/ai.action.ts`), its known role as a utility, its imports (`lib/constants.ts`), and its dependents (`app/routes/visualizer.$id.tsx`), here is a detailed explanation of what this file does and how it fits into the **Roomify** project.\n\n---\n\n### **1. File Role and Purpose**\n`lib/ai.action.ts` serves as the **AI integration and action layer** for the Roomify application. Its primary responsibility is to act as a bridge between the frontend/route handlers (specifically the room visualizer) and the underlying AI service provider (likely OpenAI, Google Gemini, or a similar LLM/image-generation API). \n\nSince it is consumed by `app/routes/visualizer.$id.tsx`, this file handles the logic required to send user requests, room images, or design parameters to an AI model, process the response, and return the AI-generated room visualizations, redesign suggestions, or layout recommendations back to the application.\n\n### **2. How it Fits into the Project Architecture**\n* **The Stack Context:** Roomify is a web application (built using Remix, given the `app/routes/` directory structure) that allows users to visualize and redesign rooms using AI.\n* **Separation of Concerns:** By placing AI logic in `lib/ai.action.ts`, the application keeps its UI components and route controllers clean. The route (`visualizer.$id.tsx`) simply calls functions defined in this file when a user triggers a redesign or generation action.\n* **Configuration Management (`lib/constants.ts`):** The file imports from `lib/constants.ts`, which likely supplies necessary configuration variables such as API keys, model names, prompt templates, or default generation settings.\n\n### **3. Likely Core Functions in the File**\nWhile the exact implementation depends on the codebase specifics, a file of this nature in a room visualizer app typically contains functions like:\n* `generateRoomDesign(...)`: Takes user inputs (e.g., room style, color palette, reference image) and calls the AI API to generate a transformed room image.\n* `getRoomSuggestions(...)`: Interacts with a text-based LLM to provide interior design tips or furniture placement ideas based on a room's description or image.\n* **Error Handling & Response Formatting:** Wraps external API calls in `try/catch` blocks to gracefully handle rate limits, network failures, or invalid AI outputs, returning standardized data to the visualizer route.\n\n### **Summary**\n`lib/ai.action.ts` is the core utility responsible for powering Roomify's AI capabilities. It encapsulates external AI API communication, utilizes shared configuration from `lib/constants.ts`, and feeds AI-generated room visualizations and data directly into the room visualizer page (`app/routes/visualizer.$id.tsx`).",
+        "scores": {
+          "grounding": 3,
+          "utility": 1,
+          "clarity": 4,
+          "overallScore": 2.67,
+          "reasoning": "The explanation makes logical assumptions based on the file name and neighbours, but violates narrow-pane utility formatting rules heavily by using markdown headings (#, ##), horizontal rules (---), and multiple long multi-level sections which break readability in a side-pane.",
+          "inventedPathCheck": {
+            "passed": false,
+            "score": 0.5,
+            "totalTokensChecked": 8,
+            "validPaths": [
+              "lib/ai.action.ts",
+              "lib/constants.ts",
+              "app/routes/visualizer.$id.tsx",
+              "visualizer.$id.tsx"
+            ],
+            "inventedPaths": [
+              "app/routes/",
+              "try/catch",
+              "frontend/route",
+              "LLM/image-generation"
+            ]
+          }
+        }
+      },
+      "v2": {
+        "text": "- The file `lib/ai.action.ts` functions as a util within the repository.\n- It relies on configuration or data provided by its import, `lib/constants.ts`.\n- In turn, `lib/ai.action.ts` is consumed by `app/routes/visualizer.$id.tsx` to help power visualizer features.",
+        "scores": {
+          "grounding": 5,
+          "utility": 5,
+          "clarity": 5,
+          "overallScore": 5,
+          "reasoning": "The explanation is tightly grounded in the provided neighbors, avoids markdown headings or tables, and clearly outlines the file's role and its relationships in a compact bulleted format well-suited for a narrow side-pane.",
+          "inventedPathCheck": {
+            "passed": true,
+            "score": 1,
+            "totalTokensChecked": 3,
+            "validPaths": [
+              "lib/ai.action.ts",
+              "lib/constants.ts",
+              "app/routes/visualizer.$id.tsx"
+            ],
+            "inventedPaths": []
+          }
+        }
+      }
+    },
+    {
+      "id": "exp-3",
+      "filePath": "lib/constants.ts",
+      "v1": {
+        "text": "Based on the file path (`lib/constants.ts`), its known role as a utility/configuration file, and the dependents (`app/components/upload.tsx`, `lib/ai.action.ts`, `lib/puter.action.ts`), we can deduce the purpose and function of this file within the **Roomify** project.\n\n---\n\n### **File Overview: `lib/constants.ts`**\n\nIn a Next.js or TypeScript-based project, `lib/constants.ts` serves as a central repository for **application-wide static data, configuration settings, magic strings, and type definitions or options** that need to be shared across multiple modules. \n\nBecause it has **no imports**, it is a \"leaf\" utility file—meaning it does not depend on other modules and purely defines foundational data values that other parts of the application consume.\n\n---\n\n### **Role in the Project & Dependents Analysis**\n\nTo understand what lives inside this file, we can look at how its dependents use constants:\n\n1. **`app/components/upload.tsx` (UI Component for Uploading Images/Files):**\n   * *Role:* Handles user file uploads (likely room photos or floor plans).\n   * *Constants usage:* Likely imports allowed file formats, maximum file size limits, predefined room categories, or storage bucket/folder names.\n\n2. **`lib/ai.action.ts` (AI Processing Server Actions):**\n   * *Role:* Interacts with AI models (such as OpenAI, Gemini, or similar) to redesign rooms, generate descriptions, or analyze images.\n   * *Constants usage:* May contain AI model identifiers (e.g., `gpt-4o`, model parameters like `temperature`), system prompts, or predefined interior design styles (e.g., \"Modern\", \"Minimalist\", \"Industrial\") that users can choose from.\n\n3. **`lib/puter.action.ts` (Puter.com Integration Actions):**\n   * *Role:* Interacts with [Puter.com](https://puter.com/)—a cloud OS/hosting/storage platform often used for cloud file storage, key-value databases, or hosting static assets in lightweight web apps.\n   * *Constants usage:* Likely stores Puter storage bucket names, API configuration endpoints, or fallback configuration keys.\n\n---\n\n### **Typical Contents of `lib/constants.ts` in Roomify**\n\nWhile the exact code depends on the specific implementation, a file like this in a room-redesign/AI app typically exports configurations such as:\n\n* **Design Styles/Themes:** Lists of interior styles (e.g., Scandinavian, Cyberpunk, Bohemian) presented in dropdowns.\n* **API Configurations:** Constants used when communicating with AI models or cloud storage (Puter).\n* **Validation Limits:** File size limits, allowed image MIME types (`image/jpeg`, `image/png`), etc.\n* **Prompt Templates:** Base strings used by `lib/ai.action.ts` to instruct the AI on how to process room images.\n\n### **Summary**\n`lib/constants.ts` acts as the **single source of truth** for configuration values and static options across Roomify. By keeping these values centralized here, UI components (`upload.tsx`) and backend/server actions (`ai.action.ts`, `puter.action.ts`) remain clean, maintainable, and free of hardcoded \"magic numbers\" or strings.",
+        "scores": {
+          "grounding": 3,
+          "utility": 1,
+          "clarity": 4,
+          "overallScore": 2.67,
+          "reasoning": "The explanation makes logical deductions based on the file name and neighbours, but violates narrow-pane utility and formatting rules severely by using large markdown headings (`###`), numbered lists, and horizontal rules, which break in narrow side-panes.",
+          "inventedPathCheck": {
+            "passed": false,
+            "score": 0.4375,
+            "totalTokensChecked": 16,
+            "validPaths": [
+              "lib/constants.ts",
+              "app/components/upload.tsx",
+              "lib/ai.action.ts",
+              "lib/puter.action.ts",
+              "upload.tsx",
+              "ai.action.ts",
+              "puter.action.ts"
+            ],
+            "inventedPaths": [
+              "image/jpeg",
+              "image/png",
+              "utility/configuration",
+              "Images/Files",
+              "bucket/folder",
+              "OS/hosting/storage",
+              "room-redesign/AI",
+              "Styles/Themes",
+              "backend/server"
+            ]
+          }
+        }
+      },
+      "v2": {
+        "text": "- `lib/constants.ts` serves as a util that provides shared constant values to the rest of the repository.\n- It acts as a dependency without importing any other files itself.\n- Several parts of the codebase rely on it, specifically being imported by `lib/ai.action.ts`, `lib/puter.action.ts`, and `app/components/upload.tsx`.",
+        "scores": {
+          "grounding": 5,
+          "utility": 5,
+          "clarity": 5,
+          "overallScore": 5,
+          "reasoning": "The explanation is perfectly grounded in the provided neighbors, adheres strictly to the formatting constraints (using bullets, inline code, and bold without any disallowed headers or lists), and clearly explains the file's architectural role as a shared constants utility.",
+          "inventedPathCheck": {
+            "passed": true,
+            "score": 1,
+            "totalTokensChecked": 4,
+            "validPaths": [
+              "lib/constants.ts",
+              "lib/ai.action.ts",
+              "lib/puter.action.ts",
+              "app/components/upload.tsx"
+            ],
+            "inventedPaths": []
+          }
+        }
+      }
+    },
+    {
+      "id": "exp-4",
+      "filePath": "app/root.tsx",
+      "v1": {
+        "text": "Based on the path (`app/root.tsx`), role (component), imports (`lib/puter.action.ts`), and standard architectural patterns for full-stack React frameworks (specifically Remix, given the `app/root.tsx` naming convention), here is a detailed explanation of what this file does and how it fits into the project.\n\n---\n\n### 1. File Context & Role in Remix\nIn a **Remix** application, `app/root.tsx` is the **root layout component**. It is the absolute highest-level component in the component tree. Every single page, route, and view rendered by the application passes through and is wrapped by `root.tsx`. \n\nTypically, `root.tsx` is responsible for:\n*   Rendering the base HTML shell (`<html>`, `<head>`, `<body>`).\n*   Including global stylesheets, meta tags, and links.\n*   Handling global providers (like state management, themes, or authentication contexts).\n*   Handling top-level error boundaries and catch boundaries for the entire app.\n\n### 2. Analysis of Imports (`lib/puter.action.ts`)\nThe file imports from `lib/puter.action.ts`. **Puter.com** is a cloud operating system and backend-as-a-service platform often used for authentication, cloud hosting, and key-value/database storage in lightweight or decentralized web applications. \n\nThe presence of this import in the root component strongly suggests that `root.tsx` uses Puter to:\n*   **Check global user authentication state** on initial load (e.g., verifying if a user is logged into Puter when they open the app).\n*   Initialize Puter SDK integrations or event listeners globally across the application.\n*   Fetch user-specific session data that needs to be accessible from any route in the app.\n\n### 3. How it Fits into the Project (`mohd-junaid-05/Roomify`)\nGiven that the repository is named **Roomify** (which implies a room booking, workspace management, or chat/collaboration space application):\n\n1.  **Global Authentication Gate:** `root.tsx` likely checks via `puter.action.ts` if the user is authenticated. If they are, it provides user details down to child routes; if not, it may redirect them to a login state or restrict access.\n2.  **App Shell & Styling:** It sets up the foundational HTML structure, Tailwind CSS (or other styling frameworks), and fonts used throughout Roomify to ensure a consistent UI.\n3.  **Data Loading (`loader` function):** In Remix, `root.tsx` usually exports a `loader` function that fetches global data (like the current authenticated Puter user) before rendering the page, preventing layout flash and ensuring data is ready when child routes render.\n\n### Summary\n`app/root.tsx` is the skeletal backbone of the **Roomify** application. It establishes the HTML structure, loads global assets, and leverages `lib/puter.action.ts` to manage user sessions and cloud integrations globally before rendering any specific page of the app.",
+        "scores": {
+          "grounding": 2,
+          "utility": 1,
+          "clarity": 3,
+          "overallScore": 2,
+          "reasoning": "The candidate explanation provides a good high-level description of a Remix root file, but it violates several constraints. It uses forbidden markdown headings (`###`), a numbered list, and horizontal rules, which break formatting in a narrow side-pane. It also speculates heavily on unverified details beyond the single neighbor `lib/puter.action.ts`.",
+          "inventedPathCheck": {
+            "passed": false,
+            "score": 0.5714,
+            "totalTokensChecked": 7,
+            "validPaths": [
+              "app/root.tsx",
+              "lib/puter.action.ts",
+              "root.tsx",
+              "puter.action.ts"
+            ],
+            "inventedPaths": [
+              "mohd-junaid-05/Roomify",
+              "key-value/database",
+              "chat/collaboration"
+            ]
+          }
+        }
+      },
+      "v2": {
+        "text": "- The `app/root.tsx` file serves as a component in the repository.\n- It imports `lib/puter.action.ts` to use its functionality.\n- No other files in the repository import `app/root.tsx`.",
+        "scores": {
+          "grounding": 3,
+          "utility": 2,
+          "clarity": 2,
+          "overallScore": 2.33,
+          "reasoning": "The explanation is too vague about the actual role of `app/root.tsx` (Remix application root) and relies on generic statements. It respects the negative formatting constraints by using bullets and no headings, but the utility is poor due to lack of architectural insight.",
+          "inventedPathCheck": {
+            "passed": true,
+            "score": 1,
+            "totalTokensChecked": 2,
+            "validPaths": [
+              "app/root.tsx",
+              "lib/puter.action.ts"
+            ],
+            "inventedPaths": []
+          }
+        }
+      }
+    },
+    {
+      "id": "exp-5",
+      "filePath": "src/services/auth.service.js",
+      "v1": {
+        "text": "Based on the file path, role, imports, and context within the `hagopj13/node-express-boilerplate` repository, here is a detailed explanation of `src/services/auth.service.js`.\n\n---\n\n### **Role in the Project**\n`src/services/auth.service.js` is an **Authentication Service**. In this Node.js/Express boilerplate (which follows a strict separation of concerns), controllers handle HTTP requests and responses, while **services contain the core business logic**. \n\nThe authentication service is responsible for handling identity verification, user login, token generation/validation, password management, and user registration verification.\n\n---\n\n### **Imports Analysis**\nThe imports reveal how `auth.service.js` collaborates with other parts of the application:\n\n1. **`src/services/user.service.js`**: Used to interact with user data (e.g., finding users by email or ID, creating new users).\n2. **`src/services/token.service.js`**: Used to generate and verify JWT tokens (Access tokens, Refresh tokens, Reset Password tokens, etc.).\n3. **`src/models/token.model.js`**: Mongoose model for storing tokens in the database (crucial for things like blacklisting refresh tokens or tracking active sessions).\n4. **`src/utils/ApiError.js`**: A custom error class used to throw standardized HTTP errors (e.g., `401 Unauthorized`, `400 Bad Request`, `404 Not Found`) that the global error-handling middleware can catch and return to the client.\n5. **`src/config/tokens.js`**: Configuration constants regarding token types (e.g., ACCESS, REFRESH, RESET_PASSWORD, VERIFY_EMAIL).\n\n---\n\n### **Core Functionality (What it typically does)**\nAlthough the exact code can vary slightly, standard implementations of `auth.service.js` in this boilerplate typically include the following exported functions:\n\n1. **`loginUserWithEmailAndPassword(email, password)`**\n   * Finds a user by email using `userService`.\n   * Checks if the user exists and if the provided password matches the hashed password stored in the database.\n   * Throws an `ApiError` (401 Unauthorized) if authentication fails.\n   * Returns the user object if successful.\n\n2. **`logout(refreshToken)`**\n   * Finds the refresh token in the database (`Token` model).\n   * Deletes or revokes the token so it can no longer be used to generate new access tokens.\n\n3. **`refreshAuth(refreshToken)`**\n   * Verifies the validity of the provided refresh token using `tokenService`.\n   * Retrieves the associated user ID from the token payload.\n   * Deletes the old refresh token and generates a new pair of auth tokens (access and refresh tokens).\n\n4. **`resetPassword(resetPasswordToken, newPassword)`**\n   * Verifies the reset password token.\n   * Finds the corresponding user.\n   * Updates the user's password with the newly hashed password.\n   * Deletes all reset password tokens associated with that user.\n\n5. **`verifyEmail(verifyEmailToken)`**\n   * Verifies the email verification token.\n   * Updates the user's `isEmailVerified` status to `true`.\n   * Deletes the verification token.\n\n---\n\n### **How it Fits into the Architecture**\n\n* **Downstream Dependency:** It is imported by `src/services/index.js`, which aggregates all services and exports them as a unified module.\n* **Upstream Usage:** It is consumed primarily by **Controllers** (e.g., `src/controllers/auth.controller.js`), which call these service methods when a client hits endpoints like `POST /v1/auth/login`, `POST /v1/auth/logout`, or `POST /v1/auth/refresh-tokens`.\n* **Database Interaction:** It acts as a bridge between the HTTP controllers and the database models (`User`, `Token`), encapsulating business rules away from the routing and controller layers.",
+        "scores": {
+          "grounding": 4,
+          "utility": 1,
+          "clarity": 4,
+          "overallScore": 3,
+          "reasoning": "The explanation accurately describes the role of `auth.service.js` using the provided neighbor files (user.service, token.service, token.model, ApiError, tokens config, and services/index). However, it completely fails the narrow-pane utility constraint by using massive markdown headings (`###`), horizontal rules (`---`), and numbered lists, making it entirely unsuitable for a narrow side-pane.",
+          "inventedPathCheck": {
+            "passed": false,
+            "score": 0.5333,
+            "totalTokensChecked": 15,
+            "validPaths": [
+              "src/services/auth.service.js",
+              "auth.service.js",
+              "src/services/user.service.js",
+              "src/services/token.service.js",
+              "src/models/token.model.js",
+              "src/utils/ApiError.js",
+              "src/config/tokens.js",
+              "src/services/index.js"
+            ],
+            "inventedPaths": [
+              "hagopj13/node-express-boilerplate",
+              "src/controllers/auth.controller.js",
+              "POST /v1/auth/login",
+              "POST /v1/auth/logout",
+              "POST /v1/auth/refresh-tokens",
+              "Node.js/Express",
+              "generation/validation"
+            ]
+          }
+        }
+      },
+      "v2": {
+        "text": "- The file `src/services/auth.service.js` acts as an authentication service with a known role of service, and it is imported by `src/services/index.js` to aggregate service functionalities.\n\n- To handle authentication logic, it imports and relies on several dependencies including `src/services/token.service.js`, `src/services/user.service.js`, `src/models/token.model.js`, `src/utils/ApiError.js`, and `src/config/tokens.js`.",
+        "scores": {
+          "grounding": 5,
+          "utility": 5,
+          "clarity": 5,
+          "overallScore": 5,
+          "reasoning": "The explanation strictly references the provided neighbor files and target file without hallucinating external details. It is concise, avoids forbidden markdown elements like headers or tables, uses bullet points and inline formatting correctly, and clearly communicates the architectural role of the file.",
+          "inventedPathCheck": {
+            "passed": true,
+            "score": 1,
+            "totalTokensChecked": 7,
+            "validPaths": [
+              "src/services/auth.service.js",
+              "src/services/index.js",
+              "src/services/token.service.js",
+              "src/services/user.service.js",
+              "src/models/token.model.js",
+              "src/utils/ApiError.js",
+              "src/config/tokens.js"
+            ],
+            "inventedPaths": []
+          }
+        }
+      }
+    },
+    {
+      "id": "exp-6",
+      "filePath": "src/services/user.service.js",
+      "v1": {
+        "text": "Based on the file path (`src/services/user.service.js`), its known role as a **service**, its imports (`src/models/index.js`, `src/utils/ApiError.js`), and its dependents (`src/services/auth.service.js`, `src/services/token.service.js`, `src/services/index.js`), we can deduce a comprehensive explanation of its purpose and functionality within the `hagopj13/node-express-boilerplate` repository.\n\n---\n\n### 1. Role in the Project Architecture\nIn this Node.js/Express boilerplate, the architecture follows a strict separation of concerns:\n* **Controllers** handle HTTP requests and responses.\n* **Services** contain the core **business logic** and interact directly with the database via Mongoose models.\n* **Models** define the Mongoose schemas.\n\nThe `user.service.js` file is the central authority for all database operations related to user data. Rather than letting controllers talk to the database directly, controllers (or other services like `auth.service.js`) call functions exported by `user.service.js`.\n\n---\n\n### 2. Breakdown of Imports\n* **`src/models/index.js`**: Imports the Mongoose models (specifically the `User` model). This allows the service to query, create, update, and delete user records in MongoDB.\n* **`src/utils/ApiError.js`**: Imports a custom error class used throughout the application to throw operational errors with specific HTTP status codes (e.g., `404 Not Found`, `400 Bad Request`, `409 Conflict`). The service uses this to handle business logic violations, such as trying to register with an email that is already taken or trying to find a user ID that doesn't exist.\n\n---\n\n### 3. Core Functionality (Expected Methods)\nGiven standard implementations of this boilerplate, `user.service.js` typically contains functions such as:\n\n* **`createUser(userBody)`**: \n  * Checks if the provided email is already taken in the database (using `User.isEmailTaken`).\n  * If taken, throws a `400` or `409` `ApiError`.\n  * Creates and saves a new user document (Mongoose handles password hashing via pre-save hooks defined in the User model).\n* **`queryUsers(filter, options)`**: \n  * Handles pagination, sorting, and filtering for retrieving a list of users (used for admin panels or search features).\n* **`getUserById(id)`**: \n  * Finds a single user by their MongoDB `ObjectId`.\n* **`getUserByEmail(email)`**: \n  * Finds a user by their email address (frequently used by `auth.service.js` during login).\n* **`updateUserById(userId, updateBody)`**: \n  * Finds a user and updates their details (e.g., name, email, password), ensuring email uniqueness is maintained if the email is being changed.\n* **`deleteUserById(userId)`**: \n  * Removes a user from the database.\n\n---\n\n### 4. Relationship with Dependents\n* **`src/services/auth.service.js`**: Relies heavily on `user.service.js`. For example, during login or registration, the authentication service calls user service methods to verify credentials, check if emails exist, or create new user accounts.\n* **`src/services/token.service.js`**: Often interacts with or complements user operations (though token generation is separate, tokens are tied to users).\n* **`src/services/index.js`**: Acts as an aggregator/barrel file, importing `user.service.js` and exporting all services collectively so other parts of the app can import them cleanly (e.g., `const { userService } = require('../services')`).\n\n### Summary\n`src/services/user.service.js` is the data-access and business-logic layer for user management. It abstracts away Mongoose queries, enforces business rules (like unique emails), and handles error-throwing when user constraints are violated, keeping the rest of the application clean and modular.",
+        "scores": {
+          "grounding": 4,
+          "utility": 1,
+          "clarity": 5,
+          "overallScore": 3.33,
+          "reasoning": "The explanation is thorough and accurately reflects the architecture, but it completely violates the narrow-pane utility constraints by using multiple headings (#, ##), horizontal rules, and a verbose essay structure that is terrible for a side-pane.",
+          "inventedPathCheck": {
+            "passed": false,
+            "score": 0.6667,
+            "totalTokensChecked": 12,
+            "validPaths": [
+              "src/services/user.service.js",
+              "src/models/index.js",
+              "src/utils/ApiError.js",
+              "src/services/auth.service.js",
+              "src/services/token.service.js",
+              "src/services/index.js",
+              "user.service.js",
+              "auth.service.js"
+            ],
+            "inventedPaths": [
+              "hagopj13/node-express-boilerplate",
+              "const { userService } = require('../services",
+              "Node.js/Express",
+              "aggregator/barrel"
+            ]
+          }
+        }
+      },
+      "v2": {
+        "text": "- **src/services/user.service.js** functions as a service in the repository, holding core business logic related to users.\n- It imports **src/models/index.js** to interact with data models and **src/utils/ApiError.js** to handle and throw application-specific errors.\n- It is utilized by **src/services/index.js** to aggregate services, as well as by **src/services/auth.service.js** and **src/services/token.service.js** to support authentication and token operations.",
+        "scores": {
+          "grounding": 5,
+          "utility": 5,
+          "clarity": 5,
+          "overallScore": 5,
+          "reasoning": "The explanation is tightly grounded in the provided neighbor files, uses only allowed formatting (bullets and bold) suitable for narrow panes, and clearly articulates the architectural role of the target file.",
+          "inventedPathCheck": {
+            "passed": true,
+            "score": 1,
+            "totalTokensChecked": 0,
+            "validPaths": [],
+            "inventedPaths": []
+          }
+        }
+      }
+    },
+    {
+      "id": "exp-7",
+      "filePath": "src/models/token.model.js",
+      "v1": {
+        "text": "Based on the file path (`src/models/token.model.js`), its known role as a database model, its imports, and its dependents in the `hagopj13/node-express-boilerplate` repository, here is a detailed explanation of what the file does and how it fits into the project.\n\n---\n\n### **1. Role in the Project**\n`src/models/token.model.js` defines the **Mongoose schema and model for authentication tokens** (such as refresh tokens, reset password tokens, verify email tokens, etc.) in a MongoDB database. \n\nIn this boilerplate, tokens are persisted rather than being purely stateless (like standard JWTs checked solely via signature). Storing them in the database allows the application to explicitly track, validate, and revoke them (e.g., when a user logs out or requests a password reset).\n\n---\n\n### **2. Imports Analysis**\n* **`src/config/tokens.js`**: Imports token types/constants (e.g., `ACCESS`, `REFRESH`, `RESET_PASSWORD`, `VERIFY_EMAIL`). These are used to categorize what kind of token is being stored.\n* **`src/models/plugins/index.js`**: Imports custom Mongoose plugins (likely the `toJSON` plugin, which strips out internal Mongoose fields like `__v` and transforms `_id` into `id` when converting the document to JSON).\n\n---\n\n### **3. Expected Schema Structure**\nWhile the exact code can vary, a token model in this specific boilerplate typically contains:\n* **`token`**: The actual token string (indexed for fast lookups).\n* **`user`**: A reference (`ObjectId`) pointing to the `User` model, establishing which user owns the token.\n* **`type`**: A string representing the token type (matching the values imported from `src/config/tokens.js`).\n* **`expires`**: A Date object indicating when the token expires.\n* **`blacklisted`**: A boolean flag indicating whether the token has been revoked (crucial for handling user logouts).\n* **Timestamps**: `createdAt` and `updatedAt` fields automatically managed by Mongoose.\n\n---\n\n### **4. How It Fits into the Architecture (Dependents)**\n\n* **`src/models/index.js`**: Aggregates all models and exports them as a single object. This allows the rest of the application to import the Token model cleanly via `const { Token } = require('./models')`.\n* **`src/services/auth.service.js`**: Uses the `Token` model heavily to:\n  * Save newly generated tokens (upon login or registration).\n  * Verify token validity during authentication checks or token refreshes.\n  * Delete or blacklist tokens when a user logs out.\n  * Handle password reset and email verification workflows.\n\n### **Summary**\n`src/models/token.model.js` acts as the data layer representation for all stateful user-related tokens. It bridges the gap between the application's authentication logic (`auth.service.js`) and the MongoDB database, ensuring secure session management, token revocation, and multi-purpose token handling (refresh, reset, verify).",
+        "scores": {
+          "grounding": 5,
+          "utility": 1,
+          "clarity": 4,
+          "overallScore": 3.33,
+          "reasoning": "The explanation is accurate and clearly describes the architecture, but it completely violates the strict formatting rules for narrow panes. It uses markdown headings (#, ##), horizontal rules, and extensive text blocks that break formatting constraints.",
+          "inventedPathCheck": {
+            "passed": false,
+            "score": 0.6667,
+            "totalTokensChecked": 9,
+            "validPaths": [
+              "src/models/token.model.js",
+              "src/config/tokens.js",
+              "src/models/plugins/index.js",
+              "src/models/index.js",
+              "src/services/auth.service.js",
+              "auth.service.js"
+            ],
+            "inventedPaths": [
+              "hagopj13/node-express-boilerplate",
+              "const { Token } = require('./models",
+              "types/constants"
+            ]
+          }
+        }
+      },
+      "v2": {
+        "text": "The file `src/models/token.model.js` is a model that defines the schema and logic for handling tokens. It relies on configuration settings imported from `src/config/tokens.js` and uses database plugins imported from `src/models/plugins/index.js`.\n\nIn the broader architecture, this model is consumed by `src/models/index.js`, which aggregates the database models for the application. Additionally, business logic inside `src/services/auth.service.js` imports it to interact with token data during authentication workflows.",
+        "scores": {
+          "grounding": 5,
+          "utility": 5,
+          "clarity": 5,
+          "overallScore": 5,
+          "reasoning": "The explanation accurately references all provided neighbors without making up unverified details. It avoids prohibited formatting (no headings, numbered lists, or tables) and uses only inline code and paragraphs suitable for a narrow pane. It clearly explains the file's role and its relationships to the surrounding modules.",
+          "inventedPathCheck": {
+            "passed": true,
+            "score": 1,
+            "totalTokensChecked": 5,
+            "validPaths": [
+              "src/models/token.model.js",
+              "src/config/tokens.js",
+              "src/models/plugins/index.js",
+              "src/models/index.js",
+              "src/services/auth.service.js"
+            ],
+            "inventedPaths": []
+          }
+        }
+      }
+    },
+    {
+      "id": "exp-8",
+      "filePath": "src/config/logger.js",
+      "v1": {
+        "text": "Based on the file path, role, imports, and dependents, here is a detailed explanation of `src/config/logger.js` in the `hagopj13/node-express-boilerplate` repository.\n\n### Role and Purpose\n`src/config/logger.js` is the centralized logging configuration file for the application. It uses **Winston**, a popular logging library for Node.js, to handle all application logs (such as errors, warnings, informational messages, and HTTP requests). \n\nBy centralizing the logger configuration, the application ensures a consistent format and transport mechanism for logs across different environments (development, production, testing).\n\n---\n\n### Imports and Configuration\n* **`src/config/config.js`**: Imports the application's environment configuration. The logger uses this configuration to determine the current environment (e.g., `development`, `production`, `test`) and the desired logging level (e.g., `debug`, `info`).\n\n#### Key Features of the Logger Setup:\n1. **Log Levels**: It maps standard Winston log levels to custom colors (e.g., error is red, warn is yellow, info is green, etc.) to make console output easily readable during development.\n2. **Format**: It formats the log output to include timestamps, the log level, and the log message. In development, it often uses colorized output for better readability.\n3. **Winston Transports**: \n   * **Console Transport**: By default, logs are printed to the console (stdout/stderr).\n   * **Environment-Specific Adjustments**: Depending on the configuration (`config.env`), it can be configured to suppress certain logs (like disabling logs during unit tests to keep test outputs clean) or write logs to files in production environments.\n4. **Error Handling**: It includes a custom format or handling mechanism to properly serialize `Error` objects, ensuring stack traces are captured when an error is logged.\n\n---\n\n### How It Fits Into the Project (Dependents)\nAs indicated by the project structure, `src/config/logger.js` is a core infrastructure module consumed across various layers of the application:\n\n* **`src/index.js` (Application Entry Point)**: Uses the logger to output startup messages (e.g., *\"Listening to port 3000...\"*) and handle uncaught exceptions or unhandled promise rejections.\n* **`src/config/morgan.js` (HTTP Request Logging)**: Integrates Morgan (an HTTP request logger middleware) with Winston. This routes all HTTP access logs (like `GET /api/v1/users 200 45ms`) through this centralized logger so they are formatted alongside the rest of the application logs.\n* **`src/middlewares/error.js` (Error Handling Middleware)**: Uses the logger to record operational and programming errors (often at the `error` level with full stack traces) before sending a standardized response back to the client.\n* **`src/services/email.service.js` (Business Logic / External Services)**: Uses the logger to record events related to email delivery (e.g., successfully sending an email or catching an error when the SMTP server fails).\n\n### Summary\n`src/config/logger.js` is the backbone of observability in this Node.js/Express boilerplate. It abstracts away the implementation details of Winston, providing a clean, pre-configured `logger` instance that the rest of the application imports to record activities, debug issues, and monitor production health.",
+        "scores": {
+          "grounding": 5,
+          "utility": 1,
+          "clarity": 5,
+          "overallScore": 3.67,
+          "reasoning": "The explanation is extremely accurate, well-grounded in the provided neighbors, and clearly communicates the architecture. However, it completely fails the narrow-pane utility formatting criteria by using multiple markdown headings (#, ###), horizontal rules (---), and numbered lists, which will break or look cluttered in a narrow side-pane.",
+          "inventedPathCheck": {
+            "passed": false,
+            "score": 0.5455,
+            "totalTokensChecked": 11,
+            "validPaths": [
+              "src/config/logger.js",
+              "src/config/config.js",
+              "src/index.js",
+              "src/config/morgan.js",
+              "src/middlewares/error.js",
+              "src/services/email.service.js"
+            ],
+            "inventedPaths": [
+              "hagopj13/node-express-boilerplate",
+              "config.env",
+              "GET /api/v1/users 200 45ms",
+              "stdout/stderr",
+              "Node.js/Express"
+            ]
+          }
+        }
+      },
+      "v2": {
+        "text": "- The file `src/config/logger.js` serves a configuration role by setting up logging for the application.\n- It imports `src/config/config.js` to utilize configuration settings.\n- It is imported by `src/config/morgan.js`, `src/index.js`, `src/middlewares/error.js`, and `src/services/email.service.js` to handle logging across requests, startup, errors, and email services.",
+        "scores": {
+          "grounding": 5,
+          "utility": 5,
+          "clarity": 5,
+          "overallScore": 5,
+          "reasoning": "The explanation is tightly grounded in the provided neighboring files, uses compact bullet points with inline code and bold formatting suitable for a narrow pane without forbidden headings or tables, and clearly communicates the architectural role of the logger file.",
+          "inventedPathCheck": {
+            "passed": true,
+            "score": 1,
+            "totalTokensChecked": 6,
+            "validPaths": [
+              "src/config/logger.js",
+              "src/config/config.js",
+              "src/config/morgan.js",
+              "src/index.js",
+              "src/middlewares/error.js",
+              "src/services/email.service.js"
+            ],
+            "inventedPaths": []
+          }
+        }
+      }
+    },
+    {
+      "id": "exp-9",
+      "filePath": "src/utils/ApiError.js",
+      "v1": {
+        "text": "Based on the file path (`src/utils/ApiError.js`), its known role as a utility, and its dependents across the project, here is a detailed explanation of what this file does and how it fits into the `hagopj13/node-express-boilerplate` repository.\n\n---\n\n### 1. What the File Does\nThe `ApiError.js` file defines a custom JavaScript/Node.js error class named `ApiError` that extends the built-in JavaScript `Error` class. \n\nIts primary purpose is to standardize how operational errors (such as \"User not found\", \"Unauthorized\", or \"Validation failed\") are created and structured throughout the application. By extending the native `Error` object, it allows the application to attach HTTP status codes, operational flags, and custom stack traces to error objects thrown during request processing.\n\n#### Code Breakdown (Expected Implementation):\nTypically, in this boilerplate, the `ApiError` class looks something like this:\n```javascript\nclass ApiError extends Error {\n  constructor(statusCode, message, isOperational = true, stack = '') {\n    super(message);\n    this.statusCode = statusCode;\n    this.isOperational = isOperational;\n    if (stack) {\n      this.stack = stack;\n    } else {\n      Error.captureStackTrace(this, this.constructor);\n    }\n  }\n}\n\nmodule.exports = ApiError;\n```\n\n* **`statusCode`**: Represents the HTTP status code associated with the error (e.g., `400` for Bad Request, `404` for Not Found, `401` for Unauthorized).\n* **`message`**: A human-readable description of what went wrong.\n* **`isOperational`**: A boolean flag (defaults to `true`) indicating whether the error is a known, trusted operational error (like invalid user input) versus a programming/system bug (like a syntax error or database crash).\n* **`stack`**: Captures the stack trace for debugging purposes.\n\n---\n\n### 2. How It Fits Into the Project (Dependents Analysis)\n\n`ApiError` is a foundational building block for error handling in this Express boilerplate. Looking at its dependents reveals its lifecycle through the application:\n\n* **`src/services/auth.service.js` & Controllers (e.g., `src/controllers/user.controller.js`)**: \n  When business logic fails (e.g., trying to register with an email that already exists, or entering an incorrect password), services and controllers throw an instance of `ApiError` with an appropriate HTTP status code and message.\n  * *Example:* `throw new ApiError(httpStatus.NOT_FOUND, 'User not found');`\n\n* **`src/middlewares/error.js`**: \n  This is the central Express error-handling middleware. It catches any errors thrown in the request-response cycle. It checks if an incoming error is an instance of `ApiError`. If it is, it uses the attached `statusCode` and `message` to send a clean, standardized JSON response back to the client. If it isn't an `ApiError` (e.g., an unhandled programming error), it typically defaults to a `500 Internal Server Error`.\n\n* **`src/app.js`**: \n  The main Express application file that registers the error-handling middleware (`src/middlewares/error.js`) globally, ensuring that any `ApiError` thrown anywhere in the app is properly caught and processed before reaching the client.\n\n### Summary\n`src/utils/ApiError.js` bridges the gap between Node.js runtime errors and HTTP responses. It allows developers to cleanly signal HTTP-specific errors from deep within controllers and services, which are then caught by the global error middleware and transformed into consistent API responses for the client.",
+        "scores": {
+          "grounding": 4,
+          "utility": 1,
+          "clarity": 5,
+          "overallScore": 3.33,
+          "reasoning": "The explanation is architecturally accurate and correctly identifies how ApiError relates to the neighbors (error middleware, app, controllers, services). However, it completely fails the narrow-pane utility constraints by using large markdown headers (#, ##), horizontal rules (---), and a verbose structure unsuitable for a side-pane.",
+          "inventedPathCheck": {
+            "passed": false,
+            "score": 0.6667,
+            "totalTokensChecked": 9,
+            "validPaths": [
+              "src/utils/ApiError.js",
+              "ApiError.js",
+              "src/services/auth.service.js",
+              "src/controllers/user.controller.js",
+              "src/middlewares/error.js",
+              "src/app.js"
+            ],
+            "inventedPaths": [
+              "hagopj13/node-express-boilerplate",
+              "JavaScript/Node.js",
+              "programming/system"
+            ]
+          }
+        }
+      },
+      "v2": {
+        "text": "- The file `src/utils/ApiError.js` defines a custom error class used for handling API-related errors throughout the application. \n- It does not import any other files, but it is imported by several components that need to raise operational errors with specific status codes.\n- Specifically, `src/services/auth.service.js` and `src/controllers/user.controller.js` use it to throw errors during request handling, while `src/middlewares/error.js` catches and processes these errors before `src/app.js` sends the response back to the client.",
+        "scores": {
+          "grounding": 5,
+          "utility": 4,
+          "clarity": 5,
+          "overallScore": 4.67,
+          "reasoning": "The explanation is well-grounded in the provided neighbors (app.js, user.controller.js, error.js, auth.service.js) and clearly explains the role of the target file. It uses bullets correctly for a narrow pane, though it could be slightly more compact by avoiding full paragraphs inside bullets.",
+          "inventedPathCheck": {
+            "passed": true,
+            "score": 1,
+            "totalTokensChecked": 5,
+            "validPaths": [
+              "src/utils/ApiError.js",
+              "src/services/auth.service.js",
+              "src/controllers/user.controller.js",
+              "src/middlewares/error.js",
+              "src/app.js"
+            ],
+            "inventedPaths": []
+          }
+        }
+      }
+    },
+    {
+      "id": "exp-10",
+      "filePath": "hooks/use-canvas-autosave.ts",
+      "v1": {
+        "text": "Based on the file path (`hooks/use-canvas-autosave.ts`), its known role as a custom React hook, its import (`types/canvas.ts`), and its dependent (`components/editor/base-canvas.tsx`), here is a detailed explanation of what this file does and how it fits into the project.\n\n---\n\n### 1. File Role and Purpose\n`use-canvas-autosave.ts` is a custom React hook responsible for automatically saving the state of the canvas in the background. In an AI-powered or diagramming/drawing application like `ghost-ai`, users frequently make changes to the canvas. Manually clicking a \"Save\" button disrupts workflow, so this hook abstracts away the persistence logic—ensuring that work is saved automatically after a period of inactivity (debouncing) or when important state changes occur.\n\n### 2. How It Fits Into the Architecture\n* **Dependency (`types/canvas.ts`):** The hook relies on TypeScript interfaces and types defined in `types/canvas.ts`. These types dictate the structure of the canvas data (e.g., nodes, edges, elements, or history states) that need to be serialized and saved.\n* **Dependent (`components/editor/base-canvas.tsx`):** The core canvas editor component (`BaseCanvas`) utilizes this hook. As the user interacts with the canvas inside the editor, `BaseCanvas` passes the current canvas state/data to `use-canvas-autosave`, which listens for changes and handles the background saving process (likely communicating with local storage, indexedDB, or a backend API).\n\n### 3. Core Logic & Implementation Details (Expected)\nWhile the exact implementation details depend on the codebase, a typical `use-canvas-autosave` hook in a modern React application generally performs the following functions:\n\n1. **State Tracking:** It accepts the current canvas data as an argument.\n2. **Debouncing:** To prevent excessive writes or API calls on every single keystroke or pixel drag, it uses a timer (e.g., `setTimeout` or libraries like `lodash.debounce`) to wait for a brief pause in user activity (e.g., 1 to 2 seconds after the last change).\n3. **Save Trigger:** Once the debounce delay clears, it triggers a save function—updating local storage or making an asynchronous API request to save the project state.\n4. **Status Indicators:** It often returns UI-friendly states such as `isSaving`, `lastSavedAt`, or `hasUnsavedChanges` so the parent component (`base-canvas.tsx`) can render indicators like \"Saving...\", \"All changes saved\", or \"Unsaved changes\".\n5. **Cleanup:** It handles cleanup (clearing timers) on component unmount to prevent memory leaks or state updates on unmounted components.",
+        "scores": {
+          "grounding": 4,
+          "utility": 1,
+          "clarity": 3,
+          "overallScore": 2.67,
+          "reasoning": "The explanation is well-written and logically deduces the hook's purpose from its name and neighbours, but it completely fails the narrow-pane formatting constraints. It uses forbidden markdown elements such as headings (`###`), horizontal rules (`---`), and a numbered list (`1., 2., 3., 4., 5.`), which will break or look terrible in a narrow side-pane.",
+          "inventedPathCheck": {
+            "passed": false,
+            "score": 0.7143,
+            "totalTokensChecked": 7,
+            "validPaths": [
+              "hooks/use-canvas-autosave.ts",
+              "types/canvas.ts",
+              "components/editor/base-canvas.tsx",
+              "use-canvas-autosave.ts",
+              "base-canvas.tsx"
+            ],
+            "inventedPaths": [
+              "diagramming/drawing",
+              "state/data"
+            ]
+          }
+        }
+      },
+      "v2": {
+        "text": "- The file `hooks/use-canvas-autosave.ts` acts as a hook in the repository, serving the `components/editor/base-canvas.tsx` component that imports it.\n- To manage canvas states and data, it relies on type definitions provided by `types/canvas.ts`.\n- Its primary responsibility is handling autosave logic for the canvas within the editor environment established by its neighbors.",
+        "scores": {
+          "grounding": 5,
+          "utility": 5,
+          "clarity": 5,
+          "overallScore": 5,
+          "reasoning": "The explanation is well-grounded in the provided neighbors, uses appropriate compact markdown formatting (bullet points, bold, and inline code) suitable for a narrow pane, and clearly explains the architectural role of the file.",
+          "inventedPathCheck": {
+            "passed": true,
+            "score": 1,
+            "totalTokensChecked": 3,
+            "validPaths": [
+              "hooks/use-canvas-autosave.ts",
+              "components/editor/base-canvas.tsx",
+              "types/canvas.ts"
+            ],
+            "inventedPaths": []
+          }
+        }
+      }
+    }
+  ]
+}

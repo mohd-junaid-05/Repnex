@@ -1,0 +1,197 @@
+[
+  {
+    "id": "exp-1",
+    "filePath": "app/components/ui/button.tsx",
+    "repoName": "mohd-junaid-05/Roomify",
+    "fileRole": "component",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "app/components/navbar.tsx"
+      }
+    ]
+  },
+  {
+    "id": "exp-2",
+    "filePath": "lib/ai.action.ts",
+    "repoName": "mohd-junaid-05/Roomify",
+    "fileRole": "util",
+    "imports": [
+      {
+        "path": "lib/constants.ts"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "app/routes/visualizer.$id.tsx"
+      }
+    ]
+  },
+  {
+    "id": "exp-3",
+    "filePath": "lib/constants.ts",
+    "repoName": "mohd-junaid-05/Roomify",
+    "fileRole": "util",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "app/components/upload.tsx"
+      },
+      {
+        "path": "lib/ai.action.ts"
+      },
+      {
+        "path": "lib/puter.action.ts"
+      }
+    ]
+  },
+  {
+    "id": "exp-4",
+    "filePath": "app/root.tsx",
+    "repoName": "mohd-junaid-05/Roomify",
+    "fileRole": "component",
+    "imports": [
+      {
+        "path": "lib/puter.action.ts"
+      }
+    ],
+    "dependents": []
+  },
+  {
+    "id": "exp-5",
+    "filePath": "src/services/auth.service.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "fileRole": "service",
+    "imports": [
+      {
+        "path": "src/services/token.service.js"
+      },
+      {
+        "path": "src/services/user.service.js"
+      },
+      {
+        "path": "src/models/token.model.js"
+      },
+      {
+        "path": "src/utils/ApiError.js"
+      },
+      {
+        "path": "src/config/tokens.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/services/index.js"
+      }
+    ]
+  },
+  {
+    "id": "exp-6",
+    "filePath": "src/services/user.service.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "fileRole": "service",
+    "imports": [
+      {
+        "path": "src/models/index.js"
+      },
+      {
+        "path": "src/utils/ApiError.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/services/auth.service.js"
+      },
+      {
+        "path": "src/services/index.js"
+      },
+      {
+        "path": "src/services/token.service.js"
+      }
+    ]
+  },
+  {
+    "id": "exp-7",
+    "filePath": "src/models/token.model.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "fileRole": "model",
+    "imports": [
+      {
+        "path": "src/models/plugins/index.js"
+      },
+      {
+        "path": "src/config/tokens.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/models/index.js"
+      },
+      {
+        "path": "src/services/auth.service.js"
+      }
+    ]
+  },
+  {
+    "id": "exp-8",
+    "filePath": "src/config/logger.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "fileRole": "config",
+    "imports": [
+      {
+        "path": "src/config/config.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/config/morgan.js"
+      },
+      {
+        "path": "src/index.js"
+      },
+      {
+        "path": "src/middlewares/error.js"
+      },
+      {
+        "path": "src/services/email.service.js"
+      }
+    ]
+  },
+  {
+    "id": "exp-9",
+    "filePath": "src/utils/ApiError.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "fileRole": "util",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "src/app.js"
+      },
+      {
+        "path": "src/controllers/user.controller.js"
+      },
+      {
+        "path": "src/middlewares/error.js"
+      },
+      {
+        "path": "src/services/auth.service.js"
+      }
+    ]
+  },
+  {
+    "id": "exp-10",
+    "filePath": "hooks/use-canvas-autosave.ts",
+    "repoName": "mohd-junaid-05/ghost-ai",
+    "fileRole": "hook",
+    "imports": [
+      {
+        "path": "types/canvas.ts"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "components/editor/base-canvas.tsx"
+      }
+    ]
+  }
+]

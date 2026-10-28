@@ -1,0 +1,825 @@
+[
+  {
+    "id": "6362c48a-71a9-4997-9123-d8e463219ca9",
+    "filePath": "app/components/navbar.tsx",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "component",
+    "imports": [
+      {
+        "path": "app/components/ui/button.tsx"
+      }
+    ],
+    "dependents": []
+  },
+  {
+    "id": "36b5ed86-551b-46c8-8dfa-21dbd10a00d1",
+    "filePath": "app/components/ui/button.tsx",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "component",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "app/components/navbar.tsx"
+      }
+    ]
+  },
+  {
+    "id": "b998ea66-dcd7-4246-a7ef-6feea0ddd827",
+    "filePath": "app/components/upload.tsx",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "component",
+    "imports": [
+      {
+        "path": "lib/constants.ts"
+      }
+    ],
+    "dependents": []
+  },
+  {
+    "id": "8c2fb3df-138a-49cc-991b-0a2d45c7652a",
+    "filePath": "app/root.tsx",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "component",
+    "imports": [
+      {
+        "path": "lib/puter.action.ts"
+      }
+    ],
+    "dependents": []
+  },
+  {
+    "id": "744f60a6-9354-47fc-889c-4ae1f2f3e2c8",
+    "filePath": "app/routes/home.tsx",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "component",
+    "imports": [
+      {
+        "path": "lib/puter.action.ts"
+      }
+    ],
+    "dependents": []
+  },
+  {
+    "id": "3ef9acff-612c-4e55-ade3-8dc22536c2b3",
+    "filePath": "app/routes/visualizer.$id.tsx",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "component",
+    "imports": [
+      {
+        "path": "lib/ai.action.ts"
+      },
+      {
+        "path": "lib/puter.action.ts"
+      }
+    ],
+    "dependents": []
+  },
+  {
+    "id": "8b02173f-fc00-463b-b93a-67e3d7009194",
+    "filePath": "app/welcome/welcome.tsx",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "component",
+    "imports": [],
+    "dependents": []
+  },
+  {
+    "id": "3d38e305-ca9a-4205-941c-1f2b7a06da0d",
+    "filePath": ".agents/skills/clerk-nextjs-patterns/templates/nextjs-basic-auth/app/page.tsx",
+    "repoName": "mohd-junaid-05/ghost-ai",
+    "lineCount": 4,
+    "groundTruthRole": "component",
+    "imports": [],
+    "dependents": []
+  },
+  {
+    "id": "a8025076-1bbe-4c63-a57e-fc16b0a6bde2",
+    "filePath": "lib/ai.action.ts",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "util",
+    "imports": [
+      {
+        "path": "lib/constants.ts"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "app/routes/visualizer.$id.tsx"
+      }
+    ]
+  },
+  {
+    "id": "1ef7f0ab-8cc4-4a92-8a13-b933f2d4c829",
+    "filePath": "lib/constants.ts",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "util",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "app/components/upload.tsx"
+      },
+      {
+        "path": "lib/ai.action.ts"
+      },
+      {
+        "path": "lib/puter.action.ts"
+      }
+    ]
+  },
+  {
+    "id": "a75c26dc-9377-44f4-8d56-124221c0fc01",
+    "filePath": "lib/puter.action.ts",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "util",
+    "imports": [
+      {
+        "path": "lib/puter.hosting.ts"
+      },
+      {
+        "path": "lib/utils.ts"
+      },
+      {
+        "path": "lib/constants.ts"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "app/root.tsx"
+      },
+      {
+        "path": "app/routes/home.tsx"
+      },
+      {
+        "path": "app/routes/visualizer.$id.tsx"
+      }
+    ]
+  },
+  {
+    "id": "17455aa1-ad79-44ca-ae7d-c51fef8e6b9a",
+    "filePath": "lib/puter.hosting.ts",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "util",
+    "imports": [
+      {
+        "path": "lib/utils.ts"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "lib/puter.action.ts"
+      }
+    ]
+  },
+  {
+    "id": "0281b09a-f0da-4f7e-8c2f-ddfaabbaeebe",
+    "filePath": "lib/puter.worker.js",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "util",
+    "imports": [],
+    "dependents": []
+  },
+  {
+    "id": "5ea9293f-c90d-4f06-9b67-a8748f4c717e",
+    "filePath": "lib/utils.ts",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "util",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "lib/puter.action.ts"
+      },
+      {
+        "path": "lib/puter.hosting.ts"
+      }
+    ]
+  },
+  {
+    "id": "138ebdcf-985a-4e19-a12c-76b8dc0463d3",
+    "filePath": "src/utils/ApiError.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "util",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "src/app.js"
+      },
+      {
+        "path": "src/controllers/user.controller.js"
+      },
+      {
+        "path": "src/middlewares/auth.js"
+      },
+      {
+        "path": "src/middlewares/error.js"
+      },
+      {
+        "path": "src/middlewares/validate.js"
+      },
+      {
+        "path": "src/services/auth.service.js"
+      },
+      {
+        "path": "src/services/token.service.js"
+      },
+      {
+        "path": "src/services/user.service.js"
+      },
+      {
+        "path": "tests/integration/auth.test.js"
+      },
+      {
+        "path": "tests/unit/middlewares/error.test.js"
+      }
+    ]
+  },
+  {
+    "id": "c16f12d6-fc2e-4993-bc8e-eba17ca09ad0",
+    "filePath": "src/utils/catchAsync.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "util",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "src/controllers/auth.controller.js"
+      },
+      {
+        "path": "src/controllers/user.controller.js"
+      }
+    ]
+  },
+  {
+    "id": "05349dbd-0c8d-4d28-851f-a36493e1dbfb",
+    "filePath": "react-router.config.ts",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "config",
+    "imports": [],
+    "dependents": []
+  },
+  {
+    "id": "37ffeaee-d4ee-4ebc-9e42-58b2103bc9d3",
+    "filePath": "vite.config.ts",
+    "repoName": "mohd-junaid-05/Roomify",
+    "lineCount": 42,
+    "groundTruthRole": "config",
+    "imports": [],
+    "dependents": []
+  },
+  {
+    "id": "86605a55-c3ff-4b3b-8271-3b8c1b521a4a",
+    "filePath": "jest.config.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "config",
+    "imports": [],
+    "dependents": []
+  },
+  {
+    "id": "f916d423-37a4-46ad-8bb9-9c92d5dd4d68",
+    "filePath": "src/config/config.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "config",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "src/app.js"
+      },
+      {
+        "path": "src/config/logger.js"
+      },
+      {
+        "path": "src/config/morgan.js"
+      },
+      {
+        "path": "src/config/passport.js"
+      },
+      {
+        "path": "src/docs/swaggerDef.js"
+      },
+      {
+        "path": "src/index.js"
+      },
+      {
+        "path": "src/middlewares/error.js"
+      },
+      {
+        "path": "src/routes/v1/index.js"
+      },
+      {
+        "path": "src/services/email.service.js"
+      },
+      {
+        "path": "src/services/token.service.js"
+      },
+      {
+        "path": "tests/fixtures/token.fixture.js"
+      },
+      {
+        "path": "tests/integration/auth.test.js"
+      },
+      {
+        "path": "tests/integration/docs.test.js"
+      },
+      {
+        "path": "tests/unit/middlewares/error.test.js"
+      },
+      {
+        "path": "tests/utils/setupTestDB.js"
+      }
+    ]
+  },
+  {
+    "id": "bfe02511-78cf-4487-a5a0-0031a8889390",
+    "filePath": "src/config/logger.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "config",
+    "imports": [
+      {
+        "path": "src/config/config.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/config/morgan.js"
+      },
+      {
+        "path": "src/index.js"
+      },
+      {
+        "path": "src/middlewares/error.js"
+      },
+      {
+        "path": "src/services/email.service.js"
+      },
+      {
+        "path": "tests/unit/middlewares/error.test.js"
+      }
+    ]
+  },
+  {
+    "id": "093fdd76-dc66-42c6-8da7-ede2e5ae6d91",
+    "filePath": "src/config/morgan.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "config",
+    "imports": [
+      {
+        "path": "src/config/config.js"
+      },
+      {
+        "path": "src/config/logger.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/app.js"
+      }
+    ]
+  },
+  {
+    "id": "b4d684ea-a26a-43f4-bc9c-804b34dd32dc",
+    "filePath": "src/config/passport.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "config",
+    "imports": [
+      {
+        "path": "src/config/config.js"
+      },
+      {
+        "path": "src/config/tokens.js"
+      },
+      {
+        "path": "src/models/index.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/app.js"
+      }
+    ]
+  },
+  {
+    "id": "1745080f-16bc-41d7-967b-fc1ffa3725de",
+    "filePath": "src/config/roles.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "config",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "src/middlewares/auth.js"
+      },
+      {
+        "path": "src/models/user.model.js"
+      },
+      {
+        "path": "tests/integration/auth.test.js"
+      }
+    ]
+  },
+  {
+    "id": "ea20b267-4a89-4c65-83c6-b15474387619",
+    "filePath": "src/models/index.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "model",
+    "imports": [
+      {
+        "path": "src/models/token.model.js"
+      },
+      {
+        "path": "src/models/user.model.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/config/passport.js"
+      },
+      {
+        "path": "src/services/token.service.js"
+      },
+      {
+        "path": "src/services/user.service.js"
+      },
+      {
+        "path": "tests/integration/auth.test.js"
+      },
+      {
+        "path": "tests/integration/user.test.js"
+      },
+      {
+        "path": "tests/unit/models/user.model.test.js"
+      }
+    ]
+  },
+  {
+    "id": "e2d6132a-c459-4468-bb04-d2ba23a630c3",
+    "filePath": "src/models/plugins/index.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "model",
+    "imports": [
+      {
+        "path": "src/models/plugins/toJSON.plugin.js"
+      },
+      {
+        "path": "src/models/plugins/paginate.plugin.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/models/token.model.js"
+      },
+      {
+        "path": "src/models/user.model.js"
+      },
+      {
+        "path": "tests/unit/models/plugins/toJSON.plugin.test.js"
+      }
+    ]
+  },
+  {
+    "id": "447b7311-b0a7-4fe7-9762-a0b6580a929a",
+    "filePath": "src/models/plugins/paginate.plugin.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "model",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "src/models/plugins/index.js"
+      },
+      {
+        "path": "tests/unit/models/plugins/paginate.plugin.test.js"
+      }
+    ]
+  },
+  {
+    "id": "0e2648ce-f884-417e-9a86-b11414844e87",
+    "filePath": "src/models/plugins/toJSON.plugin.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "model",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "src/models/plugins/index.js"
+      }
+    ]
+  },
+  {
+    "id": "45b80ae4-9745-4b8f-9900-d0edd9c391bd",
+    "filePath": "src/models/token.model.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "model",
+    "imports": [
+      {
+        "path": "src/models/plugins/index.js"
+      },
+      {
+        "path": "src/config/tokens.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/models/index.js"
+      },
+      {
+        "path": "src/services/auth.service.js"
+      }
+    ]
+  },
+  {
+    "id": "a6d62647-9e45-432e-bd2e-1f037da34bf9",
+    "filePath": "src/models/user.model.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "model",
+    "imports": [
+      {
+        "path": "src/models/plugins/index.js"
+      },
+      {
+        "path": "src/config/roles.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/models/index.js"
+      },
+      {
+        "path": "tests/fixtures/user.fixture.js"
+      }
+    ]
+  },
+  {
+    "id": "1f075c93-2b42-4c87-ab7d-ee0e0b39dafe",
+    "filePath": "src/services/auth.service.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "service",
+    "imports": [
+      {
+        "path": "src/services/token.service.js"
+      },
+      {
+        "path": "src/services/user.service.js"
+      },
+      {
+        "path": "src/models/token.model.js"
+      },
+      {
+        "path": "src/utils/ApiError.js"
+      },
+      {
+        "path": "src/config/tokens.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/services/index.js"
+      }
+    ]
+  },
+  {
+    "id": "3079ef41-f118-491b-a8eb-d70b6a0c0b4b",
+    "filePath": "src/services/email.service.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "service",
+    "imports": [
+      {
+        "path": "src/config/config.js"
+      },
+      {
+        "path": "src/config/logger.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/services/index.js"
+      }
+    ]
+  },
+  {
+    "id": "a7c2fec5-ee72-46c6-8eb9-a2314c87b606",
+    "filePath": "src/services/index.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "service",
+    "imports": [
+      {
+        "path": "src/services/auth.service.js"
+      },
+      {
+        "path": "src/services/email.service.js"
+      },
+      {
+        "path": "src/services/token.service.js"
+      },
+      {
+        "path": "src/services/user.service.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/controllers/auth.controller.js"
+      },
+      {
+        "path": "src/controllers/user.controller.js"
+      },
+      {
+        "path": "tests/integration/auth.test.js"
+      }
+    ]
+  },
+  {
+    "id": "5e071794-da82-4481-98e3-eea229621eba",
+    "filePath": "src/services/token.service.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "service",
+    "imports": [
+      {
+        "path": "src/config/config.js"
+      },
+      {
+        "path": "src/services/user.service.js"
+      },
+      {
+        "path": "src/models/index.js"
+      },
+      {
+        "path": "src/utils/ApiError.js"
+      },
+      {
+        "path": "src/config/tokens.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/services/auth.service.js"
+      },
+      {
+        "path": "src/services/index.js"
+      },
+      {
+        "path": "tests/fixtures/token.fixture.js"
+      }
+    ]
+  },
+  {
+    "id": "bd89666f-2cef-4773-afe5-1eab93b024c8",
+    "filePath": "src/services/user.service.js",
+    "repoName": "hagopj13/node-express-boilerplate",
+    "lineCount": 42,
+    "groundTruthRole": "service",
+    "imports": [
+      {
+        "path": "src/models/index.js"
+      },
+      {
+        "path": "src/utils/ApiError.js"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "src/services/auth.service.js"
+      },
+      {
+        "path": "src/services/index.js"
+      },
+      {
+        "path": "src/services/token.service.js"
+      }
+    ]
+  },
+  {
+    "id": "7912cac7-36ae-46bf-9cf6-13017923ffa5",
+    "filePath": "hooks/use-canvas-autosave.ts",
+    "repoName": "mohd-junaid-05/ghost-ai",
+    "lineCount": 101,
+    "groundTruthRole": "hook",
+    "imports": [
+      {
+        "path": "types/canvas.ts"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "components/editor/base-canvas.tsx"
+      }
+    ]
+  },
+  {
+    "id": "c95bd5d6-7c4d-4bad-b2bb-98522f6d1e7b",
+    "filePath": "hooks/use-project-actions.ts",
+    "repoName": "mohd-junaid-05/ghost-ai",
+    "lineCount": 181,
+    "groundTruthRole": "hook",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "components/editor/editor-shell.tsx"
+      },
+      {
+        "path": "components/editor/project-sidebar.tsx"
+      }
+    ]
+  },
+  {
+    "id": "e5b41224-f07c-4c39-afee-cf20c1282830",
+    "filePath": "hooks/use-project-dialogs.ts",
+    "repoName": "mohd-junaid-05/ghost-ai",
+    "lineCount": 143,
+    "groundTruthRole": "hook",
+    "imports": [],
+    "dependents": []
+  },
+  {
+    "id": "b73083c1-52b2-4fc9-9b02-272dde212f7e",
+    "filePath": "hooks/useKeyboardShortcuts.ts",
+    "repoName": "mohd-junaid-05/ghost-ai",
+    "lineCount": 68,
+    "groundTruthRole": "hook",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "components/editor/base-canvas.tsx"
+      }
+    ]
+  },
+  {
+    "id": "d9d7ed05-92cd-483a-b8ab-2a641fb2be81",
+    "filePath": "hooks/use-canvas-autosave.ts",
+    "repoName": "mohd-junaid-05/ghost-ai",
+    "lineCount": 101,
+    "groundTruthRole": "hook",
+    "imports": [
+      {
+        "path": "types/canvas.ts"
+      }
+    ],
+    "dependents": [
+      {
+        "path": "components/editor/base-canvas.tsx"
+      }
+    ]
+  },
+  {
+    "id": "63b8c6cf-9995-435e-b08b-c8de121f89ef",
+    "filePath": "hooks/use-project-actions.ts",
+    "repoName": "mohd-junaid-05/ghost-ai",
+    "lineCount": 181,
+    "groundTruthRole": "hook",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "components/editor/editor-shell.tsx"
+      },
+      {
+        "path": "components/editor/project-sidebar.tsx"
+      }
+    ]
+  },
+  {
+    "id": "c99f7d77-7008-46e9-8de2-05fa0b6e4822",
+    "filePath": "hooks/use-project-dialogs.ts",
+    "repoName": "mohd-junaid-05/ghost-ai",
+    "lineCount": 143,
+    "groundTruthRole": "hook",
+    "imports": [],
+    "dependents": []
+  },
+  {
+    "id": "23f1a407-9129-4542-a5bc-fdba9831663d",
+    "filePath": "hooks/useKeyboardShortcuts.ts",
+    "repoName": "mohd-junaid-05/ghost-ai",
+    "lineCount": 68,
+    "groundTruthRole": "hook",
+    "imports": [],
+    "dependents": [
+      {
+        "path": "components/editor/base-canvas.tsx"
+      }
+    ]
+  }
+]

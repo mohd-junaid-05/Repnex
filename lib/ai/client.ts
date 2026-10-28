@@ -7,7 +7,8 @@ import { traceable } from "langsmith/traceable";
  */
 
 /** Pinned model version. Never a moving alias; changing this invalidates only its own cache. */
-export const MODEL_NAME = "gemini-3.5-flash";
+export const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+
 
 let client: GoogleGenAI | null = null;
 

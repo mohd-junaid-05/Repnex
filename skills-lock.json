@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "design-taste-frontend": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/taste-skill/SKILL.md",
+      "computedHash": "53590ee9325bee34d7888bf0d81bd3941a108b1e7850df46802d93104e3f2b90"
+    },
     "supabase": {
       "source": "supabase/agent-skills",
       "sourceType": "github",
@@ -12,6 +18,12 @@
       "sourceType": "github",
       "skillPath": "skills/supabase-postgres-best-practices/SKILL.md",
       "computedHash": "128fac78002d916c8ca908245d398e634f540d8bcf20915b2b2359aeb18eba59"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "computedHash": "f3bc47f890f42a44db1007ab390709ec368e4b8c089baee6b0007182236ac474"
     }
   }
 }

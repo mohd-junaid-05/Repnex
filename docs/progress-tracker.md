@@ -105,5 +105,17 @@
 - [x] Constrained markdown AST renderer: inline code, bold, bullets, repo path links, and zero stray markdown characters (`lib/render-explanation.ts`)
 - [x] Fixed browser Out-of-Memory freeze by scoping inline markdown regex per invocation and parsing bold inner content non-recursively
 - [x] Staleness detection against remote repository HEAD with re-analyse trigger
-- [x] Validated types (`tsc`)
+- [x] Validated types (`tsc`), lint (`eslint`), and production build (`next build`)
+
+## Phase 11: Evals
+- [x] Environment loader (`evals/env.ts`, `lib/env.ts`) for scripts outside Next.js parsing `.env` and `.env.local`
+- [x] Authenticated Supabase client for standalone scripts using Clerk session token with template `"supabase"` (`evals/client.ts`)
+- [x] Deterministic invented-path check (`lib/ai/invented-paths.ts`) verifying all referenced filepaths against shown repository nodes
+- [x] Wired live evaluator into explanation endpoints and LangSmith run feedback (`explainFile`, `explainFolder` in `lib/ai/explain.ts`)
+- [x] CLI runner for invented paths (`evals/check-invented-paths.ts`) scoring recent database explanations (100% clean) and detecting spliced made-up filenames
+- [x] Held-out conventional role dataset (`evals/datasets/role-dataset.json`, 43 files) and automated role accuracy evaluator (`evals/check-role-accuracy.ts`, 84.4% accuracy across 32 files)
+- [x] Retired explanation prompt preserved in `evals/prompts/retired-explain-prompt.ts` outside web application bundle
+- [x] Side-by-side prompt comparison evaluator (`evals/compare-prompts.ts`) with model-as-judge scoring (+1.73 delta, 100% hallucination-free vs 0%)
+- [x] Full evaluation orchestrator script (`evals/run-all.ts`) and package scripts (`eval:paths`, `eval:roles`, `eval:prompts`, `eval:all`)
+- [x] Validated types (`tsc`), lint (`eslint`), and production build (`next build`)
 

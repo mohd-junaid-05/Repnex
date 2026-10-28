@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { traceable } from "langsmith/traceable";
-import { generateText, MODEL_NAME } from "./client";
+import { traceable, getCurrentRunTree } from "langsmith/traceable";
+import { Client } from "langsmith";
+import { generateText, MODEL_NAME, isTracingConfigured } from "./client";
+import { checkInventedPaths, type InventedPathCheckResult } from "./invented-paths";
 
 /**
  * Explanation and role-assignment operations.
@@ -54,9 +56,11 @@ export interface ExplainResult {
   model: string;
   digest: string;
   tokens: { prompt: number; candidates: number; total: number };
+  inventedPathCheck?: InventedPathCheckResult;
 }
 
 const ZERO_TOKENS = { prompt: 0, candidates: 0, total: 0 };
+
 
 /** A local, redacted view of a traced function's inputs for LangSmith. */
 function summarize(
@@ -83,6 +87,12 @@ export const explainFile = traceable(
       .eq("model", MODEL_NAME)
       .maybeSingle();
 
+    const shownPaths = [
+      params.filePath,
+      ...params.imports.map((i) => i.path),
+      ...params.dependents.map((d) => d.path),
+    ];
+
     if (existing && existing.content_hash === params.digest) {
       return {
         content: existing.content,
@@ -90,6 +100,7 @@ export const explainFile = traceable(
         model: MODEL_NAME,
         digest: params.digest,
         tokens: ZERO_TOKENS,
+        inventedPathCheck: checkInventedPaths(existing.content, shownPaths),
       };
     }
 
@@ -102,6 +113,24 @@ export const explainFile = traceable(
         "Keep it to a few short paragraphs. Name the real files you were given; never name a file you were not given.",
       prompt: buildFilePrompt(params),
     });
+
+    const inventedPathCheck = checkInventedPaths(text, shownPaths);
+
+    // Live evaluator: attach feedback directly to the LangSmith trace run
+    const runTree = getCurrentRunTree();
+    if (runTree && isTracingConfigured()) {
+      try {
+        const client = new Client();
+        await client.createFeedback(runTree.id, "invented_path", {
+          score: inventedPathCheck.score,
+          comment: inventedPathCheck.passed
+            ? "All paths verified against shown neighbours"
+            : `Invented: ${inventedPathCheck.inventedPaths.join(", ")}`,
+        });
+      } catch {
+        // Non-fatal if feedback write fails
+      }
+    }
 
     const { error } = await supabase.from("explanations").insert({
       org_id: params.orgId,
@@ -125,6 +154,7 @@ export const explainFile = traceable(
       model: MODEL_NAME,
       digest: params.digest,
       tokens: { prompt: promptTokens, candidates: candidatesTokens, total: totalTokens },
+      inventedPathCheck,
     };
   },
   {
@@ -154,6 +184,13 @@ export const explainFolder = traceable(
       .eq("model", MODEL_NAME)
       .maybeSingle();
 
+    const folderShownPaths = [
+      params.folderPath,
+      ...params.files.map((f) => f.path),
+      ...params.incomingFrom,
+      ...params.outgoingTo,
+    ];
+
     if (existing && existing.content_hash === params.digest) {
       return {
         content: existing.content,
@@ -161,6 +198,7 @@ export const explainFolder = traceable(
         model: MODEL_NAME,
         digest: params.digest,
         tokens: ZERO_TOKENS,
+        inventedPathCheck: checkInventedPaths(existing.content, folderShownPaths),
       };
     }
 
@@ -173,6 +211,24 @@ export const explainFolder = traceable(
         "This is about the folder as a whole — what it holds and why it matters — not a summary of one file in it.",
       prompt: buildFolderPrompt(params),
     });
+
+    const inventedPathCheck = checkInventedPaths(text, folderShownPaths);
+
+    // Live evaluator: attach feedback directly to the LangSmith trace run
+    const runTree = getCurrentRunTree();
+    if (runTree && isTracingConfigured()) {
+      try {
+        const client = new Client();
+        await client.createFeedback(runTree.id, "invented_path", {
+          score: inventedPathCheck.score,
+          comment: inventedPathCheck.passed
+            ? "All paths verified against folder files"
+            : `Invented: ${inventedPathCheck.inventedPaths.join(", ")}`,
+        });
+      } catch {
+        // Non-fatal if feedback write fails
+      }
+    }
 
     const { error } = await supabase.from("explanations").insert({
       org_id: params.orgId,
@@ -196,6 +252,7 @@ export const explainFolder = traceable(
       model: MODEL_NAME,
       digest: params.digest,
       tokens: { prompt: promptTokens, candidates: candidatesTokens, total: totalTokens },
+      inventedPathCheck,
     };
   },
   {

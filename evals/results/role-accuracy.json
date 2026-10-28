@@ -1,0 +1,201 @@
+{
+  "datasetSize": 32,
+  "correctCount": 27,
+  "accuracyPct": 84.38,
+  "model": "gemini-3.5-flash-lite",
+  "timestamp": "2026-10-28T09:38:32.975Z",
+  "results": [
+    {
+      "filePath": "app/components/navbar.tsx",
+      "groundTruth": "component",
+      "predicted": "component",
+      "correct": true
+    },
+    {
+      "filePath": "app/components/ui/button.tsx",
+      "groundTruth": "component",
+      "predicted": "component",
+      "correct": true
+    },
+    {
+      "filePath": "app/components/upload.tsx",
+      "groundTruth": "component",
+      "predicted": "component",
+      "correct": true
+    },
+    {
+      "filePath": "app/root.tsx",
+      "groundTruth": "component",
+      "predicted": "component",
+      "correct": true
+    },
+    {
+      "filePath": "app/routes/home.tsx",
+      "groundTruth": "component",
+      "predicted": "component",
+      "correct": true
+    },
+    {
+      "filePath": "app/routes/visualizer.$id.tsx",
+      "groundTruth": "component",
+      "predicted": "component",
+      "correct": true
+    },
+    {
+      "filePath": "app/welcome/welcome.tsx",
+      "groundTruth": "component",
+      "predicted": "component",
+      "correct": true
+    },
+    {
+      "filePath": ".agents/skills/clerk-nextjs-patterns/templates/nextjs-basic-auth/app/page.tsx",
+      "groundTruth": "component",
+      "predicted": "component",
+      "correct": true
+    },
+    {
+      "filePath": "lib/ai.action.ts",
+      "groundTruth": "util",
+      "predicted": "service",
+      "correct": false
+    },
+    {
+      "filePath": "lib/constants.ts",
+      "groundTruth": "util",
+      "predicted": "config",
+      "correct": false
+    },
+    {
+      "filePath": "lib/puter.action.ts",
+      "groundTruth": "util",
+      "predicted": "service",
+      "correct": false
+    },
+    {
+      "filePath": "lib/puter.hosting.ts",
+      "groundTruth": "util",
+      "predicted": "service",
+      "correct": false
+    },
+    {
+      "filePath": "lib/puter.worker.js",
+      "groundTruth": "util",
+      "predicted": "service",
+      "correct": false
+    },
+    {
+      "filePath": "lib/utils.ts",
+      "groundTruth": "util",
+      "predicted": "util",
+      "correct": true
+    },
+    {
+      "filePath": "src/utils/ApiError.js",
+      "groundTruth": "util",
+      "predicted": "util",
+      "correct": true
+    },
+    {
+      "filePath": "src/utils/catchAsync.js",
+      "groundTruth": "util",
+      "predicted": "util",
+      "correct": true
+    },
+    {
+      "filePath": "react-router.config.ts",
+      "groundTruth": "config",
+      "predicted": "config",
+      "correct": true
+    },
+    {
+      "filePath": "vite.config.ts",
+      "groundTruth": "config",
+      "predicted": "config",
+      "correct": true
+    },
+    {
+      "filePath": "jest.config.js",
+      "groundTruth": "config",
+      "predicted": "config",
+      "correct": true
+    },
+    {
+      "filePath": "src/config/config.js",
+      "groundTruth": "config",
+      "predicted": "config",
+      "correct": true
+    },
+    {
+      "filePath": "src/config/logger.js",
+      "groundTruth": "config",
+      "predicted": "config",
+      "correct": true
+    },
+    {
+      "filePath": "src/config/morgan.js",
+      "groundTruth": "config",
+      "predicted": "config",
+      "correct": true
+    },
+    {
+      "filePath": "src/config/passport.js",
+      "groundTruth": "config",
+      "predicted": "config",
+      "correct": true
+    },
+    {
+      "filePath": "src/config/roles.js",
+      "groundTruth": "config",
+      "predicted": "config",
+      "correct": true
+    },
+    {
+      "filePath": "src/models/index.js",
+      "groundTruth": "model",
+      "predicted": "model",
+      "correct": true
+    },
+    {
+      "filePath": "src/models/plugins/index.js",
+      "groundTruth": "model",
+      "predicted": "model",
+      "correct": true
+    },
+    {
+      "filePath": "src/models/plugins/paginate.plugin.js",
+      "groundTruth": "model",
+      "predicted": "model",
+      "correct": true
+    },
+    {
+      "filePath": "src/models/plugins/toJSON.plugin.js",
+      "groundTruth": "model",
+      "predicted": "model",
+      "correct": true
+    },
+    {
+      "filePath": "src/models/token.model.js",
+      "groundTruth": "model",
+      "predicted": "model",
+      "correct": true
+    },
+    {
+      "filePath": "src/models/user.model.js",
+      "groundTruth": "model",
+      "predicted": "model",
+      "correct": true
+    },
+    {
+      "filePath": "src/services/auth.service.js",
+      "groundTruth": "service",
+      "predicted": "service",
+      "correct": true
+    },
+    {
+      "filePath": "src/services/email.service.js",
+      "groundTruth": "service",
+      "predicted": "service",
+      "correct": true
+    }
+  ]
+}
