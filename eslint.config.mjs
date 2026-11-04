@@ -14,6 +14,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "test-repos/**",
     ".agents/**",
+    ".claude/**",
+    "repnex-agent/**",
+    "deep-agent/**",
   ]),
 ]);
 

@@ -1,9 +1,12 @@
 {
-  "name": "deep-agent",
+  "name": "repnex-agent",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "tsx index.ts"
+    "start": "tsx server.ts",
+    "test": "tsx test-runner.ts",
+    "build": "mda build .",
+    "dev": "tsx server.ts"
   },
   "dependencies": {
     "@langchain/core": "^1.2.17",
@@ -11,6 +14,7 @@
     "deepagents": "^1.14.2",
     "dotenv": "^18.0.7",
     "langchain": "^1.5.16",
+    "managed-deepagents": "^0.10.0",
     "tsx": "^4.23.15"
   }
 }

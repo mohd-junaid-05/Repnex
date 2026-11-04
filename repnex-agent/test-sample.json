@@ -1,0 +1,115 @@
+{
+  "repoRoot": "C:/fake/repo",
+  "parsedAt": "2026-10-29T00:00:00.000Z",
+  "framework": "nextjs",
+  "files": [
+    {
+      "path": "app/page.tsx",
+      "folder": "app",
+      "language": "typescriptreact",
+      "lineCount": 45,
+      "contentHash": "h1"
+    },
+    {
+      "path": "app/api/auth/route.ts",
+      "folder": "app/api/auth",
+      "language": "typescript",
+      "lineCount": 60,
+      "contentHash": "h2"
+    },
+    {
+      "path": "components/LoginButton.tsx",
+      "folder": "components",
+      "language": "typescriptreact",
+      "lineCount": 35,
+      "contentHash": "h3"
+    },
+    {
+      "path": "lib/auth.ts",
+      "folder": "lib",
+      "language": "typescript",
+      "lineCount": 120,
+      "contentHash": "h4"
+    },
+    {
+      "path": "lib/supabase.ts",
+      "folder": "lib",
+      "language": "typescript",
+      "lineCount": 80,
+      "contentHash": "h5"
+    },
+    {
+      "path": "middleware.ts",
+      "folder": "",
+      "language": "typescript",
+      "lineCount": 25,
+      "contentHash": "h6"
+    }
+  ],
+  "edges": [
+    {
+      "sourcePath": "app/page.tsx",
+      "targetPath": "components/LoginButton.tsx",
+      "importSpecifier": "@/components/LoginButton",
+      "kind": "import"
+    },
+    {
+      "sourcePath": "components/LoginButton.tsx",
+      "targetPath": "lib/auth.ts",
+      "importSpecifier": "@/lib/auth",
+      "kind": "import"
+    },
+    {
+      "sourcePath": "app/api/auth/route.ts",
+      "targetPath": "lib/auth.ts",
+      "importSpecifier": "@/lib/auth",
+      "kind": "import"
+    },
+    {
+      "sourcePath": "lib/auth.ts",
+      "targetPath": "lib/supabase.ts",
+      "importSpecifier": "./supabase",
+      "kind": "import"
+    }
+  ],
+  "fanMetrics": {
+    "app/page.tsx": { "fanIn": 0, "fanOut": 1 },
+    "app/api/auth/route.ts": { "fanIn": 0, "fanOut": 1 },
+    "components/LoginButton.tsx": { "fanIn": 1, "fanOut": 1 },
+    "lib/auth.ts": { "fanIn": 2, "fanOut": 1 },
+    "lib/supabase.ts": { "fanIn": 1, "fanOut": 0 },
+    "middleware.ts": { "fanIn": 0, "fanOut": 0 }
+  },
+  "coverage": {
+    "totalFilesFound": 6,
+    "filesParsed": 6,
+    "filesSkipped": 0,
+    "skippedFiles": [],
+    "totalImports": 4,
+    "resolvedImports": 4,
+    "externalImports": 2,
+    "unresolvedImports": []
+  },
+  "folders": ["app", "app/api/auth", "components", "lib"],
+  "routes": [
+    {
+      "filePath": "app/page.tsx",
+      "routePath": "/",
+      "httpMethods": ["GET"]
+    },
+    {
+      "filePath": "app/api/auth/route.ts",
+      "routePath": "/api/auth",
+      "httpMethods": ["GET", "POST"]
+    }
+  ],
+  "fileRoles": {
+    "app/page.tsx": "Page routes",
+    "app/api/auth/route.ts": "API endpoints",
+    "components/LoginButton.tsx": "Components",
+    "lib/auth.ts": "Utilities",
+    "lib/supabase.ts": "Utilities",
+    "middleware.ts": "Middleware"
+  }
+}
+

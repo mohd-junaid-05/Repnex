@@ -19,8 +19,10 @@ import {
   TransitiveStep,
 } from "@/lib/graph-math";
 import { ExplanationPanel } from "@/components/explanation-panel";
+import { AskPanel } from "@/components/ask-panel";
 
 interface DetailPaneProps {
+  analysisId?: string;
   data: ParseResult;
   nodes: FolderNode[];
   selectedFile: string | null;
@@ -78,6 +80,7 @@ function splitPath(filePath: string): { dir: string; filename: string } {
 
 /** Show repository, selected file, or selected folder details with navigation callbacks. */
 export function DetailPane({
+  analysisId,
   data,
   nodes,
   selectedFile,
@@ -98,6 +101,9 @@ export function DetailPane({
   onAssignRole = () => {},
   tracingConfigured = true,
 }: DetailPaneProps) {
+  // Top-level pane mode: "overview" (structure & explanation) vs "ask" (repo AI chat)
+  const [paneMode, setPaneMode] = useState<"overview" | "ask">("overview");
+
   // State for transitive walk view and collapsible insights
   const [activeWalk, setActiveWalk] = useState<"direct" | "blast-radius" | "dependency-chain">("direct");
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
@@ -132,8 +138,47 @@ export function DetailPane({
 
   return (
     <aside className="w-80 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0d14] flex flex-col h-full overflow-hidden flex-shrink-0 text-xs select-none">
-      {/* Target Identity Header */}
-      <div className="px-3 pt-2.5 pb-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0d14] flex-shrink-0">
+      {/* Top Rail Mode Switcher: Overview vs Ask */}
+      <div className="flex items-center px-3 pt-2 pb-0 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#10121d] flex-shrink-0">
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={() => setPaneMode("overview")}
+            className={`pb-2 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
+              paneMode === "overview"
+                ? "border-indigo-600 dark:border-indigo-500 text-zinc-900 dark:text-zinc-100 font-semibold"
+                : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
+            }`}
+          >
+            Overview
+          </button>
+          <button
+            type="button"
+            onClick={() => setPaneMode("ask")}
+            className={`pb-2 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
+              paneMode === "ask"
+                ? "border-indigo-600 dark:border-indigo-500 text-zinc-900 dark:text-zinc-100 font-semibold"
+                : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
+            }`}
+          >
+            Ask
+          </button>
+        </div>
+      </div>
+
+      {paneMode === "ask" ? (
+        <AskPanel
+          analysisId={analysisId}
+          data={data}
+          selectedFile={selectedFile}
+          selectedNodeId={selectedNodeId}
+          onSelectFile={onSelectFile}
+          onDeselect={onDeselect}
+        />
+      ) : (
+        <>
+          {/* Target Identity Header */}
+          <div className="px-3 pt-2.5 pb-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0d14] flex-shrink-0">
         <div className="flex items-center justify-between mb-0.5">
           <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 dark:text-zinc-500">
             {selectedFile ? "file" : selectedNodeId ? "folder" : "repository"}
@@ -1157,6 +1202,8 @@ export function DetailPane({
           </button>
         </div>
       </div>
+        </>
+      )}
     </aside>
   );
 }

@@ -368,6 +368,7 @@ export function AnalysisExplorer({
 
       {/* Right rail - Detail pane */}
       <DetailPane
+        analysisId={analysisId}
         data={activeData}
         nodes={nodes}
         selectedFile={selectedFile}

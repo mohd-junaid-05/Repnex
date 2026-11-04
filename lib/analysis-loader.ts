@@ -1,0 +1,222 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { computeFanMetrics } from "../parser/metrics";
+import type {
+  ParseResult,
+  ParsedFile,
+  ParsedEdge,
+  CoverageReport,
+  ExtractedRoute,
+  EdgeKind,
+  FileLanguage,
+} from "../parser/types";
+import * as path from "node:path";
+
+interface DbFileRow {
+  id: string;
+  path: string;
+  language: string | null;
+  line_count: number | null;
+  content_hash?: string | null;
+  exports?: string[] | null;
+  functions?: string[] | null;
+}
+
+/**
+ * Loads and reconstructs a full ParseResult from Supabase tables for a given analysisId.
+ * Strictly respects RLS policies on all queries.
+ */
+export async function loadAnalysisData(
+  supabase: SupabaseClient,
+  analysisId: string
+): Promise<ParseResult | null> {
+  // 1. Fetch analysis record
+  const { data: analysis, error: analysisErr } = await supabase
+    .from("analyses")
+    .select(
+      "id, status, commit_sha, error_message, coverage, created_at, started_at, finished_at, projects(name, repo_url)"
+    )
+    .eq("id", analysisId)
+    .maybeSingle();
+
+  if (analysisErr || !analysis) {
+    return null;
+  }
+
+  const projectRelation = analysis.projects;
+  const project = Array.isArray(projectRelation)
+    ? projectRelation[0]
+    : projectRelation;
+  const repoUrl = project?.repo_url ?? "";
+
+  // 2. Fetch files, edges, routes, roles, insights
+  let filesList: DbFileRow[] = [];
+  const primaryQuery = await supabase
+    .from("files")
+    .select("id, path, language, line_count, content_hash, exports, functions")
+    .eq("analysis_id", analysisId);
+
+  if (primaryQuery.error && primaryQuery.error.message.includes("content_hash")) {
+    const fallbackQuery = await supabase
+      .from("files")
+      .select("id, path, language, line_count, exports, functions")
+      .eq("analysis_id", analysisId);
+    filesList = (fallbackQuery.data as DbFileRow[] | null) ?? [];
+  } else {
+    filesList = (primaryQuery.data as DbFileRow[] | null) ?? [];
+  }
+
+  const [
+    { data: edgeRows },
+    { data: routeRows },
+    { data: roleRows },
+    { data: insightRows },
+  ] = await Promise.all([
+    supabase
+      .from("edges")
+      .select("id, source_id, target_id, import_path, kind")
+      .eq("analysis_id", analysisId),
+    supabase
+      .from("routes")
+      .select("id, file_id, route_path, http_methods")
+      .eq("analysis_id", analysisId),
+    supabase
+      .from("file_roles")
+      .select("id, file_id, role")
+      .eq("analysis_id", analysisId),
+    supabase
+      .from("insights")
+      .select("kind, payload")
+      .eq("analysis_id", analysisId),
+  ]);
+
+  const idToPath = new Map<string, string>();
+  for (const f of filesList) {
+    idToPath.set(f.id, f.path);
+  }
+
+  const parsedFiles: ParsedFile[] = filesList.map((f) => {
+    const rawFolder = path.posix.dirname(f.path);
+    const folder = rawFolder === "." ? "" : rawFolder;
+    const contentHash = (f as { content_hash?: string }).content_hash || "";
+    return {
+      path: f.path,
+      folder,
+      language: (f.language as FileLanguage) || "typescript",
+      lineCount: f.line_count ?? 0,
+      contentHash,
+      exports: f.exports ?? [],
+      functions: f.functions ?? [],
+    };
+  });
+
+  const parsedEdges: ParsedEdge[] = (edgeRows ?? [])
+    .map((e): ParsedEdge | null => {
+      const sourcePath = idToPath.get(e.source_id);
+      const targetPath = idToPath.get(e.target_id);
+      if (!sourcePath || !targetPath) return null;
+
+      return {
+        sourcePath,
+        targetPath,
+        importSpecifier: e.import_path,
+        kind: (e.kind as EdgeKind) || "import",
+      };
+    })
+    .filter((e): e is ParsedEdge => e !== null);
+
+  const routes: ExtractedRoute[] = (routeRows ?? [])
+    .map((r): ExtractedRoute | null => {
+      const filePath = idToPath.get(r.file_id);
+      if (!filePath) return null;
+      return {
+        filePath,
+        routePath: r.route_path,
+        httpMethods: (r.http_methods as string[]) || [],
+      };
+    })
+    .filter((r): r is ExtractedRoute => r !== null);
+
+  const fileRoles: Record<string, string> = {};
+  for (const r of roleRows ?? []) {
+    const filePath = idToPath.get(r.file_id);
+    if (filePath) {
+      fileRoles[filePath] = r.role;
+    }
+  }
+
+  // Determine framework
+  let framework = "generic";
+  const fwInsight = (insightRows ?? []).find((i) => i.kind === "framework");
+  if (
+    fwInsight?.payload &&
+    typeof fwInsight.payload === "object" &&
+    "framework" in fwInsight.payload
+  ) {
+    framework = String((fwInsight.payload as { framework: string }).framework);
+  } else {
+    const rolesList = Object.values(fileRoles);
+    if (
+      rolesList.includes("Page routes") ||
+      rolesList.includes("API endpoints") ||
+      rolesList.includes("Server actions")
+    ) {
+      framework = "nextjs";
+    } else if (
+      rolesList.includes("Controllers") ||
+      rolesList.includes("Services") ||
+      rolesList.includes("Modules")
+    ) {
+      framework = "nestjs";
+    } else if (rolesList.includes("Views") || rolesList.includes("Components")) {
+      framework = "react";
+    } else if (rolesList.includes("Routes") || rolesList.includes("Middleware")) {
+      framework = "express";
+    }
+  }
+
+  // Folders
+  const folderSet = new Set<string>();
+  for (const file of parsedFiles) {
+    if (file.folder) {
+      folderSet.add(file.folder);
+      let parent = path.posix.dirname(file.folder);
+      while (parent && parent !== ".") {
+        folderSet.add(parent);
+        parent = path.posix.dirname(parent);
+      }
+    }
+  }
+  const folders = [...folderSet].sort();
+
+  // Fan metrics
+  const fanMetrics = computeFanMetrics(parsedFiles, parsedEdges);
+
+  // Coverage
+  const defaultCoverage: CoverageReport = {
+    totalFilesFound: parsedFiles.length,
+    filesParsed: parsedFiles.length,
+    filesSkipped: 0,
+    skippedFiles: [],
+    totalImports: parsedEdges.length,
+    resolvedImports: parsedEdges.length,
+    externalImports: 0,
+    unresolvedImports: [],
+  };
+
+  const coverage: CoverageReport =
+    (analysis.coverage as unknown as CoverageReport) || defaultCoverage;
+
+  return {
+    repoRoot: repoUrl,
+    parsedAt: analysis.finished_at || analysis.created_at,
+    framework,
+    files: parsedFiles,
+    edges: parsedEdges,
+    fanMetrics,
+    coverage,
+    folders,
+    routes,
+    fileRoles,
+  };
+}
+
