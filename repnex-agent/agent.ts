@@ -2,13 +2,12 @@ import "dotenv/config";
 import { defineDeepAgent } from "managed-deepagents";
 import { allTools } from "./tools/index";
 
-if (process.env.GEMINI_API_KEY && !process.env.GOOGLE_API_KEY) {
-  process.env.GOOGLE_API_KEY = process.env.GEMINI_API_KEY;
-}
+const modelName =
+  process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-ultra-550b-a55b:free";
 
 export const agent = defineDeepAgent({
   name: "repnex-agent",
-  model: "google-genai:gemini-3.5-flash",
+  model: modelName,
   tools: allTools,
 });
 

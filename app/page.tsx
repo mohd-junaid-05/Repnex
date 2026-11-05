@@ -15,24 +15,33 @@ export default async function Home() {
   const client = await clerkClient();
 
   if (!orgId) {
-    const memberships = await client.users.getOrganizationMembershipList({ userId });
+    try {
+      const memberships = await client.users.getOrganizationMembershipList({ userId });
 
-    if (memberships.data.length === 0) {
-      // Create a default organization so the user always has a workspace.
-      const user = await client.users.getUser(userId);
-      const orgName = `${user.firstName || "My"} Workspace`;
-      await client.organizations.createOrganization({
-        name: orgName,
-        createdBy: userId,
-      });
-      redirect("/");
+      if (memberships.data.length === 0) {
+        // Create a default organization so the user always has a workspace.
+        const user = await client.users.getUser(userId);
+        const defaultOrgName = `${user.firstName || "My"} Workspace`;
+        await client.organizations.createOrganization({
+          name: defaultOrgName,
+          createdBy: userId,
+        });
+        redirect("/");
+      }
+    } catch (err) {
+      console.warn("[dashboard] organization check failed:", err);
     }
   }
 
   let orgName = "Personal Account";
   if (orgId) {
-    const org = await client.organizations.getOrganization({ organizationId: orgId });
-    orgName = org.name;
+    try {
+      const org = await client.organizations.getOrganization({ organizationId: orgId });
+      orgName = org.name;
+    } catch (err) {
+      console.warn("[dashboard] failed to fetch organization:", orgId, err);
+      orgName = "Workspace";
+    }
   }
 
   // Fetch analyses for this org. RLS enforces tenancy; no WHERE clause needed.

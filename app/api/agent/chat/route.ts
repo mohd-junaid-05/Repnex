@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
 
   // Mint scoped short-lived credential
   const supabaseToken = await getToken({ template: "supabase" }).catch(() => null);
-  const credential = mintAnalysisCredential({
+  const credential = await mintAnalysisCredential({
     analysisId,
     orgId: analysis.org_id || orgId,
     supabaseToken: supabaseToken || undefined,

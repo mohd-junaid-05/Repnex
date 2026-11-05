@@ -2,7 +2,7 @@ import "dotenv/config";
 import * as path from "node:path";
 import * as fs from "node:fs";
 import { fileURLToPath } from "node:url";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatOpenAI } from "@langchain/openai";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import {
   summaryTool,
@@ -91,16 +91,33 @@ async function runTests() {
   console.log("\n=== Testing Agent Execution with Model and Tools ===");
 
   const instructions = fs.readFileSync(path.join(__dirname, "instructions.md"), "utf-8");
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  const apiKey = (
+    process.env.OPENROUTER_API_KEY ||
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_API_KEY ||
+    ""
+  ).trim();
 
   if (!apiKey) {
-    console.warn("GEMINI_API_KEY not set; skipping live agent call.");
+    console.warn("OPENROUTER_API_KEY not set; skipping live agent call.");
     return;
   }
 
-  const model = new ChatGoogleGenerativeAI({
-    model: "gemini-3.5-flash",
+  const modelName =
+    process.env.OPENROUTER_MODEL ||
+    process.env.GEMINI_MODEL ||
+    "nvidia/nemotron-3-ultra-550b-a55b:free";
+
+  const model = new ChatOpenAI({
+    model: modelName,
     apiKey,
+    configuration: {
+      baseURL: "https://openrouter.ai/api/v1",
+      defaultHeaders: {
+        "HTTP-Referer": "https://cartograph.local",
+        "X-Title": "Cartograph Repnex Agent Tests",
+      },
+    },
     temperature: 0,
   });
 

@@ -3,7 +3,7 @@ import * as http from "node:http";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatOpenAI } from "@langchain/openai";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { HumanMessage, AIMessage, BaseMessage } from "@langchain/core/messages";
 import { allTools } from "./tools/index";
@@ -17,14 +17,28 @@ const instructions = fs.existsSync(instructionsPath)
   ? fs.readFileSync(instructionsPath, "utf-8")
   : "You are the Cartograph repository assistant. Always look up answers using tools.";
 
-const apiKey =
-  (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "").trim();
+const apiKey = (
+  process.env.OPENROUTER_API_KEY ||
+  process.env.GEMINI_API_KEY ||
+  process.env.GOOGLE_API_KEY ||
+  ""
+).trim();
 
-const modelName = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+const modelName =
+  process.env.OPENROUTER_MODEL ||
+  process.env.GEMINI_MODEL ||
+  "nvidia/nemotron-3-ultra-550b-a55b:free";
 
-const model = new ChatGoogleGenerativeAI({
+const model = new ChatOpenAI({
   model: modelName,
   apiKey,
+  configuration: {
+    baseURL: "https://openrouter.ai/api/v1",
+    defaultHeaders: {
+      "HTTP-Referer": "https://cartograph.local",
+      "X-Title": "Cartograph Repnex Agent",
+    },
+  },
   temperature: 0,
 });
 

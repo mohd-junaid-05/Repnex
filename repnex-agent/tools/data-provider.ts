@@ -14,10 +14,10 @@ export function setCachedAnalysisData(data: ParseResult | null): void {
  * Uses cached data if already loaded for the current token or environment.
  */
 export async function getAnalysisData(config?: RunnableConfig): Promise<ParseResult> {
-  const token =
-    (config?.configurable?.analysis_token as string | undefined) ||
-    process.env.REPNEX_ANALYSIS_TOKEN ||
-    "";
+  const rawToken =
+    config?.configurable?.analysis_token ||
+    process.env.REPNEX_ANALYSIS_TOKEN;
+  const token = typeof rawToken === "string" ? rawToken.trim() : "";
 
   if (token && tokenCache.has(token)) {
     return tokenCache.get(token)!.data;

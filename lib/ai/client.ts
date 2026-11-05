@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import OpenAI from "openai";
 import { traceable } from "langsmith/traceable";
 
 /**
@@ -7,19 +7,26 @@ import { traceable } from "langsmith/traceable";
  */
 
 /** Pinned model version. Never a moving alias; changing this invalidates only its own cache. */
-export const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+export const MODEL_NAME =
+  process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-ultra-550b-a55b:free";
 
+let client: OpenAI | null = null;
 
-let client: GoogleGenAI | null = null;
-
-function getClient(): GoogleGenAI {
+function getClient(): OpenAI {
   if (!client) {
-    const rawKey = process.env.GEMINI_API_KEY;
+    const rawKey = process.env.OPENROUTER_API_KEY;
     const apiKey = rawKey ? rawKey.trim() : "";
     if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is not configured.");
+      throw new Error("OPENROUTER_API_KEY is not configured.");
     }
-    client = new GoogleGenAI({ apiKey });
+    client = new OpenAI({
+      baseURL: "https://openrouter.ai/api/v1",
+      apiKey,
+      defaultHeaders: {
+        "HTTP-Referer": "https://cartograph.local",
+        "X-Title": "Cartograph",
+      },
+    });
   }
   return client;
 }
@@ -39,34 +46,35 @@ export interface GenerateTextResult {
 }
 
 /**
- * Generate text through Gemini, traced. The cache read lives in a higher-level
+ * Generate text through OpenRouter, traced. The cache read lives in a higher-level
  * traced function (lib/ai/explain.ts), so a cache hit records a run with no
  * model call in it. If tracing is unconfigured, this still succeeds — just
  * without a trace.
  */
 export const generateText = traceable(
   async ({ system, prompt }: GenerateTextInput): Promise<GenerateTextResult> => {
-    const response = await getClient().models.generateContent({
+    const response = await getClient().chat.completions.create({
       model: MODEL_NAME,
-      contents: prompt,
-      config: {
-        systemInstruction: system,
-        temperature: 0.2,
-      },
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.2,
     });
 
-    const usage = response.usageMetadata;
+    const choice = response.choices[0];
+    const usage = response.usage;
     return {
-      text: response.text ?? "",
-      promptTokens: usage?.promptTokenCount ?? 0,
-      candidatesTokens: usage?.candidatesTokenCount ?? 0,
-      totalTokens: usage?.totalTokenCount ?? 0,
+      text: choice?.message?.content ?? "",
+      promptTokens: usage?.prompt_tokens ?? 0,
+      candidatesTokens: usage?.completion_tokens ?? 0,
+      totalTokens: usage?.total_tokens ?? 0,
     };
   },
   {
     name: "generate_text",
     run_type: "llm",
-    metadata: { provider: "google", model: MODEL_NAME },
+    metadata: { provider: "openrouter", model: MODEL_NAME },
   }
 );
 
