@@ -3,13 +3,27 @@ import { redirect } from "next/navigation";
 import { createSupabaseClient } from "@/lib/supabase";
 import { AnalysesList } from "@/components/analyses-list";
 import { AnalysisForm } from "@/components/analysis-form";
+import { LandingPage } from "@/components/landing-page";
 
-/** Ensure a signed-in user has a workspace and render the analysis form and recent analyses. */
-export default async function Home() {
+interface HomePageProps {
+  searchParams?: Promise<{
+    repoUrl?: string;
+    view?: string;
+  }>;
+}
+
+/**
+ * Root page handler:
+ * - When signed out (or view=landing), render the landing marketing page.
+ * - When signed in, render the workspace dashboard and auto-submit pending repo if present.
+ */
+export default async function Home({ searchParams }: HomePageProps) {
   const { userId, orgId } = await auth();
+  const params = searchParams ? await searchParams : undefined;
 
-  if (!userId) {
-    redirect("/sign-in");
+  // Signed out strangers see the landing page
+  if (!userId || params?.view === "landing") {
+    return <LandingPage />;
   }
 
   const client = await clerkClient();
@@ -26,7 +40,7 @@ export default async function Home() {
           name: defaultOrgName,
           createdBy: userId,
         });
-        redirect("/");
+        redirect(params?.repoUrl ? `/?repoUrl=${encodeURIComponent(params.repoUrl)}` : "/");
       }
     } catch (err) {
       console.warn("[dashboard] organization check failed:", err);
@@ -86,7 +100,10 @@ export default async function Home() {
           <h2 className="text-xs font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-3">
             Analyse Repository
           </h2>
-          <AnalysisForm />
+          <AnalysisForm
+            initialRepoUrl={params?.repoUrl}
+            autoSubmit={Boolean(params?.repoUrl)}
+          />
         </section>
 
         {/* Analyses list */}

@@ -119,3 +119,16 @@
 - [x] Full evaluation orchestrator script (`evals/run-all.ts`) and package scripts (`eval:paths`, `eval:roles`, `eval:prompts`, `eval:all`)
 - [x] Validated types (`tsc`), lint (`eslint`), and production build (`next build`)
 
+## Phase 13: The landing page
+- [x] Root route marketing page (`components/landing-page.tsx`, `app/page.tsx`) rendered for signed-out visitors without sign-up walls or video
+- [x] Sticky header carrying product mark & name (`Cartograph`), theme switcher, and sign-in button
+- [x] Active hero repository input (`components/landing-hero-form.tsx`) that stores pending input, routes through sign-in, and initiates analysis automatically
+- [x] Four post-hero sections separated by hairline rules: What it does, How it works, Framework adapters, and Deliberate omissions
+- [x] Strict proportions: capped at 1140px, centered with 24px gutter, 8rem (`py-28 md:py-32`) vertical section padding, tight headings (`leading-[1.1]` with negative letter-spacing), wide 5rem (`gap-20`) column gaps
+- [x] Measure-capped typography: `max-w-[46ch]` beside figures, `max-w-[64ch]` across full-width section
+- [x] Five unlabelled, static, inline SVG illustrations (`components/landing-illustrations.tsx`) using the product's canvas color palette (zinc, indigo, emerald, amber, sky, cyan, rose)
+- [x] Quiet developer footer with product name, framework tags, and LangSmith trace note
+- [x] Public route middleware configuration in `proxy.ts` enabling signed-out access to `/` and `/landing`
+- [x] Validated types (`tsc`), lint (`eslint`), and production build (`next build`)
+
+

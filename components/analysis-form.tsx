@@ -1,11 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export function AnalysisForm() {
-  const [repoUrl, setRepoUrl] = useState("");
+export interface AnalysisFormProps {
+  initialRepoUrl?: string;
+  autoSubmit?: boolean;
+}
+
+export function AnalysisForm({ initialRepoUrl = "", autoSubmit = false }: AnalysisFormProps = {}) {
+  const [repoUrl, setRepoUrl] = useState<string>(() => {
+    if (initialRepoUrl) return initialRepoUrl;
+    if (typeof window !== "undefined") {
+      const pending = sessionStorage.getItem("cartograph_pending_repo");
+      if (pending) {
+        sessionStorage.removeItem("cartograph_pending_repo");
+        return pending;
+      }
+    }
+    return "";
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [existingAnalysis, setExistingAnalysis] = useState<{
@@ -20,9 +35,8 @@ export function AnalysisForm() {
     if (existingAnalysis) setExistingAnalysis(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = repoUrl.trim();
+  const submitRepo = useCallback(async (targetUrl: string, isAuto = false) => {
+    const trimmed = targetUrl.trim();
     if (!trimmed) return;
 
     setIsLoading(true);
@@ -43,6 +57,10 @@ export function AnalysisForm() {
       }
 
       if (data.isExisting) {
+        if (isAuto) {
+          router.push(`/analysis/${data.analysisId}`);
+          return;
+        }
         // Repository already exists in this account: do not parse again, show notification
         setExistingAnalysis({
           id: data.analysisId,
@@ -60,7 +78,21 @@ export function AnalysisForm() {
       );
       setIsLoading(false);
     }
+  }, [router]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitRepo(repoUrl, false);
   };
+
+  useEffect(() => {
+    if (autoSubmit && repoUrl) {
+      const timer = setTimeout(() => {
+        submitRepo(repoUrl, true);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [autoSubmit, repoUrl, submitRepo]);
 
   return (
     <div className="w-full">

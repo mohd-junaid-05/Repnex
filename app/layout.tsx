@@ -1,7 +1,5 @@
 import {
   ClerkProvider,
-  SignInButton,
-  SignUpButton,
   Show,
   UserButton,
   OrganizationSwitcher,
@@ -39,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="h-full flex flex-col bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 overflow-hidden">
         <ClerkProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <header className="flex items-center justify-between gap-4 px-4 py-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shrink-0 z-30">
+            <header className="sticky top-0 z-40 flex items-center justify-between gap-4 px-4 sm:px-6 py-2.5 border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm shrink-0">
               <div className="flex items-center gap-4">
                 <Link
                   href="/"
@@ -48,27 +46,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <span className="w-2.5 h-2.5 rounded-xs bg-indigo-600 dark:bg-indigo-400 inline-block shadow-xs shadow-indigo-500/50" />
                   <span>Cartograph</span>
                 </Link>
-                <nav className="flex items-center gap-1 text-xs">
-                  <Link
-                    href="/"
-                    className="px-2 py-1 rounded text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors font-mono"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    href="/preview"
-                    className="px-2 py-1 rounded text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors font-mono"
-                  >
-                    Preview
-                  </Link>
-                </nav>
+                <Show when="signed-in">
+                  <nav className="flex items-center gap-1 text-xs">
+                    <Link
+                      href="/"
+                      className="px-2 py-1 rounded text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors font-mono"
+                    >
+                      Dashboard
+                    </Link>
+                  </nav>
+                </Show>
               </div>
 
               <div className="flex items-center gap-3">
                 <ThemeSwitcher />
                 <Show when="signed-out">
-                  <SignInButton />
-                  <SignUpButton />
+                  <Link
+                    href="/sign-in"
+                    className="px-3 py-1.5 rounded border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
+                  >
+                    Sign in
+                  </Link>
                 </Show>
                 <Show when="signed-in">
                   <OrganizationSwitcher hidePersonal={false} />
