@@ -252,8 +252,8 @@ export function AnalysisProgress({ initialAnalysis }: AnalysisProgressProps) {
   const currentIdx = getStageIndex(stage);
 
   return (
-    <div className="flex flex-col flex-1 items-center justify-center p-6 bg-zinc-50 dark:bg-black font-sans">
-      <div className="w-full max-w-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0d14] rounded-lg p-6 flex flex-col gap-6 shadow-xs">
+    <div className="flex flex-col flex-1 items-center justify-center p-6 bg-zinc-50 dark:bg-zinc-950 font-sans">
+      <div className="w-full max-w-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-lg p-6 flex flex-col gap-6 shadow-xs">
         {/* Header */}
         <div className="flex flex-col gap-1 border-b border-zinc-100 dark:border-zinc-800/80 pb-4">
           <div className="flex items-center justify-between">
@@ -264,19 +264,19 @@ export function AnalysisProgress({ initialAnalysis }: AnalysisProgressProps) {
               ← Back to dashboard
             </Link>
             <span
-              className={`text-[11px] font-mono px-2 py-0.5 rounded-full ${
+              className={`text-[11px] font-mono px-2 py-0.5 rounded ${
                 status === "failed"
-                  ? "bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400"
+                  ? "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60"
                   : status === "complete"
-                  ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400"
-                  : "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
+                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60"
+                  : "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60"
               }`}
             >
               {status}
             </span>
           </div>
 
-          <h1 className="text-lg font-semibold text-black dark:text-white mt-2 truncate">
+          <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mt-2 truncate">
             {initialAnalysis.projectName}
           </h1>
           <p className="text-xs font-mono text-zinc-400 dark:text-zinc-500 truncate">

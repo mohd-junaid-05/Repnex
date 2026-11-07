@@ -35,7 +35,7 @@ export function CoverageBanner({
 
   return (
     <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 max-w-xl w-11/12">
-      <div className="bg-amber-50/95 dark:bg-[#1a140a]/95 border border-amber-300 dark:border-amber-800/80 rounded shadow-xs text-xs backdrop-blur-xs">
+      <div className="bg-amber-50/95 dark:bg-amber-950/90 border border-amber-300/80 dark:border-amber-800/80 rounded-md shadow-xs text-xs backdrop-blur-xs">
         {/* Collapsed header / single line summary */}
         <div className="flex items-center justify-between px-3 py-1.5 gap-3">
           <div className="flex items-center gap-2 min-w-0">

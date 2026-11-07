@@ -24,10 +24,10 @@ body {
   color: var(--foreground);
 }
 
-/* Sleek minimal scrollbar */
+/* Clean neutral scrollbar for dense developer tool */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -35,24 +35,28 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.25);
-  border-radius: 9999px;
+  background: rgba(161, 161, 170, 0.3);
+  border-radius: 2px;
 }
 
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.45);
+  background: rgba(113, 113, 122, 0.35);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.7);
+  background: rgba(161, 161, 170, 0.55);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(113, 113, 122, 0.6);
 }
 
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(99, 102, 241, 0.25) transparent;
+  scrollbar-color: rgba(161, 161, 170, 0.3) transparent;
 }
 
 .dark .custom-scrollbar {
-  scrollbar-color: rgba(99, 102, 241, 0.45) transparent;
+  scrollbar-color: rgba(113, 113, 122, 0.35) transparent;
 }
 

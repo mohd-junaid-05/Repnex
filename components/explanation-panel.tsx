@@ -42,7 +42,7 @@ export function ExplanationPanel({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="p-3 bg-zinc-50 dark:bg-zinc-900/60 rounded-lg border border-zinc-200 dark:border-zinc-800">
+      <div className="p-3 bg-zinc-50 dark:bg-zinc-900/60 rounded-md border border-zinc-200 dark:border-zinc-800">
         <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 dark:text-zinc-500 mb-1">
           Target
         </div>
@@ -52,22 +52,22 @@ export function ExplanationPanel({
       </div>
 
       {targetKind === "repo" ? (
-        <div className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed p-2 rounded-lg border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20">
+        <div className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed p-2.5 rounded-md border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20">
           Select a file or a folder, then click Explain to read what it does in the context of its real
           neighbours.
         </div>
       ) : isLoading ? (
         <div className="flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400 p-2">
-          <span className="w-3 h-3 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <span className="w-3 h-3 border-2 border-zinc-400 dark:border-zinc-600 border-t-transparent rounded-full animate-spin" />
           Generating explanation…
         </div>
       ) : errorText ? (
-        <div className="flex flex-col gap-2 p-2 rounded-lg border border-red-500/30 bg-red-500/5 text-[11px] text-red-600 dark:text-red-400">
+        <div className="flex flex-col gap-2 p-2.5 rounded-md border border-rose-500/30 bg-rose-500/5 text-[11px] text-rose-600 dark:text-rose-400">
           <span>{errorText}</span>
           <button
             type="button"
             onClick={explainAction}
-            className="self-start px-2 py-0.5 rounded bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-600 dark:text-red-400 font-mono transition-colors cursor-pointer"
+            className="self-start px-2 py-0.5 rounded bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-600 dark:text-rose-400 font-mono transition-colors cursor-pointer"
           >
             Retry
           </button>
@@ -75,7 +75,7 @@ export function ExplanationPanel({
       ) : explanation ? (
         <div className="flex flex-col gap-2.5">
           {explanation.stale && (
-            <div className="flex flex-col gap-1.5 p-2 rounded-lg border border-amber-500/30 bg-amber-500/5 text-[11px] text-amber-700 dark:text-amber-400">
+            <div className="flex flex-col gap-1.5 p-2.5 rounded-md border border-amber-500/30 bg-amber-500/5 text-[11px] text-amber-700 dark:text-amber-400">
               <span className="font-medium">
                 This analysis is stale. The repository has moved past the commit that was analysed.
               </span>
@@ -111,14 +111,14 @@ export function ExplanationPanel({
           <button
             type="button"
             onClick={explainAction}
-            className="self-start px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors cursor-pointer"
+            className="self-start px-3 py-1.5 rounded-md bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-xs font-medium transition-colors cursor-pointer"
           >
             Explain
           </button>
         </div>
       )}
       {showRoleAssign && (
-        <div className="flex flex-col gap-1.5 p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 text-[11px]">
+        <div className="flex flex-col gap-1.5 p-2.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 text-[11px]">
           <span className="text-zinc-500 dark:text-zinc-400">
             No adapter matched this file. Its role is currently{" "}
             <span className="font-medium text-zinc-700 dark:text-zinc-300">
