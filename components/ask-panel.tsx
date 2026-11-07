@@ -375,9 +375,9 @@ export function AskPanel({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-[#0c0d14] text-xs">
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 text-xs">
       {/* Context Scope Bar */}
-      <div className="px-3 py-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#10121d] flex items-center justify-between flex-shrink-0">
+      <div className="px-3 py-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-1.5 truncate">
           <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 dark:text-zinc-500">
             Scope
@@ -507,7 +507,7 @@ export function AskPanel({
                         return (
                           <div
                             key={tc.id}
-                            className="flex flex-col rounded border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#10121d] overflow-hidden"
+                            className="flex flex-col rounded border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 overflow-hidden"
                           >
                             <button
                               type="button"
@@ -540,7 +540,7 @@ export function AskPanel({
                             </button>
 
                             {isExpanded && (
-                              <div className="p-2 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black text-[10px] font-mono flex flex-col gap-1.5 overflow-x-auto">
+                              <div className="p-2 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-[10px] font-mono flex flex-col gap-1.5 overflow-x-auto">
                                 <div>
                                   <span className="text-zinc-400 uppercase tracking-wider block mb-0.5">
                                     Input
@@ -569,7 +569,7 @@ export function AskPanel({
 
                   {/* Text Content */}
                   {msg.content && (
-                    <div className="px-3 py-2.5 rounded-md bg-zinc-50 dark:bg-[#10121d] border border-zinc-200 dark:border-zinc-800/80 text-zinc-800 dark:text-zinc-200 leading-relaxed whitespace-pre-wrap break-words">
+                    <div className="px-3 py-2.5 rounded-md bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800/80 text-zinc-800 dark:text-zinc-200 leading-relaxed whitespace-pre-wrap break-words">
                       {renderFormattedText(msg.content)}
                     </div>
                   )}
@@ -584,8 +584,8 @@ export function AskPanel({
                   {/* Streaming indicator */}
                   {msg.isStreaming && !msg.content && (!msg.toolCalls || msg.toolCalls.length === 0) && (
                     <div className="flex items-center gap-2 text-zinc-400 text-[11px] font-mono">
-                      <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
-                      <span>Thinking and preparing lookups...</span>
+                      <span className="w-2 h-2 rounded-full bg-zinc-500 animate-pulse" />
+                      <span>Running tool lookups...</span>
                     </div>
                   )}
                 </div>
@@ -597,7 +597,7 @@ export function AskPanel({
       </div>
 
       {/* Input Area */}
-      <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0d14] flex-shrink-0">
+      <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -617,7 +617,7 @@ export function AskPanel({
             }
             rows={2}
             disabled={isStreaming}
-            className="w-full px-2.5 py-1.5 text-xs font-mono bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 disabled:opacity-50"
+            className="w-full px-2.5 py-1.5 text-xs font-mono bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded resize-none focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600 focus:border-zinc-400 dark:focus:border-zinc-600 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 disabled:opacity-50"
           />
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">
@@ -626,7 +626,7 @@ export function AskPanel({
             <button
               type="submit"
               disabled={isStreaming || !input.trim()}
-              className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-300 dark:disabled:bg-zinc-800 text-white text-xs font-medium rounded transition-colors cursor-pointer disabled:cursor-not-allowed"
+              className="px-3 py-1 bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50 text-xs font-medium rounded transition-colors cursor-pointer disabled:cursor-not-allowed"
             >
               {isStreaming ? "Looking up..." : "Send"}
             </button>

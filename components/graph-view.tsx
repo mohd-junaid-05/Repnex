@@ -104,13 +104,13 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
 
     return (
       <div
-        className={`bg-white dark:bg-[#0d0e15]/95 border ${
+        className={`bg-white dark:bg-zinc-900 border ${
           selected
-            ? "border-indigo-600 dark:border-indigo-500 shadow-indigo-500/20 shadow-lg ring-1 ring-indigo-500"
+            ? "border-zinc-900 dark:border-zinc-100 ring-1 ring-zinc-900 dark:ring-zinc-100"
             : containsHoveredFile || isNodeHovered
-            ? "border-cyan-500 dark:border-cyan-400/80 shadow-cyan-500/10 shadow-md ring-1 ring-cyan-400/40"
-            : "border-zinc-200 dark:border-indigo-900/40"
-        } rounded-xl text-xs font-mono overflow-hidden w-full h-full flex flex-col relative shadow-md dark:shadow-2xl transition-all duration-200 ${
+            ? "border-zinc-400 dark:border-zinc-600"
+            : "border-zinc-200 dark:border-zinc-800"
+        } rounded-md text-xs font-mono overflow-hidden w-full h-full flex flex-col relative shadow-xs transition-colors duration-150 ${
           isDimmed ? "opacity-25 grayscale" : "opacity-100"
         }`}
       >
@@ -143,20 +143,20 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
 
         {/* Header */}
         <div
-          className="bg-zinc-50 dark:bg-[#131522] px-3 py-1.5 h-[46px] border-b border-zinc-200 dark:border-indigo-900/40 cursor-grab active:cursor-grabbing flex items-center justify-between gap-1 hover:bg-zinc-100 dark:hover:bg-[#181a2b] transition-colors shrink-0 z-10 select-none"
+          className="bg-zinc-50 dark:bg-zinc-900/90 px-3 py-1.5 h-[46px] border-b border-zinc-200 dark:border-zinc-800 cursor-grab active:cursor-grabbing flex items-center justify-between gap-1 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/60 transition-colors shrink-0 z-10 select-none"
           onMouseEnter={() => onHoverNode(node.id)}
           onMouseLeave={() => onHoverNode(null)}
         >
           <div className="flex flex-col gap-0.5 min-w-0 flex-1">
             <span
-              className="font-bold text-zinc-900 dark:text-zinc-100 text-xs tracking-tight truncate"
+              className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs tracking-tight truncate"
               title={node.label}
             >
               {node.label}
             </span>
             <div className="flex items-center gap-2 text-[10px] text-zinc-500 dark:text-zinc-400">
               {selectedCategory ? (
-                <span className="font-mono font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1 py-0.2 rounded border border-indigo-500/20">
+                <span className="font-mono font-medium text-zinc-800 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800 px-1 py-0.2 rounded border border-zinc-200 dark:border-zinc-700">
                   {categoryMatchCount} matched
                 </span>
               ) : (
@@ -184,7 +184,7 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
         <div
           className={`flex-1 min-h-0 ${
             isScrollable ? "overflow-y-auto" : "overflow-hidden"
-          } nowheel nodrag custom-scrollbar flex flex-col bg-zinc-50/50 dark:bg-[#0d0e15]/90 py-1 z-10`}
+          } nowheel nodrag custom-scrollbar flex flex-col bg-white dark:bg-zinc-950/40 py-1 z-10`}
           onScroll={handleScroll}
         >
           {node.files.map((f) => {
@@ -195,18 +195,18 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
             const isFileDimmed = (activeFiles && !isFileActive) || (selectedCategory && !isCategoryMatch);
             const name = f.path.split("/").pop() || f.path;
 
-            // Dynamic UX color coding for file swatch box
-            let swatchColor = "bg-indigo-500/80";
+            // Clear, un-slopped color coding for file swatch box
+            let swatchColor = "bg-indigo-500";
             if (isFileSelected) {
-              swatchColor = "bg-cyan-500 shadow-xs shadow-cyan-500/50 ring-2 ring-cyan-400/40";
+              swatchColor = "bg-sky-500 ring-1 ring-sky-400";
             } else if (name.startsWith("index.")) {
-              swatchColor = "bg-emerald-500 shadow-xs shadow-emerald-400/40";
+              swatchColor = "bg-emerald-500";
             } else if (name.includes(".test.") || name.includes(".spec.")) {
-              swatchColor = "bg-rose-500/80";
+              swatchColor = "bg-rose-500";
             } else if (f.fanIn > 0 && f.fanOut === 0) {
-              swatchColor = "bg-teal-500/80";
+              swatchColor = "bg-teal-500";
             } else if (f.fanOut > 0 && f.fanIn === 0) {
-              swatchColor = "bg-amber-500/80";
+              swatchColor = "bg-amber-500";
             }
 
             return (
@@ -214,12 +214,12 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
                 key={f.path}
                 className={`px-3 py-1 shrink-0 h-[28px] cursor-pointer truncate flex items-center justify-between group transition-colors relative ${
                   isFileSelected
-                    ? "bg-indigo-50 dark:bg-indigo-600/35 text-indigo-900 dark:text-white font-semibold ring-1 ring-indigo-500/50"
+                    ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold ring-1 ring-zinc-300 dark:ring-zinc-700"
                     : isFileHovered
-                    ? "bg-cyan-50 dark:bg-cyan-500/20 text-cyan-900 dark:text-cyan-200 ring-1 ring-cyan-400/50"
+                    ? "bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100"
                     : isFileDimmed
                     ? "text-zinc-400 dark:text-zinc-600 opacity-25 grayscale"
-                    : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
+                    : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
                 }`}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -230,7 +230,7 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
               >
                 <div className="flex items-center truncate mr-2 z-10">
                   <span
-                    className={`w-2.5 h-2.5 rounded-[2px] ${swatchColor} shrink-0 inline-block mr-2 transition-all`}
+                    className={`w-2 h-2 rounded-[2px] ${swatchColor} shrink-0 inline-block mr-2`}
                   />
                   <span className="truncate text-[11px] font-mono">{name}</span>
                 </div>
@@ -251,13 +251,13 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
     <div
       onMouseEnter={() => onHoverNode(node.id)}
       onMouseLeave={() => onHoverNode(null)}
-      className={`bg-white dark:bg-[#0d0e15] border ${
+      className={`bg-white dark:bg-zinc-900 border ${
         selected
-          ? "border-indigo-600 dark:border-indigo-500 shadow-md ring-1 ring-indigo-500"
+          ? "border-zinc-900 dark:border-zinc-100 ring-1 ring-zinc-900 dark:ring-zinc-100"
           : containsHoveredFile || isNodeHovered
-          ? "border-cyan-500 dark:border-cyan-400/80 shadow-cyan-500/10 shadow-md ring-1 ring-cyan-400/40"
-          : "border-zinc-200 dark:border-indigo-900/40 hover:border-zinc-300 dark:hover:border-indigo-500/60"
-      } rounded-lg text-xs font-mono px-2.5 py-1.5 cursor-grab active:cursor-grabbing shadow-xs dark:shadow-none transition-all duration-200 flex items-center justify-between select-none ${
+          ? "border-zinc-400 dark:border-zinc-600"
+          : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+      } rounded-md text-xs font-mono px-2.5 py-1.5 cursor-grab active:cursor-grabbing shadow-xs transition-colors duration-150 flex items-center justify-between select-none ${
         isDimmed ? "opacity-25 grayscale" : "opacity-100"
       }`}
       style={{ height: "100%", width: "100%" }}
@@ -280,7 +280,7 @@ function FolderNodeComponent({ id, data, selected }: { id: string; data: FolderN
       </div>
       <div className="flex items-center gap-1.5 text-[10px] font-mono shrink-0">
         {selectedCategory && (
-          <span className="font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1 py-0.5 rounded border border-indigo-500/20 mr-0.5">
+          <span className="font-medium text-zinc-800 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800 px-1 py-0.5 rounded border border-zinc-200 dark:border-zinc-700 mr-0.5">
             {categoryMatchCount}
           </span>
         )}
@@ -623,12 +623,12 @@ function GraphInner({
       nodesDraggable={true}
       nodesConnectable={false}
       elementsSelectable={true}
-      className="bg-slate-50 dark:bg-[#090a0f]"
+      className="bg-zinc-50 dark:bg-zinc-950"
     >
-      <Background color={isDark ? "#1f212d" : "#cbd5e1"} gap={20} size={1} />
+      <Background color={isDark ? "#27272a" : "#e4e4e7"} gap={20} size={1} />
       <Controls
         showInteractive={false}
-        className="!bg-white dark:!bg-[#131522] !border-zinc-200 dark:!border-indigo-900/40 !text-zinc-700 dark:!text-zinc-300 !shadow-xs"
+        className="!bg-white dark:!bg-zinc-900 !border-zinc-200 dark:!border-zinc-800 !text-zinc-700 dark:!text-zinc-300 !shadow-xs !rounded-md"
       />
     </ReactFlow>
   );

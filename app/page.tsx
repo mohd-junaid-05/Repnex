@@ -83,23 +83,30 @@ export default async function Home({ searchParams }: HomePageProps) {
   });
 
   return (
-    <div className="flex flex-col flex-1 bg-zinc-50 font-sans dark:bg-black overflow-y-auto">
+    <div className="flex flex-col flex-1 bg-zinc-50 font-sans dark:bg-zinc-950 overflow-y-auto">
       <main className="flex flex-1 flex-col w-full max-w-4xl mx-auto px-6 py-10 gap-8">
-        {/* Header */}
-        <div>
-          <p className="text-xs font-mono text-zinc-500 dark:text-zinc-500 mb-1">
-            {orgId ?? "no org"}
-          </p>
-          <h1 className="text-2xl font-semibold text-black dark:text-white tracking-tight">
-            {orgName}
+        {/* Header with workspace breadcrumb */}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 text-xs font-mono text-zinc-500">
+            <span>Workspace</span>
+            <span className="text-zinc-400 dark:text-zinc-600">/</span>
+            <span className="text-zinc-700 dark:text-zinc-300 font-medium">{orgName}</span>
+          </div>
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
+            Repository Maps
           </h1>
         </div>
 
         {/* Form to submit a new repository */}
-        <section className="bg-white dark:bg-[#0c0d14] border border-zinc-200 dark:border-zinc-800 rounded-md p-4">
-          <h2 className="text-xs font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-3">
-            Analyse Repository
-          </h2>
+        <section className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-5 shadow-xs">
+          <div className="mb-3">
+            <h2 className="text-xs font-mono font-medium text-zinc-900 dark:text-zinc-200">
+              New Repository Analysis
+            </h2>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              Paste a public GitHub repository. Parsing runs via ts-morph AST without token scopes.
+            </p>
+          </div>
           <AnalysisForm
             initialRepoUrl={params?.repoUrl}
             autoSubmit={Boolean(params?.repoUrl)}
@@ -107,10 +114,12 @@ export default async function Home({ searchParams }: HomePageProps) {
         </section>
 
         {/* Analyses list */}
-        <section>
-          <h2 className="text-xs font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-4">
-            Analyses
-          </h2>
+        <section className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-mono uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              Recent Analyses ({uniqueAnalyses.length})
+            </h2>
+          </div>
           <AnalysesList analyses={uniqueAnalyses} />
         </section>
       </main>
