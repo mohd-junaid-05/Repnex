@@ -70,12 +70,12 @@ export function AnalysisExplorer({
       const savedLeft = localStorage.getItem("repnex_left_width") || localStorage.getItem("cartograph_left_width");
       if (savedLeft) {
         const val = parseInt(savedLeft, 10);
-        if (!isNaN(val) && val >= 160 && val <= 400) setLeftWidth(val);
+        if (!isNaN(val) && val >= 160 && val <= 420) setLeftWidth(val);
       }
       const savedRight = localStorage.getItem("repnex_right_width") || localStorage.getItem("cartograph_right_width");
       if (savedRight) {
         const val = parseInt(savedRight, 10);
-        if (!isNaN(val) && val >= 260 && val <= 600) setRightWidth(val);
+        if (!isNaN(val) && val >= 260 && val <= 650) setRightWidth(val);
       }
     } catch {}
   }, []);
@@ -387,8 +387,11 @@ export function AnalysisExplorer({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
+        e.ctrlKey || e.metaKey || e.altKey ||
         e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement ||
+        (e.target instanceof HTMLElement && e.target.isContentEditable)
       ) {
         return;
       }
@@ -526,7 +529,7 @@ export function AnalysisExplorer({
         {/* Canvas Telemetry HUD & Shortcut trigger */}
         <div className="absolute bottom-3 left-3 z-30 flex items-center gap-2 bg-white/95 dark:bg-zinc-900/95 border border-zinc-200 dark:border-zinc-800 rounded-md px-2.5 py-1 text-[11px] font-mono shadow-xs backdrop-blur-xs select-none">
           <div className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
             <span>{nodes.length} folders</span>
             <span className="text-zinc-300 dark:text-zinc-700">/</span>
             <span>{Object.keys(data.files).length} files</span>

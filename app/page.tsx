@@ -104,7 +104,7 @@ export default async function Home({ searchParams }: HomePageProps) {
               New Repository Analysis
             </h2>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-              Paste a public GitHub repository. Parsing runs via ts-morph AST without token scopes.
+              Paste a public GitHub repository containing TypeScript or JavaScript files. Parsing runs via ts-morph AST without token scopes.
             </p>
           </div>
           <AnalysisForm

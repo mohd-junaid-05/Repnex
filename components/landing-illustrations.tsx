@@ -432,35 +432,6 @@ export function HeroFigure() {
           markerEnd="url(#arrow-emerald)"
         />
 
-        {/* Animated flow pulses along real dependency lines */}
-        <circle r="2.5" className="fill-emerald-400">
-          <animateMotion
-            dur="2.2s"
-            repeatCount="indefinite"
-            path="M 180 173 C 205 173, 210 175, 238 175"
-          />
-        </circle>
-        <circle r="2.5" className="fill-amber-400">
-          <animateMotion
-            dur="2.5s"
-            repeatCount="indefinite"
-            path="M 432 175 C 455 175, 460 173, 485 173"
-          />
-        </circle>
-        <circle r="2.2" className="fill-sky-400">
-          <animateMotion
-            dur="3.0s"
-            repeatCount="indefinite"
-            path="M 432 116 C 455 116, 460 209, 485 209"
-          />
-        </circle>
-        <circle r="2" className="fill-emerald-400">
-          <animateMotion
-            dur="3.4s"
-            repeatCount="indefinite"
-            path="M 180 173 C 195 173, 215 292, 238 292"
-          />
-        </circle>
 
         {/* Metric indicator badge overlay (top right) */}
         <g transform="translate(500, 24)">
@@ -883,35 +854,6 @@ export function WhatItDoesFigure() {
           markerEnd="url(#wid-amber)"
         />
 
-        {/* Animated flow pulses */}
-        <circle r="2.2" className="fill-emerald-400">
-          <animateMotion
-            dur="2.4s"
-            repeatCount="indefinite"
-            path="M 200 134 C 212 134, 212 170, 225 170"
-          />
-        </circle>
-        <circle r="2.2" className="fill-emerald-400">
-          <animateMotion
-            dur="2.8s"
-            repeatCount="indefinite"
-            path="M 200 209 C 212 209, 212 170, 225 170"
-          />
-        </circle>
-        <circle r="2.2" className="fill-amber-400">
-          <animateMotion
-            dur="2.4s"
-            repeatCount="indefinite"
-            path="M 315 170 C 328 170, 328 134, 340 134"
-          />
-        </circle>
-        <circle r="2.2" className="fill-amber-400">
-          <animateMotion
-            dur="2.8s"
-            repeatCount="indefinite"
-            path="M 315 170 C 328 170, 328 209, 340 209"
-          />
-        </circle>
       </svg>
     </div>
   );
@@ -995,9 +937,6 @@ export function HowItWorksFigure() {
           strokeWidth="1.5"
           markerEnd="url(#hiw-arrow)"
         />
-        <circle r="2.5" className="fill-indigo-500">
-          <animateMotion dur="1.6s" repeatCount="indefinite" path="M 160 170 L 195 170" />
-        </circle>
 
         {/* STAGE 2: Graph Arithmetic Matrix */}
         <g transform="translate(205, 90)">
@@ -1056,9 +995,6 @@ export function HowItWorksFigure() {
           strokeWidth="1.5"
           markerEnd="url(#hiw-arrow)"
         />
-        <circle r="2.5" className="fill-emerald-500">
-          <animateMotion dur="1.6s" repeatCount="indefinite" path="M 335 170 L 370 170" />
-        </circle>
 
         {/* STAGE 3: Traced AI Explanation Engine */}
         <g transform="translate(380, 90)">
