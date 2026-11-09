@@ -1,5 +1,6 @@
 import React from "react";
 import { LandingHeroForm } from "./landing-hero-form";
+import { LandingHeroHeadline } from "./landing-hero-headline";
 import {
   HeroFigure,
   WhatItDoesFigure,
@@ -21,46 +22,47 @@ import {
  */
 export function LandingPage() {
   return (
-    <div className="w-full bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 flex flex-col font-sans overflow-x-hidden">
-      {/* ---------------- 1. HERO SECTION ---------------- */}
-      <section className="w-full min-h-[calc(100vh-4rem)] flex flex-col justify-center py-16 md:py-24">
-        <div className="w-full max-w-[1140px] mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
-            {/* Left: Headline & Repository input */}
-            <div className="lg:col-span-6 flex flex-col items-start">
-              <span className="text-xs font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-3">
-                Repository Dependency Explorer
-              </span>
+    <div className="w-full bg-zinc-100/60 dark:bg-black text-zinc-900 dark:text-zinc-100 flex flex-col font-sans overflow-x-hidden min-h-screen">
+      <div className="w-full max-w-[1140px] mx-auto bg-white dark:bg-zinc-950 border-x border-zinc-200 dark:border-zinc-800/80 shadow-xs flex flex-col">
+        {/* ---------------- 1. HERO SECTION ---------------- */}
+        <section className="w-full min-h-[calc(100vh-3rem)] flex flex-col justify-center py-16 md:py-24">
+          <div className="w-full px-6 md:px-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+              {/* Left: Headline & Repository input */}
+              <div className="lg:col-span-6 flex flex-col items-start">
+                <div className="flex items-center gap-2 mb-4 font-mono text-xs text-zinc-500 dark:text-zinc-400">
+                  <span>Codebase Architecture</span>
+                  <span className="text-zinc-300 dark:text-zinc-700">·</span>
+                  <span>AST Graph</span>
+                </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-semibold tracking-tight leading-[1.08] text-zinc-900 dark:text-zinc-100 mb-6">
-                See the shape of your codebase.
-              </h1>
+                <LandingHeroHeadline />
 
-              <p className="text-sm sm:text-base leading-relaxed text-zinc-600 dark:text-zinc-400 max-w-[46ch] mb-8">
-                A dependency map of your TypeScript or JavaScript repository. Folders fold into boxes, imports become directional lines. Everything on screen comes from real code parsing.
-              </p>
+                <p className="text-sm sm:text-base leading-relaxed text-zinc-600 dark:text-zinc-400 max-w-[46ch] mb-8">
+                  A dependency map of your TypeScript or JavaScript repository. Folders fold into boxes, imports become directional lines. Everything on screen comes from real code parsing.
+                </p>
 
-              <div className="w-full max-w-[480px]">
-                <LandingHeroForm />
+                <div className="w-full max-w-[480px]">
+                  <LandingHeroForm />
+                </div>
+              </div>
+
+              {/* Right: Inline SVG Canvas Illustration */}
+              <div className="lg:col-span-6 w-full">
+                <HeroFigure />
               </div>
             </div>
-
-            {/* Right: Inline SVG Canvas Illustration */}
-            <div className="lg:col-span-6 w-full">
-              <HeroFigure />
-            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       {/* ---------------- 2. WHAT IT DOES ---------------- */}
-      <section className="w-full border-t border-zinc-200 dark:border-zinc-800 py-28 md:py-32">
+      <section className="w-full border-t border-zinc-200 dark:border-zinc-800/80 py-24 md:py-32">
         <div className="w-full max-w-[1140px] mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
             {/* Left: Text column */}
             <div className="lg:col-span-5 flex flex-col items-start">
-              <span className="text-xs font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-3">
-                01 / What It Does
+              <span className="text-xs font-mono uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-3">
+                01 / Graph Resolution
               </span>
 
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight leading-[1.12] text-zinc-900 dark:text-zinc-100 mb-6">
@@ -89,7 +91,7 @@ export function LandingPage() {
       </section>
 
       {/* ---------------- 3. HOW IT WORKS ---------------- */}
-      <section className="w-full border-t border-zinc-200 dark:border-zinc-800 py-28 md:py-32">
+      <section className="w-full border-t border-zinc-200 dark:border-zinc-800/80 py-24 md:py-32">
         <div className="w-full max-w-[1140px] mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
             {/* Left: SVG Figure */}
@@ -99,8 +101,8 @@ export function LandingPage() {
 
             {/* Right: Text column */}
             <div className="lg:col-span-5 order-1 lg:order-2 flex flex-col items-start">
-              <span className="text-xs font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-3">
-                02 / How It Works
+              <span className="text-xs font-mono uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-3">
+                02 / Standalone Pipeline
               </span>
 
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight leading-[1.12] text-zinc-900 dark:text-zinc-100 mb-6">
@@ -124,13 +126,13 @@ export function LandingPage() {
       </section>
 
       {/* ---------------- 4. FRAMEWORK ADAPTERS ---------------- */}
-      <section className="w-full border-t border-zinc-200 dark:border-zinc-800 py-28 md:py-32">
+      <section className="w-full border-t border-zinc-200 dark:border-zinc-800/80 py-24 md:py-32">
         <div className="w-full max-w-[1140px] mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
             {/* Left: Text column */}
             <div className="lg:col-span-5 flex flex-col items-start">
-              <span className="text-xs font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-3">
-                03 / Framework Adapters
+              <span className="text-xs font-mono uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-3">
+                03 / Framework Knowledge
               </span>
 
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight leading-[1.12] text-zinc-900 dark:text-zinc-100 mb-6">
@@ -159,15 +161,15 @@ export function LandingPage() {
       </section>
 
       {/* ---------------- 5. WHAT IT DELIBERATELY DOESN'T DO ---------------- */}
-      <section className="w-full border-t border-zinc-200 dark:border-zinc-800 py-28 md:py-32">
+      <section className="w-full border-t border-zinc-200 dark:border-zinc-800/80 py-24 md:py-32">
         <div className="w-full max-w-[1140px] mx-auto px-6">
           {/* Header across full width */}
-          <div className="mb-16">
-            <span className="text-xs font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-3 block">
-              04 / Deliberate Omissions
+          <div className="mb-14">
+            <span className="text-xs font-mono uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-3 block">
+              04 / Deliberate Boundaries
             </span>
 
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight leading-[1.12] text-zinc-900 dark:text-zinc-100 mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight leading-[1.12] text-zinc-900 dark:text-zinc-100 mb-4">
               What we deliberately don&apos;t do.
             </h2>
 
@@ -178,47 +180,57 @@ export function LandingPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
             {/* List of 5 commitments */}
-            <div className="lg:col-span-6 flex flex-col gap-10">
-              <div>
-                <h3 className="text-sm font-mono font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
-                  No scores, grades, or severity badges.
-                </h3>
+            <div className="lg:col-span-6 flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800/80">
+              <div className="py-6 first:pt-0 group hover:translate-x-1 transition-transform duration-150">
+                <div className="flex items-center gap-2 mb-1.5 font-mono text-xs text-zinc-400 dark:text-zinc-500">
+                  <span className="group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors">01</span>
+                  <span>/</span>
+                  <span className="text-zinc-900 dark:text-zinc-200 font-semibold font-mono">No scores, grades, or severity badges</span>
+                </div>
                 <p className="text-xs sm:text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 max-w-[46ch]">
                   This tool explains a codebase; it does not grade one. The moment there is a score, people argue with the number instead of reading the map.
                 </p>
               </div>
 
-              <div>
-                <h3 className="text-sm font-mono font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
-                  No model-guessed connections.
-                </h3>
+              <div className="py-6 group hover:translate-x-1 transition-transform duration-150">
+                <div className="flex items-center gap-2 mb-1.5 font-mono text-xs text-zinc-400 dark:text-zinc-500">
+                  <span className="group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors">02</span>
+                  <span>/</span>
+                  <span className="text-zinc-900 dark:text-zinc-200 font-semibold font-mono">No model-guessed connections</span>
+                </div>
                 <p className="text-xs sm:text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 max-w-[46ch]">
                   If an import cannot be resolved to a real file on disk, it is marked unresolved with a reason, never filled in by an LLM. An edge exists because syntax connects two files. Absent beats approximate.
                 </p>
               </div>
 
-              <div>
-                <h3 className="text-sm font-mono font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
-                  No private repository token storage.
-                </h3>
+              <div className="py-6 group hover:translate-x-1 transition-transform duration-150">
+                <div className="flex items-center gap-2 mb-1.5 font-mono text-xs text-zinc-400 dark:text-zinc-500">
+                  <span className="group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors">03</span>
+                  <span>/</span>
+                  <span className="text-zinc-900 dark:text-zinc-200 font-semibold font-mono">No private repository token storage</span>
+                </div>
                 <p className="text-xs sm:text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 max-w-[46ch]">
                   Sign-in provides identity only. We never request repository read or write OAuth scopes and never store GitHub access tokens. Public repositories only.
                 </p>
               </div>
 
-              <div>
-                <h3 className="text-sm font-mono font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
-                  No approximate or inferred routes.
-                </h3>
+              <div className="py-6 group hover:translate-x-1 transition-transform duration-150">
+                <div className="flex items-center gap-2 mb-1.5 font-mono text-xs text-zinc-400 dark:text-zinc-500">
+                  <span className="group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors">04</span>
+                  <span>/</span>
+                  <span className="text-zinc-900 dark:text-zinc-200 font-semibold font-mono">No approximate or inferred routes</span>
+                </div>
                 <p className="text-xs sm:text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 max-w-[46ch]">
                   If both the HTTP method and full path pattern cannot be recovered from syntax, we emit none. A wrong route is the exact same failure as an invented edge.
                 </p>
               </div>
 
-              <div>
-                <h3 className="text-sm font-mono font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
-                  No languages beyond TypeScript and JavaScript.
-                </h3>
+              <div className="py-6 last:pb-0 group hover:translate-x-1 transition-transform duration-150">
+                <div className="flex items-center gap-2 mb-1.5 font-mono text-xs text-zinc-400 dark:text-zinc-500">
+                  <span className="group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors">05</span>
+                  <span>/</span>
+                  <span className="text-zinc-900 dark:text-zinc-200 font-semibold font-mono">No languages beyond TypeScript and JavaScript</span>
+                </div>
                 <p className="text-xs sm:text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 max-w-[46ch]">
                   Not because other ecosystems are hard, but because getting import resolution, barrel files, and framework conventions genuinely right for one ecosystem is the entire proposition.
                 </p>
@@ -234,25 +246,45 @@ export function LandingPage() {
       </section>
 
       {/* ---------------- 6. QUIET FOOTER ---------------- */}
-      <footer className="w-full border-t border-zinc-200 dark:border-zinc-800 py-12 md:py-16">
+      <footer className="w-full border-t border-zinc-200 dark:border-zinc-800/80 py-12 md:py-16">
         <div className="w-full max-w-[1140px] mx-auto px-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-xs bg-indigo-600 dark:bg-indigo-400 inline-block shadow-xs shadow-indigo-500/50" />
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="shrink-0 text-zinc-900 dark:text-zinc-100"
+                aria-hidden="true"
+              >
+                <rect x="2" y="2" width="4" height="4" rx="0.75" fill="currentColor" />
+                <rect x="10" y="2" width="4" height="4" rx="0.75" fill="currentColor" opacity="0.6" />
+                <rect x="10" y="10" width="4" height="4" rx="0.75" fill="currentColor" />
+                <path
+                  d="M4 6V12H10M12 6V10"
+                  stroke="currentColor"
+                  strokeWidth="1.25"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
               <span className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-                Cartograph
+                Repnex
               </span>
-              <span className="text-xs text-zinc-400 dark:text-zinc-600 ml-2 font-mono">
+              <span className="text-xs text-zinc-400 dark:text-zinc-500 ml-2 font-mono">
                 &mdash; Parsed from real code. Traced with LangSmith.
               </span>
             </div>
 
-            <div className="text-xs font-mono text-zinc-400 dark:text-zinc-600">
+            <div className="text-xs font-mono text-zinc-400 dark:text-zinc-500">
               TypeScript / JavaScript / Next.js / NestJS / Express
             </div>
           </div>
         </div>
       </footer>
+      </div>
     </div>
   );
 }

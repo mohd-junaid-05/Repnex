@@ -121,7 +121,7 @@
 
 ## Phase 13: The landing page
 - [x] Root route marketing page (`components/landing-page.tsx`, `app/page.tsx`) rendered for signed-out visitors without sign-up walls or video
-- [x] Sticky header carrying product mark & name (`Cartograph`), theme switcher, and sign-in button
+- [x] Sticky header carrying product mark & name (`Repnex`), theme switcher, and sign-in button
 - [x] Active hero repository input (`components/landing-hero-form.tsx`) that stores pending input, routes through sign-in, and initiates analysis automatically
 - [x] Four post-hero sections separated by hairline rules: What it does, How it works, Framework adapters, and Deliberate omissions
 - [x] Strict proportions: capped at 1140px, centered with 24px gutter, 8rem (`py-28 md:py-32`) vertical section padding, tight headings (`leading-[1.1]` with negative letter-spacing), wide 5rem (`gap-20`) column gaps

@@ -7,11 +7,11 @@ import { useSupabase } from "@/lib/client-supabase";
 
 // Status badge colours — colour carries meaning, nothing else does.
 const STATUS_STYLES: Record<string, string> = {
-  pending:  "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400",
-  running:  "bg-blue-50  text-blue-600  dark:bg-blue-950  dark:text-blue-400",
-  complete: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400",
-  failed:   "bg-red-50   text-red-700   dark:bg-red-950   dark:text-red-400",
-  stale:    "bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-500 line-through-none",
+  pending:  "bg-zinc-100 text-zinc-600 dark:bg-zinc-800/80 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700/60",
+  running:  "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60",
+  complete: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60",
+  failed:   "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60",
+  stale:    "bg-zinc-100 text-zinc-500 dark:bg-zinc-800/60 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700/60",
 };
 
 export type Project = {
@@ -146,19 +146,19 @@ export function AnalysesList({ analyses: initialAnalyses }: { analyses: Analysis
 
   if (analyses.length === 0) {
     return (
-      <div className="border border-dashed border-zinc-200 dark:border-zinc-800 rounded-md px-6 py-12 text-center">
-        <p className="text-sm text-zinc-400 dark:text-zinc-600 font-mono">
-          No analyses yet for this organization.
+      <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-8 text-center bg-white dark:bg-zinc-900 shadow-xs">
+        <p className="text-xs font-mono font-medium text-zinc-700 dark:text-zinc-300">
+          No analyses recorded yet for this organization.
         </p>
-        <p className="text-xs text-zinc-300 dark:text-zinc-700 font-mono mt-1">
-          Paste a repository URL above to generate your first dependency map.
+        <p className="text-xs text-zinc-400 dark:text-zinc-500 font-sans mt-1">
+          Paste a repository URL in the form above to generate an AST dependency graph.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="border border-zinc-200 dark:border-zinc-800 rounded-md divide-y divide-zinc-100 dark:divide-zinc-900 bg-white dark:bg-[#0c0d14]">
+    <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg divide-y divide-zinc-200/70 dark:divide-zinc-800/70 bg-white dark:bg-zinc-900 overflow-hidden shadow-xs">
       {analyses.map((analysis) => {
         const project = firstProject(analysis.projects);
         const isStale = isAnalysisStale(analysis);
@@ -169,23 +169,23 @@ export function AnalysesList({ analyses: initialAnalyses }: { analyses: Analysis
           <Link
             key={analysis.id}
             href={`/analysis/${analysis.id}`}
-            className="flex items-center justify-between px-4 py-3 gap-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/60 transition-colors"
+            className="flex items-center justify-between px-4 py-3 gap-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors group"
           >
             <div className="flex flex-col gap-0.5 min-w-0">
-              <span className="text-sm font-medium text-black dark:text-white truncate">
+              <span className="text-xs font-mono font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
                 {project?.name ?? "Unknown project"}
               </span>
-              <span className="text-xs font-mono text-zinc-400 dark:text-zinc-600 truncate">
+              <span className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500 truncate">
                 {project?.repo_url ?? ""}
               </span>
             </div>
 
-            <div className="flex items-center gap-4 shrink-0">
-              <span className="text-xs font-mono text-zinc-400 dark:text-zinc-600">
+            <div className="flex items-center gap-3.5 shrink-0">
+              <span className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500">
                 {formatRelative(analysis.created_at)}
               </span>
               <span
-                className={`text-xs font-mono px-2 py-0.5 rounded-full ${
+                className={`text-[11px] font-mono px-2 py-0.5 rounded ${
                   STATUS_STYLES[displayStatus] ?? STATUS_STYLES.pending
                 }`}
               >

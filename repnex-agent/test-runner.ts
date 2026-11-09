@@ -114,8 +114,8 @@ async function runTests() {
     configuration: {
       baseURL: "https://openrouter.ai/api/v1",
       defaultHeaders: {
-        "HTTP-Referer": "https://cartograph.local",
-        "X-Title": "Cartograph Repnex Agent Tests",
+        "HTTP-Referer": "https://repnex.local",
+        "X-Title": "Repnex Agent Tests",
       },
     },
     temperature: 0,

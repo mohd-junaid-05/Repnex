@@ -23,8 +23,8 @@ function getClient(): OpenAI {
       baseURL: "https://openrouter.ai/api/v1",
       apiKey,
       defaultHeaders: {
-        "HTTP-Referer": "https://cartograph.local",
-        "X-Title": "Cartograph",
+        "HTTP-Referer": "https://repnex.local",
+        "X-Title": "Repnex",
       },
     });
   }

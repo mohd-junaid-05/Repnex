@@ -1,7 +1,7 @@
 import React from "react";
 
 /**
- * Static SVG illustrations for the Cartograph landing page.
+ * Static SVG illustrations for the Repnex landing page.
  * Strictly adheres to Phase 13 spec:
  * - Drawn, not captured.
  * - Completely unlabelled (no directory names, filepaths, or domain claims).
@@ -12,7 +12,7 @@ import React from "react";
 
 export function HeroFigure() {
   return (
-    <div className="w-full relative rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-[#0c0d14] p-4 sm:p-6 overflow-hidden">
+    <div className="w-full relative rounded-lg border border-zinc-200 dark:border-zinc-800/80 bg-zinc-50/80 dark:bg-zinc-900/40 p-4 sm:p-6 overflow-hidden">
       <svg
         viewBox="0 0 640 380"
         fill="none"
@@ -432,6 +432,36 @@ export function HeroFigure() {
           markerEnd="url(#arrow-emerald)"
         />
 
+        {/* Animated flow pulses along real dependency lines */}
+        <circle r="2.5" className="fill-emerald-400">
+          <animateMotion
+            dur="2.2s"
+            repeatCount="indefinite"
+            path="M 180 173 C 205 173, 210 175, 238 175"
+          />
+        </circle>
+        <circle r="2.5" className="fill-amber-400">
+          <animateMotion
+            dur="2.5s"
+            repeatCount="indefinite"
+            path="M 432 175 C 455 175, 460 173, 485 173"
+          />
+        </circle>
+        <circle r="2.2" className="fill-sky-400">
+          <animateMotion
+            dur="3.0s"
+            repeatCount="indefinite"
+            path="M 432 116 C 455 116, 460 209, 485 209"
+          />
+        </circle>
+        <circle r="2" className="fill-emerald-400">
+          <animateMotion
+            dur="3.4s"
+            repeatCount="indefinite"
+            path="M 180 173 C 195 173, 215 292, 238 292"
+          />
+        </circle>
+
         {/* Metric indicator badge overlay (top right) */}
         <g transform="translate(500, 24)">
           <rect
@@ -467,7 +497,7 @@ export function HeroFigure() {
 
 export function WhatItDoesFigure() {
   return (
-    <div className="w-full relative rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-[#0c0d14] p-4 sm:p-6 overflow-hidden">
+    <div className="w-full relative rounded-lg border border-zinc-200 dark:border-zinc-800/80 bg-zinc-50/80 dark:bg-zinc-900/40 p-4 sm:p-6 overflow-hidden">
       <svg
         viewBox="0 0 540 340"
         fill="none"
@@ -852,6 +882,36 @@ export function WhatItDoesFigure() {
           fill="none"
           markerEnd="url(#wid-amber)"
         />
+
+        {/* Animated flow pulses */}
+        <circle r="2.2" className="fill-emerald-400">
+          <animateMotion
+            dur="2.4s"
+            repeatCount="indefinite"
+            path="M 200 134 C 212 134, 212 170, 225 170"
+          />
+        </circle>
+        <circle r="2.2" className="fill-emerald-400">
+          <animateMotion
+            dur="2.8s"
+            repeatCount="indefinite"
+            path="M 200 209 C 212 209, 212 170, 225 170"
+          />
+        </circle>
+        <circle r="2.2" className="fill-amber-400">
+          <animateMotion
+            dur="2.4s"
+            repeatCount="indefinite"
+            path="M 315 170 C 328 170, 328 134, 340 134"
+          />
+        </circle>
+        <circle r="2.2" className="fill-amber-400">
+          <animateMotion
+            dur="2.8s"
+            repeatCount="indefinite"
+            path="M 315 170 C 328 170, 328 209, 340 209"
+          />
+        </circle>
       </svg>
     </div>
   );
@@ -859,7 +919,7 @@ export function WhatItDoesFigure() {
 
 export function HowItWorksFigure() {
   return (
-    <div className="w-full relative rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-[#0c0d14] p-4 sm:p-6 overflow-hidden">
+    <div className="w-full relative rounded-lg border border-zinc-200 dark:border-zinc-800/80 bg-zinc-50/80 dark:bg-zinc-900/40 p-4 sm:p-6 overflow-hidden">
       <svg
         viewBox="0 0 540 340"
         fill="none"
@@ -935,6 +995,9 @@ export function HowItWorksFigure() {
           strokeWidth="1.5"
           markerEnd="url(#hiw-arrow)"
         />
+        <circle r="2.5" className="fill-indigo-500">
+          <animateMotion dur="1.6s" repeatCount="indefinite" path="M 160 170 L 195 170" />
+        </circle>
 
         {/* STAGE 2: Graph Arithmetic Matrix */}
         <g transform="translate(205, 90)">
@@ -993,6 +1056,9 @@ export function HowItWorksFigure() {
           strokeWidth="1.5"
           markerEnd="url(#hiw-arrow)"
         />
+        <circle r="2.5" className="fill-emerald-500">
+          <animateMotion dur="1.6s" repeatCount="indefinite" path="M 335 170 L 370 170" />
+        </circle>
 
         {/* STAGE 3: Traced AI Explanation Engine */}
         <g transform="translate(380, 90)">
@@ -1065,7 +1131,7 @@ export function HowItWorksFigure() {
 
 export function FrameworksFigure() {
   return (
-    <div className="w-full relative rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-[#0c0d14] p-4 sm:p-6 overflow-hidden">
+    <div className="w-full relative rounded-lg border border-zinc-200 dark:border-zinc-800/80 bg-zinc-50/80 dark:bg-zinc-900/40 p-4 sm:p-6 overflow-hidden">
       <svg
         viewBox="0 0 540 340"
         fill="none"
@@ -1282,7 +1348,7 @@ export function FrameworksFigure() {
 
 export function BoundariesFigure() {
   return (
-    <div className="w-full relative rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-[#0c0d14] p-4 sm:p-6 overflow-hidden">
+    <div className="w-full relative rounded-lg border border-zinc-200 dark:border-zinc-800/80 bg-zinc-50/80 dark:bg-zinc-900/40 p-4 sm:p-6 overflow-hidden">
       <svg
         viewBox="0 0 540 340"
         fill="none"

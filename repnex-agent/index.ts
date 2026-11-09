@@ -8,7 +8,7 @@ if (process.env.GEMINI_API_KEY && !process.env.GOOGLE_API_KEY) {
 }
 
 async function main() {
-  console.log("Repnex Cartograph Agent initialized.");
+  console.log("Repnex Agent initialized.");
   console.log("Agent Name:", agent.config.name);
   console.log("Model:", agent.config.model);
   console.log("Registered Tools:", agent.config.tools?.map((t: { name: string }) => t.name).join(", "));

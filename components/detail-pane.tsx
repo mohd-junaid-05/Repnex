@@ -45,6 +45,9 @@ interface DetailPaneProps {
   isAssigningRole?: boolean;
   onAssignRole?: () => void;
   tracingConfigured?: boolean;
+  width?: number;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 /** Extract file extension including dot, e.g. '.js'. */
@@ -100,6 +103,9 @@ export function DetailPane({
   isAssigningRole = false,
   onAssignRole = () => {},
   tracingConfigured = true,
+  width,
+  isCollapsed = false,
+  onToggleCollapse,
 }: DetailPaneProps) {
   // Top-level pane mode: "overview" (structure & explanation) vs "ask" (repo AI chat)
   const [paneMode, setPaneMode] = useState<"overview" | "ask">("overview");
@@ -136,17 +142,22 @@ export function DetailPane({
     return getFolderDetails(selectedNodeId, node, data);
   }, [selectedFile, selectedNodeId, nodes, data]);
 
+  if (isCollapsed) return null;
+
   return (
-    <aside className="w-80 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0d14] flex flex-col h-full overflow-hidden flex-shrink-0 text-xs select-none">
+    <aside
+      style={{ width: width ? `${width}px` : undefined }}
+      className={`${width ? "" : "w-80"} border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col h-full overflow-hidden flex-shrink-0 text-xs select-none`}
+    >
       {/* Top Rail Mode Switcher: Overview vs Ask */}
-      <div className="flex items-center px-3 pt-2 pb-0 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#10121d] flex-shrink-0">
+      <div className="flex items-center justify-between px-3 pt-2 pb-0 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 flex-shrink-0">
         <div className="flex gap-4">
           <button
             type="button"
             onClick={() => setPaneMode("overview")}
             className={`pb-2 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
               paneMode === "overview"
-                ? "border-indigo-600 dark:border-indigo-500 text-zinc-900 dark:text-zinc-100 font-semibold"
+                ? "border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 font-semibold"
                 : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
             }`}
           >
@@ -157,13 +168,25 @@ export function DetailPane({
             onClick={() => setPaneMode("ask")}
             className={`pb-2 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
               paneMode === "ask"
-                ? "border-indigo-600 dark:border-indigo-500 text-zinc-900 dark:text-zinc-100 font-semibold"
+                ? "border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 font-semibold"
                 : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
             }`}
           >
             Ask
           </button>
         </div>
+        {onToggleCollapse && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className="pb-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors cursor-pointer p-0.5 rounded hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+            title="Collapse detail pane (])"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {paneMode === "ask" ? (
@@ -178,7 +201,7 @@ export function DetailPane({
       ) : (
         <>
           {/* Target Identity Header */}
-          <div className="px-3 pt-2.5 pb-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0d14] flex-shrink-0">
+          <div className="px-3 pt-2.5 pb-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
         <div className="flex items-center justify-between mb-0.5">
           <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 dark:text-zinc-500">
             {selectedFile ? "file" : selectedNodeId ? "folder" : "repository"}
@@ -193,7 +216,7 @@ export function DetailPane({
                     onExplain();
                   }
                 }}
-                className="px-2 py-0.5 text-[10px] font-mono font-medium text-indigo-700 dark:text-indigo-300 hover:text-indigo-900 dark:hover:text-indigo-100 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-800 rounded cursor-pointer transition-colors flex items-center gap-1"
+                className="px-2 py-0.5 text-[10px] font-mono font-medium text-zinc-900 dark:text-zinc-100 hover:text-black dark:hover:text-white bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-700 rounded cursor-pointer transition-colors flex items-center gap-1"
                 title="Explain this target in context of its real neighbours"
               >
                 Explain
@@ -250,14 +273,14 @@ export function DetailPane({
       </div>
 
       {/* Tab Navigation Header */}
-      <div className="flex items-center px-3 pt-2 pb-0 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#10121d] flex-shrink-0">
+      <div className="flex items-center px-3 pt-2 pb-0 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 flex-shrink-0">
         <div className="flex gap-4">
           <button
             type="button"
             onClick={() => onTabChange("structure")}
             className={`pb-2 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
               activeTab === "structure"
-                ? "border-indigo-600 dark:border-indigo-500 text-zinc-900 dark:text-zinc-100 font-semibold"
+                ? "border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 font-semibold"
                 : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
             }`}
           >
@@ -268,7 +291,7 @@ export function DetailPane({
             onClick={() => onTabChange("explanation")}
             className={`pb-2 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
               activeTab === "explanation"
-                ? "border-indigo-600 dark:border-indigo-500 text-zinc-900 dark:text-zinc-100 font-semibold"
+                ? "border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 font-semibold"
                 : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
             }`}
           >
@@ -1134,7 +1157,7 @@ export function DetailPane({
       </div>
 
       {/* Footer Actions / Utility Row */}
-      <div className="px-3 py-2 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#10121d] flex items-center justify-between text-zinc-400 dark:text-zinc-500 flex-shrink-0">
+      <div className="px-3 py-2 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 flex items-center justify-between text-zinc-400 dark:text-zinc-500 flex-shrink-0">
         <div className="flex items-center gap-3">
           <button
             type="button"
