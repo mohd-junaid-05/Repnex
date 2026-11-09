@@ -13,8 +13,11 @@ export function AnalysisForm({ initialRepoUrl = "", autoSubmit = false }: Analys
   const [repoUrl, setRepoUrl] = useState<string>(() => {
     if (initialRepoUrl) return initialRepoUrl;
     if (typeof window !== "undefined") {
-      const pending = sessionStorage.getItem("cartograph_pending_repo");
+      const pending =
+        sessionStorage.getItem("repnex_pending_repo") ||
+        sessionStorage.getItem("cartograph_pending_repo");
       if (pending) {
+        sessionStorage.removeItem("repnex_pending_repo");
         sessionStorage.removeItem("cartograph_pending_repo");
         return pending;
       }

@@ -1,7 +1,7 @@
 import React from "react";
 
 /**
- * Static SVG illustrations for the Cartograph landing page.
+ * Static SVG illustrations for the Repnex landing page.
  * Strictly adheres to Phase 13 spec:
  * - Drawn, not captured.
  * - Completely unlabelled (no directory names, filepaths, or domain claims).

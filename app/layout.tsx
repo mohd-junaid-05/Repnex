@@ -22,7 +22,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cartograph",
+  title: "Repnex",
   description: "Repository dependency mapping and architecture visualization",
 };
 
@@ -63,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       strokeLinejoin="round"
                     />
                   </svg>
-                  <span>Cartograph</span>
+                  <span>Repnex</span>
                 </Link>
                 <Show when="signed-in">
                   <nav className="flex items-center gap-1 text-xs">

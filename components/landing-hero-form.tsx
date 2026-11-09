@@ -29,7 +29,7 @@ export function LandingHeroForm() {
 
     try {
       if (typeof window !== "undefined") {
-        sessionStorage.setItem("cartograph_pending_repo", trimmed);
+        sessionStorage.setItem("repnex_pending_repo", trimmed);
       }
 
       if (isSignedIn) {

@@ -67,12 +67,12 @@ export function AnalysisExplorer({
   // Load saved sidebar dimensions from localStorage
   useEffect(() => {
     try {
-      const savedLeft = localStorage.getItem("cartograph_left_width");
+      const savedLeft = localStorage.getItem("repnex_left_width") || localStorage.getItem("cartograph_left_width");
       if (savedLeft) {
         const val = parseInt(savedLeft, 10);
         if (!isNaN(val) && val >= 160 && val <= 400) setLeftWidth(val);
       }
-      const savedRight = localStorage.getItem("cartograph_right_width");
+      const savedRight = localStorage.getItem("repnex_right_width") || localStorage.getItem("cartograph_right_width");
       if (savedRight) {
         const val = parseInt(savedRight, 10);
         if (!isNaN(val) && val >= 260 && val <= 600) setRightWidth(val);
@@ -83,13 +83,13 @@ export function AnalysisExplorer({
   // Persist sidebar adjustments to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem("cartograph_left_width", String(leftWidth));
+      localStorage.setItem("repnex_left_width", String(leftWidth));
     } catch {}
   }, [leftWidth]);
 
   useEffect(() => {
     try {
-      localStorage.setItem("cartograph_right_width", String(rightWidth));
+      localStorage.setItem("repnex_right_width", String(rightWidth));
     } catch {}
   }, [rightWidth]);
 
@@ -622,7 +622,7 @@ export function AnalysisExplorer({
             <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/80">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">Keyboard Shortcuts</span>
-                <span className="text-[10px] font-mono text-zinc-400">Cartograph HUD</span>
+                <span className="text-[10px] font-mono text-zinc-400">Repnex HUD</span>
               </div>
               <button
                 type="button"

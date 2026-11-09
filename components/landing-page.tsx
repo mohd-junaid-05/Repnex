@@ -271,7 +271,7 @@ export function LandingPage() {
                 />
               </svg>
               <span className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-                Cartograph
+                Repnex
               </span>
               <span className="text-xs text-zinc-400 dark:text-zinc-500 ml-2 font-mono">
                 &mdash; Parsed from real code. Traced with LangSmith.

@@ -15,7 +15,7 @@ const PORT = parseInt(process.env.AGENT_PORT || process.env.PORT || "3001", 10);
 const instructionsPath = path.join(__dirname, "instructions.md");
 const instructions = fs.existsSync(instructionsPath)
   ? fs.readFileSync(instructionsPath, "utf-8")
-  : "You are the Cartograph repository assistant. Always look up answers using tools.";
+  : "You are the Repnex repository assistant. Always look up answers using tools.";
 
 const apiKey = (
   process.env.OPENROUTER_API_KEY ||
@@ -35,8 +35,8 @@ const model = new ChatOpenAI({
   configuration: {
     baseURL: "https://openrouter.ai/api/v1",
     defaultHeaders: {
-      "HTTP-Referer": "https://cartograph.local",
-      "X-Title": "Cartograph Repnex Agent",
+      "HTTP-Referer": "https://repnex.local",
+      "X-Title": "Repnex Agent",
     },
   },
   temperature: 0,

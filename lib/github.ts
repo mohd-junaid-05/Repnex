@@ -72,7 +72,7 @@ export async function fetchRepositoryArchive(
 
   const { owner, repo, canonicalUrl } = parsed;
   const headers = {
-    "User-Agent": "repnex-cartograph-analyzer",
+    "User-Agent": "repnex-analyzer",
     Accept: "application/vnd.github.v3+json",
   };
 
@@ -104,7 +104,7 @@ export async function fetchRepositoryArchive(
     `https://api.github.com/repos/${owner}/${repo}/tarball/${commitSha}`,
     {
       headers: {
-        "User-Agent": "repnex-cartograph-analyzer",
+        "User-Agent": "repnex-analyzer",
       },
       redirect: "follow",
     }
@@ -158,7 +158,7 @@ export async function fetchRepositoryHeadCommit(repoInput: string): Promise<stri
   try {
     const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits/HEAD`, {
       headers: {
-        "User-Agent": "repnex-cartograph-analyzer",
+        "User-Agent": "repnex-analyzer",
         Accept: "application/vnd.github.v3+json",
       },
     });
