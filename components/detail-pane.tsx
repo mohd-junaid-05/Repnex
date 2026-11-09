@@ -142,12 +142,10 @@ export function DetailPane({
     return getFolderDetails(selectedNodeId, node, data);
   }, [selectedFile, selectedNodeId, nodes, data]);
 
-  if (isCollapsed) return null;
-
   return (
     <aside
       style={{ width: width ? `${width}px` : undefined }}
-      className={`${width ? "" : "w-80"} border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col h-full overflow-hidden flex-shrink-0 text-xs select-none`}
+      className={`${width ? "" : "w-80"} border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 ${isCollapsed ? "hidden" : "flex"} flex-col h-full overflow-hidden flex-shrink-0 text-xs select-none`}
     >
       {/* Top Rail Mode Switcher: Overview vs Ask */}
       <div className="flex items-center justify-between px-3 pt-2 pb-0 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 flex-shrink-0">
