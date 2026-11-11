@@ -15,7 +15,6 @@ const eslintConfig = defineConfig([
     "test-repos/**",
     ".agents/**",
     ".claude/**",
-    "repnex-agent/**",
     "deep-agent/**",
   ]),
 ]);

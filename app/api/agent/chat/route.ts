@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
   });
 
   const agentServiceUrl = (
-    process.env.AGENT_SERVICE_URL || "http://127.0.0.1:3001"
+    process.env.AGENT_SERVICE_URL || "https://repnex-agent.onrender.com"
   ).replace(/\/$/, "");
 
   const appOrigin =
@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
     // Graceful failure when agent service is stopped/unreachable (Acceptance Check 5)
     return new Response(
       `event: error\ndata: ${JSON.stringify({
-        message: `Agent service is currently offline (${errorMsg}). Start the agent with 'npm run dev' in repnex-agent.`,
+        message: `Agent service is currently unreachable (${errorMsg}).`,
       })}\n\n`,
       {
         headers: {
