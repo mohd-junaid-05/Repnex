@@ -7,6 +7,7 @@ import type { FolderNode, GraphEdge } from "@/lib/folding";
 import { GraphView } from "@/components/graph-view";
 import { DetailPane } from "@/components/detail-pane";
 import { CoverageBanner } from "@/components/coverage-banner";
+import { RepnexLogo } from "@/components/repnex-logo";
 
 import type { RailCategoryItem } from "@/lib/taxonomy";
 
@@ -625,7 +626,10 @@ export function AnalysisExplorer({
             <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/80">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">Keyboard Shortcuts</span>
-                <span className="text-[10px] font-mono text-zinc-400">Repnex HUD</span>
+                <div className="flex items-center gap-1 text-[10px] font-mono text-zinc-400">
+                  <RepnexLogo size={11} className="text-zinc-400" />
+                  <span>Repnex HUD</span>
+                </div>
               </div>
               <button
                 type="button"

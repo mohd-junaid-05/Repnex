@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { computeFoldedGraph } from "@/lib/folding";
@@ -22,6 +23,39 @@ export const revalidate = 0;
 
 interface AnalysisPageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: AnalysisPageProps): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const supabase = await createSupabaseClient();
+    const { data } = await supabase
+      .from("analyses")
+      .select("projects(name)")
+      .eq("id", id)
+      .maybeSingle();
+
+    const projectRelation = data?.projects;
+    const project = Array.isArray(projectRelation)
+      ? projectRelation[0]
+      : projectRelation;
+    const repoName = project?.name;
+
+    if (repoName) {
+      return {
+        title: `${repoName} — Architecture Map`,
+        description: `Interactive AST dependency graph and architecture map for ${repoName}.`,
+      };
+    }
+  } catch {
+    // fallback
+  }
+
+  return {
+    title: "Repository Architecture Map",
+  };
 }
 
 export default async function AnalysisPage({ params }: AnalysisPageProps) {

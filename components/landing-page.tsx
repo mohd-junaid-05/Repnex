@@ -1,6 +1,7 @@
 import React from "react";
 import { LandingHeroForm } from "./landing-hero-form";
 import { LandingHeroHeadline } from "./landing-hero-headline";
+import { RepnexLogo } from "./repnex-logo";
 import {
   HeroFigure,
   WhatItDoesFigure,
@@ -250,29 +251,11 @@ export function LandingPage() {
         <div className="w-full max-w-[1140px] mx-auto px-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 16 16"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="shrink-0 text-zinc-900 dark:text-zinc-100"
-                aria-hidden="true"
-              >
-                <rect x="2" y="2" width="4" height="4" rx="0.75" fill="currentColor" />
-                <rect x="10" y="2" width="4" height="4" rx="0.75" fill="currentColor" opacity="0.6" />
-                <rect x="10" y="10" width="4" height="4" rx="0.75" fill="currentColor" />
-                <path
-                  d="M4 6V12H10M12 6V10"
-                  stroke="currentColor"
-                  strokeWidth="1.25"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-                Repnex
-              </span>
+              <RepnexLogo
+                size={18}
+                showText
+                textClassName="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100"
+              />
               <span className="text-xs text-zinc-400 dark:text-zinc-500 ml-2 font-mono">
                 &mdash; Parsed from real code. Traced with LangSmith.
               </span>
@@ -284,6 +267,37 @@ export function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* SEO Structured Data (JSON-LD) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "Repnex",
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "Web",
+            "url": "https://repnex.com",
+            "logo": "https://repnex.com/logo.png",
+            "image": "https://repnex.com/og.png",
+            "description":
+              "Interactive AST-parsed dependency maps for TypeScript and JavaScript repositories. Real code parsing with zero hallucinated edges.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+            },
+            "featureList": [
+              "AST Codebase Architecture Mapping",
+              "Directional Dependency Graph",
+              "Architectural Clustering & Folding",
+              "Blast Radius Computation",
+              "AI Explanations Traced with LangSmith",
+            ],
+          }),
+        }}
+      />
       </div>
     </div>
   );

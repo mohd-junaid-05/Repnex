@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <style>
+    :root { color-scheme: light dark; }
+    .repnex-primary { fill: #18181b; }
+    .repnex-muted { fill: #71717a; }
+    .repnex-stroke { stroke: #18181b; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+    @media (prefers-color-scheme: dark) {
+      .repnex-primary { fill: #f4f4f5; }
+      .repnex-muted { fill: #71717a; }
+      .repnex-stroke { stroke: #f4f4f5; }
+    }
+  </style>
+
+  <!-- Connectors / Edges -->
+  <path d="M21 20 H79" class="repnex-stroke" />
+  <path d="M21 20 V56" class="repnex-stroke" />
+  <path d="M79 20 V52" class="repnex-stroke" />
+  <path d="M21 54 H70" class="repnex-stroke" />
+  <path d="M34 54 Q 50 54 62 66 L 79 82" class="repnex-stroke" />
+
+  <!-- AST Nodes -->
+  <rect x="8" y="8" width="26" height="24" rx="6.5" class="repnex-primary" />
+  <rect x="66" y="8" width="26" height="24" rx="6.5" class="repnex-primary" />
+  <rect x="8" y="44" width="26" height="24" rx="6.5" class="repnex-primary" />
+  <rect x="66" y="40" width="26" height="24" rx="6.5" class="repnex-muted" />
+  <rect x="66" y="70" width="26" height="24" rx="6.5" class="repnex-primary" />
+</svg>
